@@ -1,0 +1,20 @@
+# cargo-about configuration
+# https://embarkstudios.github.io/cargo-about/
+
+# Licenses we accept for dependencies
+accepted = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "MPL-2.0",
+    "NCSA",
+    "CDLA-Permissive-2.0",
+]
+
+# Only include runtime dependencies (not build or dev dependencies)
+ignore-build-dependencies = true
+ignore-dev-dependencies = true

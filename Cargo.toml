@@ -2,6 +2,12 @@
 name = "speq-skill"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "Spec-driven development CLI for Claude Code"
+repository = "https://github.com/marconae/speq-skill"
+readme = "README.md"
+keywords = ["spec", "tdd", "claude", "ai", "cli"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "speq"
@@ -11,10 +17,10 @@ path = "src/main.rs"
 clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
 thiserror = "2"
-fastembed = "4"
+fastembed = "5"
 dirs = "6"
 serde = { version = "1", features = ["derive"] }
-bincode = "1"
+bincode = { version = "2", features = ["serde"] }
 
 [dev-dependencies]
 assert_cmd = "2"

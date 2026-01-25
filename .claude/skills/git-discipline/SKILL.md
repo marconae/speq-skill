@@ -38,6 +38,10 @@ git status   # Check files changed
 git diff     # Review actual changes
 ```
 
+## Security
+
+Never commit secrets (API keys, passwords, credentials, tokens).
+
 ## Commit Conventions
 
 When user asks for a commit message, use this format:

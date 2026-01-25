@@ -71,7 +71,7 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
     configure_fastembed_cache();
 
     // Initialize the embedding model
-    let model = TextEmbedding::try_new(
+    let mut model = TextEmbedding::try_new(
         InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(true),
     )
     .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
@@ -146,7 +146,8 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
             .map_err(|e| format!("Failed to create index directory: {}", e))?;
     }
 
-    let encoded = bincode::serialize(&index).map_err(|e| format!("Failed to serialize: {}", e))?;
+    let encoded = bincode::serde::encode_to_vec(&index, bincode::config::standard())
+        .map_err(|e| format!("Failed to serialize: {}", e))?;
     std::fs::write(&index_path, encoded).map_err(|e| format!("Failed to write index: {}", e))?;
 
     Ok(count)
@@ -166,15 +167,16 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     }
 
     let data = std::fs::read(&index_path).map_err(|e| format!("Failed to read index: {}", e))?;
-    let index: SearchIndex =
-        bincode::deserialize(&data).map_err(|e| format!("Failed to deserialize index: {}", e))?;
+    let (index, _): (SearchIndex, usize) =
+        bincode::serde::decode_from_slice(&data, bincode::config::standard())
+            .map_err(|e| format!("Failed to deserialize index: {}", e))?;
 
     if index.scenarios.is_empty() {
         return Ok(Vec::new());
     }
 
     // Initialize the embedding model
-    let model = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))
+    let mut model = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))
         .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
 
     // Generate query embedding

@@ -12,22 +12,21 @@ You are **building speq-skill while using it**.
 
 ```
 .claude/skills/
-├── util/                        # Utility skills (reusable guidance)
-│   ├── code-tools/SKILL.md
-│   ├── ext-research/SKILL.md
-│   ├── implementer/SKILL.md
-│   ├── git-discipline/SKILL.md
-│   └── speq-cli/SKILL.md
-├── speq-plan/                   # Workflow skill
+├── speq-plan/                   # Workflow skill (speq- prefix)
 ├── speq-implement/              # Workflow skill
 ├── speq-record/                 # Workflow skill
-└── speq-mission/                # Workflow skill
+├── speq-mission/                # Workflow skill
+├── code-guardrails/             # Utility skill (no prefix)
+├── code-tools/                  # Utility skill
+├── ext-research/                # Utility skill
+├── git-discipline/              # Utility skill
+└── speq-cli/                    # Utility skill
 ```
 
 ### Build Script
 
-The build script (`scripts/build-plugin.sh`):
-- Copies utility skills from `.claude/skills/util/*` to `plugin/skills/*`
+The build script (`scripts/plugin/build.sh`):
+- Copies utility skills from `.claude/skills/` to `plugin/skills/`
 - Copies workflow skills from `.claude/skills/speq-*` to `plugin/skills/*` (drops `speq-` prefix)
 - Updates skill name prefixes from local (`speq-*`) to plugin (`speq:*`)
 - Updates skill cross-references for plugin context
@@ -37,8 +36,8 @@ The build script (`scripts/build-plugin.sh`):
 
 | Context | Workflow Skills | Utility Skills |
 |---------|-----------------|----------------|
-| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/code-tools`, `/ext-research`, `/implementer`, `/git-discipline`, `/speq-cli` |
-| Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:implementer`, `/speq:git-discipline`, `/speq:speq-cli` |
+| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/code-guardrails`, `/code-tools`, `/ext-research`, `/git-discipline`, `/speq-cli` |
+| Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-guardrails`, `/speq:code-tools`, `/speq:ext-research`, `/speq:git-discipline`, `/speq:speq-cli` |
 
 ## speq CLI Invocation
 
@@ -53,6 +52,34 @@ The build script (`scripts/build-plugin.sh`):
 - `speq` (global)
 - `cargo run --` (inconsistent)
 - Nested paths like `../target/debug/speq`
+
+## Scripts Directory
+
+```
+scripts/
+├── release/
+│   ├── build.sh    # Build release artifact for current platform
+│   └── test.sh     # Test release artifact locally
+└── plugin/
+    └── build.sh    # Build Claude plugin from .claude/skills/
+```
+
+### Release Scripts
+
+```bash
+# Build release for current platform
+./scripts/release/build.sh v0.2.0
+
+# Test release artifact (builds if needed)
+./scripts/release/test.sh v0.2.0
+```
+
+### Plugin Scripts
+
+```bash
+# Build distributable plugin
+./scripts/plugin/build.sh
+```
 
 ## Mission Reference for speq CLI
 

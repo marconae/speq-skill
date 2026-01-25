@@ -26,6 +26,7 @@ target
 
 # Added by cargo
 /target
+/dist
 
 # LLVM coverage data
 *.profraw
@@ -34,4 +35,4 @@ target
 _ideas
 
 # Built plugin (regenerate with scripts/build-plugin.sh)
-plugin/
+/plugin

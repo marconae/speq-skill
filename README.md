@@ -11,8 +11,19 @@
 [![CI](https://github.com/marconae/speq-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/marconae/speq-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Why](#why-i-built-it) • [Getting Started](#getting-started) • [How It Works](#how-does-it-work) • [Reference](#reference)
+[Getting Started](#getting-started) • [Why](#why-i-built-it) • [How It Works](#how-does-it-work) • [Reference](#reference) • [Installation](#installation)
 </div>
+
+---
+
+## Getting Started
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+claude plugin add ~/.claude/plugins/speq
+```
+
+Then run `claude` and type `/speq:mission` to start.
 
 ---
 
@@ -22,45 +33,29 @@ I want to leverage Claude Code as an effective tool to write software.
 
 There are other spec-driven development tools out there; OpenSpec, BMAD, SpecKit... But I was missing the following:
 1. A straightforward repeatable workflow (`plan → implement → record`)
-2. A system that is not primped on one language or framework (e.g. Python or TypeScript only)
-3. A permanent and growing spec-library
+2. A system that is not primped on one language or framework (e.g., Python or TypeScript)
+3. A **permanent** and growing spec-library
 4. A system that keeps the specs **small** to avoid context cluttering
-5. A system that keeps asking me instead of making assumptions
+5. A system that keeps **asking me instead of making assumptions**
 
-So I built `speq-skill`. It combines Claude Skills with a simple CLI called `speq` that adds a semantical search layer to the spec library. The search empowers the coding agent to find the right feature scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window. 
+So I built `speq-skill`. It combines Skills and Agents with a simple CLI called `speq` that adds a semantical search layer to the spec library. The search empowers the coding agent to find the right feature scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window.
 
 ## Who should use it?
 
-If you want to describe what you want and have a coding agent build the code for you. If you can answer this question with "yes", then you should give `speq-skill` a try!
+If you want to describe what you want and have a coding agent build the code for you. If you can answer this question with "yes," then you should give `speq-skill` a try!
 
 Vibe Coding does not scale. `speq-skill` fixes this. It adds a lightweight and straightforward system for spec-driven development that engineers the context for the coding agent.
-
-## Getting Started
-
-```bash
-# Install CLI
-cargo install --git https://github.com/marconae/speq-skill speq
-
-# Install plugin
-claude plugin install speq@https://github.com/marconae/speq-skill
-
-# Run Claude Code
-claude
-
-# Start with a mission
-You: /speq:mission-creator
-```
 
 ---
 
 ## How Does it Work?
 
 ```
-/spec-planner →    /spec-implementer  →  /spec-recorder
-     │                  │                   │
-     ▼                  ▼                   ▼
-Creates plan.md    TDD implementation    Merges deltas
-with deltas        + verification        to permanent specs
+/speq:plan     →    /speq:implement    →    /speq:record
+     │                   │                       │
+     ▼                   ▼                       ▼
+Creates plan.md     Implementation          Merges deltas into
+with deltas         + verification          permanent specs library
 ```
 
 1. **Plan** — Describe what you want. The agent searches existing specs, asks clarifying questions, and creates a plan with spec deltas.
@@ -75,14 +70,24 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ### Skills
 
-Four Claude Code skills form the workflow:
+**Workflow Skills** — The core spec-driven development flow:
 
 | Skill | Trigger | Purpose |
 |-------|---------|---------|
-| `/mission-creator` | Project init, specs setup | Interview user, explore codebase, generate `specs/mission.md` |
-| `/spec-planner` | Plan mode, feature planning | Search specs, interview user, create plan with deltas |
-| `/spec-implementer` | Implement plan | TDD cycle with mandatory evidence, generate verification report |
-| `/spec-recorder` | Record approved plan | Merge deltas to permanent specs, validate, archive plan |
+| `/speq:mission` | Project init, specs setup | Interview user, explore codebase, generate `specs/mission.md` |
+| `/speq:plan` | Plan mode, feature planning | Search specs, interview user, create plan with deltas |
+| `/speq:implement` | Implement plan | TDD cycle with mandatory evidence, generate verification report |
+| `/speq:record` | Record approved plan | Merge deltas to permanent specs, validate, archive plan |
+
+**Utility Skills** — Reusable guidance invoked by workflow skills:
+
+| Skill | Purpose |
+|-------|---------|
+| `/speq:code-tools` | Semantic code navigation via Serena MCP |
+| `/speq:ext-research` | External docs via Context7 and WebSearch |
+| `/speq:implementer` | TDD workflow and code quality guardrails |
+| `/speq:git-discipline` | Git read-only rules |
+| `/speq:speq-cli` | speq CLI usage patterns |
 
 ### CLI
 
@@ -116,32 +121,35 @@ speq record <plan-name>                       # Merge plan deltas to permanent s
 Specs use Gherkin-like Markdown with RFC 2119 keywords:
 
 ```markdown
-# Feature Name
+# Feature: User Login
 
-Description of the feature.
+The system SHALL provide a secure login mechanism for registered users.
 
 ## Background
 
-Common context for all scenarios.
+* The system has a registered user with email "user@example.com"
+* The user is not currently authenticated
 
 ## Scenarios
 
-### Happy path
+### Scenario: Successful login
 
-  Given some precondition
-  When the user performs an action
-  Then the system SHALL respond with expected result
+* *GIVEN* valid credentials are provided
+* *WHEN* the user submits the login form
+* *THEN* the system SHALL authenticate the user
+* *AND* the system SHALL redirect to the dashboard
 
-### Error case
+### Scenario: Invalid password
 
-  Given an invalid state
-  When the user attempts the action
-  Then the system MUST return an error
+* *GIVEN* an incorrect password is provided
+* *WHEN* the user submits the login form
+* *THEN* the system MUST reject the authentication
+* *AND* the system MUST display an error message
 ```
 
 **Keywords:** `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
 
-### Directory Structure
+### Structure of your Spec Library
 
 ```
 specs/
@@ -160,13 +168,58 @@ specs/
 
 ---
 
+## Installation
+
+**Quick Install (Recommended)**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+```
+
+This installs:
+- `speq` CLI to `~/.local/bin`
+- Plugin to `~/.claude/plugins/speq`
+
+Then activate the plugin:
+```bash
+claude plugin add ~/.claude/plugins/speq
+```
+
+**Options:**
+```bash
+# Install CLI only
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --cli-only
+
+# Install plugin only
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --plugin-only
+
+# Custom CLI location
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --to ~/bin
+```
+
+**Update to Latest:**
+```bash
+# Re-run the same command - it always fetches and installs the latest version
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+```
+
+**From Source**
+
+```bash
+cargo install --git https://github.com/marconae/speq-skill speq
+```
+
+---
+
 ## Important
 
-`speq-skill` is a plugin for Claude Code and compatible AI coding assistants. This tool provides workflow structure and spec management only—**the AI agent generates all code and specifications**. You are responsible for reviewing and approving all AI-generated output before use.
+`speq-skill` is a plugin for Claude Code and compatible AI coding assistants. This tool provides workflow structure and spec management only—**the AI / coding agent (such as Claude Code) generates all code, specs, or other artifacts**.
 
 ## Dependencies
 
 This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers (both MIT licensed).
+
+The `speq` CLI downloads the [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) embeddings model (~23MB) on first run for semantic search (Apache 2.0 licensed).
 
 ## License
 
