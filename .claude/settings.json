@@ -1,0 +1,54 @@
+{
+  "env": {
+    "DISABLE_TELEMETRY": "1"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "mcp__serena__*",
+      "mcp__context7__*",
+      "Bash(mkdir:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(cargo:*)",
+      "Bash(sleep:*)",
+      "Bash(xargs:*)",
+      "Bash(nm:*)",
+      "Bash(tee:*)",
+      "Bash(chmod:*)",
+      "Bash(wc:*)",
+      "Bash(timeout:*)",
+      "Bash(node:*)",
+      "Bash(file:*)",
+      "Bash(test:*)",
+      "Bash(python3:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(kill:*)",
+      "Bash(echo:*)",
+      "Bash(perl:*)",
+      "Bash(pgrep:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(lsof:*)",
+      "Bash(for:*)",
+      "Bash(done)",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "enableAllProjectMcpServers": true,
+  "fileExclusions": [
+    "target/**",
+    ".serena/**",
+    ".git/**"
+  ]
+}
