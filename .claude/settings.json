@@ -39,6 +39,10 @@
       "Bash(lsof:*)",
       "Bash(for:*)",
       "Bash(done)",
+      "Bash(rustfmt:*)",
+      "Bash(tree:*)",
+      "Bash(./target/release/speq:*)",
+      "Bash(./target/debug/speq:*)",
       "WebSearch",
       "WebFetch"
     ],
