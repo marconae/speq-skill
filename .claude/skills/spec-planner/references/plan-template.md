@@ -1,8 +1,49 @@
 # Plan: <plan-name>
 
+<!--
+STRUCTURAL TEMPLATE - DO NOT COPY-PASTE
+Generate actual content for each section based on your specific plan.
+Read `specs/mission.md` for project-specific commands.
+-->
+
 ## Summary
 
-One-paragraph description of what this plan accomplishes.
+One-paragraph description of what this plan achieves (max two sentences).
+
+## Design
+
+Required for new features and significant changes. Skip for small fixes.
+
+### Goals / Non-Goals
+
+- Goals
+    - <Primary objective this design achieves>
+    - <Secondary objectives>
+- Non-Goals
+    - <What this design explicitly does NOT address>
+    - <Scope boundaries to prevent creep>
+
+### Architecture
+
+High-level system structure: components, layers, data flow
+
+```
+┌─────────────┐     ┌─────────────┐
+│ Component A │────▶│ Component B │
+└─────────────┘     └─────────────┘
+```
+
+### Design Patterns
+
+| Pattern | Where | Why |
+|---------|-------|-----|
+| <pattern> | <component> | <rationale> |
+
+### Trade-offs
+
+| Decision | Alternatives Considered | Rationale |
+|----------|------------------------|-----------|
+| <choice made> | <other options> | <why this choice> |
 
 ## Features
 
@@ -17,7 +58,7 @@ Status values:
 
 ## Requirements
 
-<!-- Optional: High-level requirements if not fully captured in feature specs -->
+Optional: High-level requirements if not fully captured in feature specs
 
 | Requirement | Details |
 |-------------|---------|
@@ -25,11 +66,11 @@ Status values:
 
 ## Dependencies
 
-<!-- Optional: External dependencies, libraries, or prerequisite work -->
+Optional: External dependencies, libraries, or prerequisite work
 
 ## Migration
 
-<!-- Optional: For changes affecting existing data/structure -->
+Optional: For changes affecting existing data/structure
 
 | Current | New |
 |---------|-----|
@@ -43,7 +84,7 @@ Status values:
 
 ## Parallelization
 
-<!-- Optional: Tasks that can run concurrently -->
+Optional: Tasks that can run concurrently
 
 | Parallel Group | Tasks |
 |----------------|-------|
@@ -55,7 +96,7 @@ Sequential dependencies:
 
 ## Dead Code Removal
 
-<!-- Required: Identify obsolete code to remove -->
+Required: Identify obsolete code to remove
 
 | Type | Location | Reason |
 |------|----------|--------|
@@ -65,48 +106,34 @@ Sequential dependencies:
 
 ## Verification
 
-**Principle:** Integration Test > Unit Test. Evidence before claims.
+<!--
+IMPORTANT: Generate actual commands from specs/mission.md § Commands.
+Do NOT copy placeholders below. Replace with real values.
+-->
 
-Run commands from `specs/mission.md § Commands`:
+### Checklist
 
-1. **Test** — ALL tests pass (unit, integration, e2e)
-2. **Coverage** — ~80% code coverage (use command from `specs/mission.md § Tech Stack`)
-3. **Lint** — No errors or warnings (use tooling, agents MUST NOT format manually)
-4. **Format** — No changes (use tooling, agents MUST NOT format manually)
-5. **Dead Code** — Removed all obsolete code identified above
+<!-- Read specs/mission.md and fill with ACTUAL commands -->
 
-### Evidence Requirements
+| Step | Command | Expected |
+|------|---------|----------|
+| Build | `<from mission.md>` | Exit 0 |
+| Test | `<from mission.md>` | 0 failures |
+| Lint | `<from mission.md>` | 0 errors/warnings |
+| Format | `<from mission.md>` | No changes |
+| Coverage | `<from mission.md>` | ≥80% |
 
-| Claim | Required Evidence |
-|-------|-------------------|
-| "Tests pass" | Fresh test run output showing 0 failures |
-| "Coverage ~80%" | Fresh coverage command output showing percentage |
-| "Lint clean" | Linter output showing 0 errors/warnings |
-| "Formatted" | Formatter output showing no changes |
-| "Feature works" | Integration test covering all scenarios |
+### Manual Testing
 
-**Rule:** No claim without running the command and showing output in this session.
+<!-- Generate from Features table above. One row per feature with concrete steps. -->
 
-### Code Coverage
-
-Coverage command is defined in `specs/mission.md § Tech Stack`. Example:
-
-```bash
-# Rust
-cargo tarpaulin --out Html
-
-# Node.js
-npm run test:coverage
-
-# Python
-pytest --cov=src --cov-report=term
-```
-
-Target: ~80% line coverage. Evidence MUST be fresh command output showing coverage percentage.
+| Feature | Test Steps | Expected Result |
+|---------|------------|-----------------|
+| <feature from table above> | <actual CLI command or UI action> | <observable outcome> |
 
 ### Scenario Verification
 
-Each feature spec scenario MUST be verified:
+<!-- Map each scenario from feature specs to a test -->
 
 | Scenario | Test Type | Test Location |
 |----------|-----------|---------------|
@@ -114,6 +141,5 @@ Each feature spec scenario MUST be verified:
 
 - **Integration test** — Default for all scenarios
 - **Unit test** — Only if scenario is isolated and small
-- **Documentation** — Never sufficient alone
 
 A feature is complete when ALL scenarios have passing integration tests.

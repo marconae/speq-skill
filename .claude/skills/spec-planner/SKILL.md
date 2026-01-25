@@ -92,9 +92,26 @@ Dependent tasks → Sequential chain
 | Multiple components | Integration test |
 | Isolated, single unit | Unit test |
 
-#### 4.6 Generate plan.md
+#### 4.6 Design Section (for significant changes)
 
-Create `specs/_plans/<plan-name>/plan.md` using template in `references/plan-template.md`.
+For new features and major changes, include `## Design` in plan.md:
+- **Goals / Non-Goals** — Scope boundaries
+- **Architecture** — Components, layers, data flow
+- **Design Patterns** — Patterns used and rationale
+- **Trade-offs** — Decisions made and alternatives considered
+- **Key Interfaces** — Core types and signatures
+
+Skip for small fixes and minor changes.
+
+#### 4.7 Generate plan.md
+
+Create `specs/_plans/<plan-name>/plan.md`:
+
+1. Read `specs/mission.md` to get project-specific commands and tech stack
+2. Use `references/plan-template.md` as structural guide (NOT copy-paste)
+3. Generate concrete content for each section based on the actual plan
+
+**Critical:** The template shows structure only. Replace ALL placeholders with actual content.
 
 ### 5. Exit Plan Mode
 
@@ -115,24 +132,66 @@ specs/
 
 THEN steps MUST use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
 
-## Verification Rules
+## Verification Section Guidelines
 
-### Evidence Requirements
+The plan's `## Verification` section MUST contain concrete, executable tasks—not template placeholders.
 
-| Claim | Required Evidence |
-|-------|-------------------|
-| "Tests pass" | Fresh run showing 0 failures |
-| "Lint clean" | Output showing 0 errors |
-| "Coverage ~80%" | Coverage command output from `specs/mission.md § Tech Stack` |
-| "Feature works" | Integration test covering all scenarios |
+### Reading the Mission
 
-**Code Coverage:** Run the coverage command from `specs/mission.md § Tech Stack`. Target ~80%. Evidence MUST be fresh command output.
+Before writing verification, read `specs/mission.md § Commands` to get:
+- Exact test command (e.g., `cargo test`, `npm test`)
+- Exact lint command (e.g., `cargo clippy -- -D warnings`)
+- Exact format command (e.g., `cargo fmt --check`)
+- Exact coverage command (e.g., `cargo tarpaulin --out Html`)
+
+### Verification Checklist (generate actual commands)
+
+Write the verification section with actual commands from the mission:
+
+```markdown
+## Verification
+
+### Checklist
+
+| Step | Command | Expected |
+|------|---------|----------|
+| Build | `<actual build cmd>` | Exit 0 |
+| Test | `<actual test cmd>` | 0 failures |
+| Lint | `<actual lint cmd>` | 0 errors/warnings |
+| Format | `<actual fmt cmd>` | No changes |
+| Coverage | `<actual coverage cmd>` | ≥80% |
+
+### Manual Testing
+
+| Feature | Test Steps | Expected Result |
+|---------|------------|-----------------|
+| <feature from plan> | <concrete steps> | <observable outcome> |
+```
+
+### Manual Testing (generate from features)
+
+For each feature in the plan, generate concrete manual test steps:
+
+1. Look at the plan's `## Features` table
+2. For each feature, write specific CLI commands or UI actions
+3. Describe the expected observable outcome
+
+Example (good):
+```markdown
+| domain list | Run `speq domain list` in project with specs/ | Lists: cli, core |
+| feature get | Run `speq feature get cli/validate` | Prints feature spec |
+```
+
+Example (bad - template placeholder):
+```markdown
+| <feature-name> | <concrete steps> | <observable outcome> |
+```
 
 ### Completion Criteria
 
 1. ALL scenarios have passing integration tests
-2. ALL tests pass (unit + integration + e2e) - verified with measured test results as evidence
-3. Code coverage ~80% (verified with measured coverage data as evidence)
-4. Lint and format pass via tooling
+2. ALL tests pass (verified with fresh output)
+3. Code coverage ≥80% (verified with fresh output)
+4. Lint and format pass
 5. Dead code removed
-6. Evidence shown for each claim
+6. Manual testing completed for all features
