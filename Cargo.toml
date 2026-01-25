@@ -1,7 +1,11 @@
 [package]
-name = "speq"
+name = "speq-skill"
 version = "0.1.0"
 edition = "2024"
+
+[[bin]]
+name = "speq"
+path = "src/main.rs"
 
 [dependencies]
 clap = { version = "4.5.54", features = ["derive"] }
