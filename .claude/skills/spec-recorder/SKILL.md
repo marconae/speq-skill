@@ -1,5 +1,5 @@
 ---
-name: recorder
+name: spec-recorder
 description: |
   Apply approved plan deltas to permanent feature specs.
   Use after a plan is approved to merge deltas from specs/_plans/<plan-name>/ into specs/.
