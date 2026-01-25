@@ -10,45 +10,51 @@ description: |
 
 # Spec Planner
 
-You are creating and managing feature specification deltas. 
-
-Note: Feature specification deltas are recorded into the permanent specs directory `specs/<domain>/<feature>` when implementation work is complete using the spec-recorder skill.
+Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/spec-recorder`.
 
 ## Guiding Principles
 
-| Principle | Rule |
-|-----------|------|
-| **Integration Test > Unit Test** | Integration tests default; unit tests for isolated scenarios |
-| **Evidence Before Claims** | No claim without fresh command output |
-| **Dead Code = Debt** | Identify and remove obsolete code in every plan |
+- Integration tests default; unit tests for isolated scenarios only
+- Identify and remove obsolete code in every plan
 
 ## Workflow
 
 ### 1. Discovery
 
+Use speq CLI to explore existing specs:
+
 ```bash
-speq feature list
-speq feature list <domain>
+# Browse structure
+speq domain list                    # List domains
+speq feature list                   # Tree view of all features
+speq feature list <domain>          # Features in domain
+
+# Semantic search (find related specs)
+speq search query "error handling"  # Find scenarios about errors
+speq search query "validation"      # Find validation-related specs
+
+# Get specific content
+speq feature get cli/validate                        # Full feature spec
+speq feature get "cli/validate/Validation fails"    # Single scenario
 ```
 
-- Existing specs → modify with DELTA markers
-- Missing features → add as new specs
+**Search first** when modifying behavior — find related scenarios to understand scope.
 
 ### 2. Research
 
-- Use `WebSearch` for topic research
-- Context7 MCP for third-party library capabilities
+- `WebSearch` for external topic research
+- Context7 MCP for third-party library docs
 
 ### 3. Clarifying Interview
 
-Use `AskUserQuestion` — MUST NOT assume:
+Use `AskUserQuestion` — never assume:
 - Clarify vague requirements
-- Choose between solutions found in research
-- Confirm design decisions and tradeoffs
+- Choose between alternative solutions
+- Confirm design tradeoffs
 
 ### 4. Planning
 
-#### 4.1 Generate Plan Name
+#### 4.1 Plan Name
 
 Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 
@@ -58,140 +64,70 @@ Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 | `change` | Modify existing |
 | `remove` | Deprecate/delete |
 | `refactor` | Restructure, same behavior |
-| `fix` | Spec/implementation mismatch, bugs |
+| `fix` | Bug or spec mismatch |
 
-#### 4.2 Generate Spec Deltas
+#### 4.2 Spec Deltas
 
 ```
 specs/<domain>/<feature>/spec.md exists?
-├─ Yes → Use DELTA markers (see references/delta-template.md)
-└─ No  → Full spec (see references/feature-template.md)
+├─ Yes → DELTA markers (references/delta-template.md)
+└─ No  → Full spec (references/feature-template.md)
 
-Create: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
+Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
-#### 4.3 Identify Dead Code
+#### 4.3 Dead Code
 
-| Look For | Action |
-|----------|--------|
-| Replaced functions | Mark for removal |
-| Obsolete tests | Mark for removal |
-| Unused imports/modules | Mark for removal |
+Mark for removal: replaced functions, obsolete tests, unused imports.
 
-#### 4.4 Plan Parallelization
-
-```
-Independent tasks → Parallel group
-Dependent tasks → Sequential chain
-```
-
-#### 4.5 Map Scenarios to Tests
+#### 4.4 Test Mapping
 
 | Scenario Type | Test Type |
 |---------------|-----------|
-| Multiple components | Integration test |
-| Isolated, single unit | Unit test |
+| Multiple components | Integration |
+| Single isolated unit | Unit |
 
-#### 4.6 Design Section (for significant changes)
+#### 4.5 Design Section
 
-For new features and major changes, include `## Design` in plan.md:
-- **Goals / Non-Goals** — Scope boundaries
-- **Architecture** — Components, layers, data flow
-- **Design Patterns** — Patterns used and rationale
-- **Trade-offs** — Decisions made and alternatives considered
-- **Key Interfaces** — Core types and signatures
+For new features/major changes, add `## Design` to plan.md:
+- Goals / Non-Goals
+- Architecture
+- Trade-offs
+- Key Interfaces
 
-Skip for small fixes and minor changes.
+Skip for minor fixes.
 
-#### 4.7 Generate plan.md
+#### 4.6 Generate plan.md
 
-Create `specs/_plans/<plan-name>/plan.md`:
-
-1. Read `specs/mission.md` to get project-specific commands and tech stack
-2. Use `references/plan-template.md` as structural guide (NOT copy-paste)
-3. Generate concrete content for each section based on the actual plan
-
-**Critical:** The template shows structure only. Replace ALL placeholders with actual content.
+1. Read `specs/mission.md` for commands and tech stack
+2. Use `references/plan-template.md` as structure guide
+3. Generate concrete content (no template placeholders)
 
 ### 5. Exit Plan Mode
 
-Call `ExitPlanMode` when workflow is complete.
+Call `ExitPlanMode` when complete.
 
 ## Spec Hierarchy
 
 ```
 specs/
-├── <domain>/<feature>/spec.md     # Permanent specs
-├── _plans/<plan-name>/            # Active plans
-│   ├── plan.md
-│   └── <domain>/<feature>/spec.md
-└── _recorded/<plan-name>/         # Archived plans
+├── <domain>/<feature>/spec.md     # Permanent
+├── _plans/<plan-name>/            # Active
+└── _recorded/<plan-name>/         # Archived
 ```
 
 ## RFC 2119 Keywords
 
-THEN steps MUST use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
+THEN steps use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
 
-## Verification Section Guidelines
+## Verification Section
 
-The plan's `## Verification` section MUST contain concrete, executable tasks—not template placeholders.
+Read `specs/mission.md § Commands` for project-specific build/test/lint/format commands.
 
-### Reading the Mission
+The plan's `## Verification` section MUST include tasks that produce evidence:
 
-Before writing verification, read `specs/mission.md § Commands` to get:
-- Exact test command (e.g., `cargo test`, `npm test`)
-- Exact lint command (e.g., `cargo clippy -- -D warnings`)
-- Exact format command (e.g., `cargo fmt --check`)
-- Exact coverage command (e.g., `cargo tarpaulin --out Html`)
+1. **Checklist tasks** — Build, test, lint, format commands from mission.md
+2. **Manual testing tasks** — Concrete steps for each feature in the plan
+3. **Scenario coverage** — Map each spec scenario to its test location
 
-### Verification Checklist (generate actual commands)
-
-Write the verification section with actual commands from the mission:
-
-```markdown
-## Verification
-
-### Checklist
-
-| Step | Command | Expected |
-|------|---------|----------|
-| Build | `<actual build cmd>` | Exit 0 |
-| Test | `<actual test cmd>` | 0 failures |
-| Lint | `<actual lint cmd>` | 0 errors/warnings |
-| Format | `<actual fmt cmd>` | No changes |
-| Coverage | `<actual coverage cmd>` | ≥80% |
-
-### Manual Testing
-
-| Feature | Test Steps | Expected Result |
-|---------|------------|-----------------|
-| <feature from plan> | <concrete steps> | <observable outcome> |
-```
-
-### Manual Testing (generate from features)
-
-For each feature in the plan, generate concrete manual test steps:
-
-1. Look at the plan's `## Features` table
-2. For each feature, write specific CLI commands or UI actions
-3. Describe the expected observable outcome
-
-Example (good):
-```markdown
-| domain list | Run `speq domain list` in project with specs/ | Lists: cli, core |
-| feature get | Run `speq feature get cli/validate` | Prints feature spec |
-```
-
-Example (bad - template placeholder):
-```markdown
-| <feature-name> | <concrete steps> | <observable outcome> |
-```
-
-### Completion Criteria
-
-1. ALL scenarios have passing integration tests
-2. ALL tests pass (verified with fresh output)
-3. Code coverage ≥80% (verified with fresh output)
-4. Lint and format pass
-5. Dead code removed
-6. Manual testing completed for all features
+No placeholders. Use actual commands from the project's mission.md.
