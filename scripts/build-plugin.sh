@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Build speq plugin from .claude/ source
-# Transforms skills, merges rules, and generates plugin.json
+# Transforms skills and generates plugin.json
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
@@ -25,10 +25,11 @@ setup_plugin_dir() {
     rm -rf "$PLUGIN_DIR"
     mkdir -p "$PLUGIN_DIR/.claude-plugin"
     mkdir -p "$PLUGIN_DIR/skills"
+    mkdir -p "$PLUGIN_DIR/agents"
 }
 
-# Copy a skill with renaming
-copy_skill() {
+# Copy a workflow skill with renaming
+copy_workflow_skill() {
     local source_name="$1"
     local target_name="$2"
     local source_path="$SOURCE_DIR/skills/$source_name"
@@ -43,90 +44,122 @@ copy_skill() {
             # macOS and Linux compatible sed
             if [[ "$OSTYPE" == "darwin"* ]]; then
                 sed -i '' "s/^name: $source_name$/name: speq:$target_name/" "$target_path/SKILL.md"
-                sed -i '' 's|/speq-planner|/speq:planner|g' "$target_path/SKILL.md"
-                sed -i '' 's|/speq-implementer|/speq:implementer|g' "$target_path/SKILL.md"
-                sed -i '' 's|/speq-recorder|/speq:recorder|g' "$target_path/SKILL.md"
-                sed -i '' 's|/speq-mission-creator|/speq:mission-creator|g' "$target_path/SKILL.md"
+                # Update workflow skill references
+                sed -i '' 's|/speq-plan|/speq:plan|g' "$target_path/SKILL.md"
+                sed -i '' 's|/speq-implement|/speq:implement|g' "$target_path/SKILL.md"
+                sed -i '' 's|/speq-record|/speq:record|g' "$target_path/SKILL.md"
+                sed -i '' 's|/speq-mission|/speq:mission|g' "$target_path/SKILL.md"
+                # Update utility skill references
+                sed -i '' 's|`/code-tools`|`/speq:code-tools`|g' "$target_path/SKILL.md"
+                sed -i '' 's|`/ext-research`|`/speq:ext-research`|g' "$target_path/SKILL.md"
+                sed -i '' 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$target_path/SKILL.md"
+                sed -i '' 's|`/git-discipline`|`/speq:git-discipline`|g' "$target_path/SKILL.md"
+                sed -i '' 's|`/speq-cli`|`/speq:speq-cli`|g' "$target_path/SKILL.md"
             else
                 sed -i "s/^name: $source_name$/name: speq:$target_name/" "$target_path/SKILL.md"
-                sed -i 's|/speq-planner|/speq:planner|g' "$target_path/SKILL.md"
-                sed -i 's|/speq-implementer|/speq:implementer|g' "$target_path/SKILL.md"
-                sed -i 's|/speq-recorder|/speq:recorder|g' "$target_path/SKILL.md"
-                sed -i 's|/speq-mission-creator|/speq:mission-creator|g' "$target_path/SKILL.md"
+                # Update workflow skill references
+                sed -i 's|/speq-plan|/speq:plan|g' "$target_path/SKILL.md"
+                sed -i 's|/speq-implement|/speq:implement|g' "$target_path/SKILL.md"
+                sed -i 's|/speq-record|/speq:record|g' "$target_path/SKILL.md"
+                sed -i 's|/speq-mission|/speq:mission|g' "$target_path/SKILL.md"
+                # Update utility skill references
+                sed -i 's|`/code-tools`|`/speq:code-tools`|g' "$target_path/SKILL.md"
+                sed -i 's|`/ext-research`|`/speq:ext-research`|g' "$target_path/SKILL.md"
+                sed -i 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$target_path/SKILL.md"
+                sed -i 's|`/git-discipline`|`/speq:git-discipline`|g' "$target_path/SKILL.md"
+                sed -i 's|`/speq-cli`|`/speq:speq-cli`|g' "$target_path/SKILL.md"
             fi
+        fi
+
+        # Update references files if they exist
+        if [[ -d "$target_path/references" ]]; then
+            for ref_file in "$target_path/references"/*.md; do
+                if [[ -f "$ref_file" ]]; then
+                    if [[ "$OSTYPE" == "darwin"* ]]; then
+                        sed -i '' 's|`/code-tools`|`/speq:code-tools`|g' "$ref_file"
+                        sed -i '' 's|`/ext-research`|`/speq:ext-research`|g' "$ref_file"
+                        sed -i '' 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$ref_file"
+                        sed -i '' 's|`/git-discipline`|`/speq:git-discipline`|g' "$ref_file"
+                        sed -i '' 's|`/speq-cli`|`/speq:speq-cli`|g' "$ref_file"
+                    else
+                        sed -i 's|`/code-tools`|`/speq:code-tools`|g' "$ref_file"
+                        sed -i 's|`/ext-research`|`/speq:ext-research`|g' "$ref_file"
+                        sed -i 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$ref_file"
+                        sed -i 's|`/git-discipline`|`/speq:git-discipline`|g' "$ref_file"
+                        sed -i 's|`/speq-cli`|`/speq:speq-cli`|g' "$ref_file"
+                    fi
+                fi
+            done
         fi
     else
         log_warn "  Skill not found: $source_name"
     fi
 }
 
-# Copy and rename all skills
-copy_skills() {
-    log_info "Copying skills..."
-    copy_skill "speq-planner" "planner"
-    copy_skill "speq-implementer" "implementer"
-    copy_skill "speq-recorder" "recorder"
-    copy_skill "speq-mission-creator" "mission-creator"
-}
+# Copy utility skills
+copy_util_skills() {
+    log_info "Copying utility skills..."
+    mkdir -p "$PLUGIN_DIR/skills"
 
-# Merge rules into a skill's references directory
-merge_rules_for_skill() {
-    local skill_name="$1"
-    local output_filename="$2"
-    shift 2
-    local rules=("$@")
+    for skill in code-tools ext-research code-guardrails git-discipline speq-cli; do
+        local source_path="$SOURCE_DIR/skills/$skill"
+        local target_path="$PLUGIN_DIR/skills/$skill"
 
-    local skill_path="$PLUGIN_DIR/skills/$skill_name"
-    local output_file="$skill_path/references/$output_filename"
+        if [[ -d "$source_path" ]]; then
+            log_info "  $skill"
+            cp -r "$source_path" "$target_path"
 
-    if [[ ! -d "$skill_path" ]]; then
-        log_warn "  Skill directory not found: $skill_name"
-        return
-    fi
-
-    mkdir -p "$skill_path/references"
-    log_info "  Creating $output_filename for $skill_name"
-
-    cat > "$output_file" << 'HEADER'
-# Embedded Rules
-
-These rules are embedded from the project's .claude/rules/ directory.
-They apply when using this skill.
-
-HEADER
-
-    for rule in "${rules[@]}"; do
-        local rule_path="$SOURCE_DIR/rules/$rule"
-        if [[ -f "$rule_path" ]]; then
-            echo "---" >> "$output_file"
-            echo "" >> "$output_file"
-            cat "$rule_path" >> "$output_file"
-            echo "" >> "$output_file"
+            # Update skill name in frontmatter
+            if [[ -f "$target_path/SKILL.md" ]]; then
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    sed -i '' "s/^name: $skill$/name: speq:$skill/" "$target_path/SKILL.md"
+                else
+                    sed -i "s/^name: $skill$/name: speq:$skill/" "$target_path/SKILL.md"
+                fi
+            fi
         else
-            log_warn "    Rule file not found: $rule"
+            log_warn "  Utility skill not found: $skill"
         fi
     done
 }
 
-# Merge rules into skills
-merge_rules() {
-    log_info "Merging rules into skills..."
+# Copy and rename all workflow skills
+copy_workflow_skills() {
+    log_info "Copying workflow skills..."
+    copy_workflow_skill "speq-plan" "plan"
+    copy_workflow_skill "speq-implement" "implement"
+    copy_workflow_skill "speq-record" "record"
+    copy_workflow_skill "speq-mission" "mission"
+}
 
-    # planner: serena, context7, git
-    merge_rules_for_skill "planner" "rules.md" \
-        "mcp-serena.md" "mcp-context7.md" "default-git.md"
+# Copy agent definitions
+copy_agents() {
+    log_info "Copying agents..."
 
-    # implementer: serena, context7, git, guardrails (core)
-    merge_rules_for_skill "implementer" "rules-and-guardrails.md" \
-        "mcp-serena.md" "mcp-context7.md" "default-git.md" "default-guardrails.md"
+    if [[ -d "$SOURCE_DIR/agents" ]]; then
+        for agent_file in "$SOURCE_DIR/agents"/*.md; do
+            if [[ -f "$agent_file" ]]; then
+                local filename=$(basename "$agent_file")
+                log_info "  $filename"
+                cp "$agent_file" "$PLUGIN_DIR/agents/$filename"
 
-    # recorder: serena, context7, git
-    merge_rules_for_skill "recorder" "rules.md" \
-        "mcp-serena.md" "mcp-context7.md" "default-git.md"
-
-    # mission-creator: serena, context7, git, guardrails (core)
-    merge_rules_for_skill "mission-creator" "rules-and-guardrails.md" \
-        "mcp-serena.md" "mcp-context7.md" "default-git.md" "default-guardrails.md"
+                # Update skill references for plugin context
+                if [[ "$OSTYPE" == "darwin"* ]]; then
+                    sed -i '' 's|`/code-tools`|`/speq:code-tools`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i '' 's|`/ext-research`|`/speq:ext-research`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i '' 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i '' 's|`/git-discipline`|`/speq:git-discipline`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i '' 's|`/speq-cli`|`/speq:speq-cli`|g' "$PLUGIN_DIR/agents/$filename"
+                else
+                    sed -i 's|`/code-tools`|`/speq:code-tools`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i 's|`/ext-research`|`/speq:ext-research`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i 's|`/code-guardrails`|`/speq:code-guardrails`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i 's|`/git-discipline`|`/speq:git-discipline`|g' "$PLUGIN_DIR/agents/$filename"
+                    sed -i 's|`/speq-cli`|`/speq:speq-cli`|g' "$PLUGIN_DIR/agents/$filename"
+                fi
+            fi
+        done
+    fi
 }
 
 # Copy plugin.json manifest
@@ -149,8 +182,9 @@ main() {
     echo ""
 
     setup_plugin_dir
-    copy_skills
-    merge_rules
+    copy_util_skills
+    copy_workflow_skills
+    copy_agents
     generate_manifest
     generate_mcp_config
 
@@ -163,7 +197,9 @@ main() {
 
     echo ""
     log_info "To test: claude --plugin-dir $PLUGIN_DIR"
-    log_info "Skills available: /speq:planner, /speq:implementer, /speq:recorder, /speq:mission-creator"
+    log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission"
+    log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:speq-cli"
+    log_info "Agents: implementer-agent, code-reviewer"
 }
 
 main "$@"

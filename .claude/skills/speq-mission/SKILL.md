@@ -1,11 +1,11 @@
 ---
-name: speq-mission-creator
+name: speq-mission
 description: |
-  Interactive workflow for creating project mission files (specs/mission.md).
-  Use when initializing a new project's specification structure or documenting an existing project.
-  Invoke explicitly with /speq-mission-creator to start the mission creation workflow.
-  Detects brownfield vs greenfield projects and adapts the interview accordingly.
-  Triggers: mission creation, project initialization, specs setup, document existing project.
+  Interactive workflow for creating project mission files.
+  Use when initializing specs or documenting existing projects.
+  Invoke with /speq-mission to start mission creation.
+  Detects brownfield vs greenfield and adapts interview.
+  Triggers: mission creation, project initialization, specs setup, document project.
 ---
 
 # Mission Creator
@@ -13,6 +13,13 @@ description: |
 You are creating a project mission file (`specs/mission.md`) through an interactive interview.
 
 **Golden Rule:** NEVER assume. ALL content MUST come from user answers or code exploration.
+
+## Required Skills
+
+Invoke before starting:
+- `/code-tools` — Codebase exploration
+- `/ext-research` — Tech stack research
+- `/speq-cli` — Spec structure
 
 ## Workflow
 

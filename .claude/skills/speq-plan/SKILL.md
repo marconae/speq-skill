@@ -1,21 +1,27 @@
 ---
-name: speq-planner
+name: speq-plan
 description: |
-  Plan mode workflow for creating and managing feature specification deltas.
-  Use when entering plan mode to define new features or changes to existing features.
-  Invoke explicitly with /speq-planner when planning implementation work.
-  Creates delta specs in specs/_plans/<plan-name>/ following the plan template.
-  Triggers: planning mode, feature specification, spec planning, implementation planning.
+  Plan mode workflow for creating feature specification deltas.
+  Use when entering plan mode to define new features or changes.
+  Invoke with /speq-plan when planning implementation work.
+  Creates delta specs in specs/_plans/<plan-name>/.
+  Triggers: planning mode, feature specification, spec planning, plan feature.
 ---
 
 # Spec Planner
 
-Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/speq-recorder`.
+Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/speq-record`.
+
+## Required Skills
+
+Invoke before starting:
+- `/code-tools` — Codebase exploration
+- `/ext-research` — API docs and design research
+- `/speq-cli` — Spec discovery and search
 
 ## Guiding Principles
 
 - Integration tests default; unit tests for isolated scenarios only
-- Identify and remove obsolete code in every plan
 
 ## Workflow
 
@@ -42,8 +48,9 @@ speq feature get "cli/validate/Validation fails"    # Single scenario
 
 ### 2. Research
 
-- `WebSearch` for external topic research
-- Context7 MCP for third-party library docs
+Invoke `/ext-research` and conduct research for:
+- External libraries and APIs
+- Design patterns and architecture
 
 ### 3. Clarifying Interview
 
@@ -76,18 +83,14 @@ specs/<domain>/<feature>/spec.md exists?
 Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
-#### 4.3 Dead Code
-
-Mark for removal: replaced functions, obsolete tests, unused imports.
-
-#### 4.4 Test Mapping
+#### 4.3 Test Mapping
 
 | Scenario Type | Test Type |
 |---------------|-----------|
 | Multiple components | Integration |
 | Single isolated unit | Unit |
 
-#### 4.5 Design Section
+#### 4.4 Design Section
 
 For new features/major changes, add `## Design` to plan.md:
 - Goals / Non-Goals
@@ -97,7 +100,7 @@ For new features/major changes, add `## Design` to plan.md:
 
 Skip for minor fixes.
 
-#### 4.6 Generate plan.md
+#### 4.5 Generate plan.md
 
 1. Read `specs/mission.md` for commands and tech stack
 2. Use `references/plan-template.md` as structure guide

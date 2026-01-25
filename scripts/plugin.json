@@ -9,5 +9,6 @@
   "license": "MIT",
   "keywords": ["spec-driven", "tdd", "specifications", "planning", "workflow"],
   "skills": "./skills/",
+  "agents": "./agents/",
   "mcpServers": "./.mcp.json"
 }
