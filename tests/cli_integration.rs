@@ -1,0 +1,249 @@
+use assert_cmd::Command;
+use predicates::prelude::*;
+use std::fs;
+use tempfile::TempDir;
+
+fn setup_test_specs() -> TempDir {
+    let tmp = TempDir::new().unwrap();
+    let specs = tmp.path().join("specs");
+
+    // Create valid hierarchy
+    let cli_validate = specs.join("cli/validate");
+    fs::create_dir_all(&cli_validate).unwrap();
+    fs::write(
+        cli_validate.join("spec.md"),
+        r#"# Feature: CLI Validate
+
+The system SHALL provide validation.
+
+## Background
+
+* Test context.
+
+## Scenarios
+
+### Scenario: Basic test
+
+* *GIVEN* a setup
+* *WHEN* an action occurs
+* *THEN* the system SHALL respond
+"#,
+    )
+    .unwrap();
+
+    let validation_doc = specs.join("validation/document-structure");
+    fs::create_dir_all(&validation_doc).unwrap();
+    fs::write(
+        validation_doc.join("spec.md"),
+        r#"# Feature: Document Validation
+
+The system SHALL validate documents.
+
+## Background
+
+* Documents have structure.
+
+## Scenarios
+
+### Scenario: Valid docs pass
+
+* *GIVEN* a valid document
+* *WHEN* validation runs
+* *THEN* the system SHALL pass
+"#,
+    )
+    .unwrap();
+
+    tmp
+}
+
+fn cmd() -> Command {
+    Command::cargo_bin("speq").unwrap()
+}
+
+mod feature_list {
+    use super::*;
+
+    #[test]
+    fn lists_all_features() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "list"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/"))
+            .stdout(predicate::str::contains("validate"))
+            .stdout(predicate::str::contains("validation/"))
+            .stdout(predicate::str::contains("document-structure"));
+    }
+
+    #[test]
+    fn lists_domain_features() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "list", "cli"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/"))
+            .stdout(predicate::str::contains("validate"));
+    }
+
+    #[test]
+    fn empty_domain_shows_message() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "list", "nonexistent"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("No features found"));
+    }
+}
+
+mod feature_validate {
+    use super::*;
+
+    #[test]
+    fn validates_all_specs() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/validate"))
+            .stdout(predicate::str::contains("validation/document-structure"));
+    }
+
+    #[test]
+    fn validates_single_domain() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate", "cli"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/validate"));
+    }
+
+    #[test]
+    fn validates_single_feature() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate", "cli/validate"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/validate"))
+            .stdout(predicate::str::contains("0 errors"));
+    }
+
+    #[test]
+    fn reports_invalid_spec() {
+        let tmp = TempDir::new().unwrap();
+        let specs = tmp.path().join("specs/broken/test");
+        fs::create_dir_all(&specs).unwrap();
+        fs::write(specs.join("spec.md"), "# Feature: Broken\n\nNo sections.\n").unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate", "broken/test"])
+            .assert()
+            .code(1)
+            .stdout(predicate::str::contains("✗"))
+            .stdout(predicate::str::contains("error"));
+    }
+
+    #[test]
+    fn no_features_found() {
+        let tmp = TempDir::new().unwrap();
+        fs::create_dir_all(tmp.path().join("specs")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("No features found"));
+    }
+}
+
+mod record {
+    use super::*;
+
+    #[test]
+    fn record_nonexistent_plan_fails() {
+        let tmp = TempDir::new().unwrap();
+        fs::create_dir_all(tmp.path().join("specs/_plans")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["record", "nonexistent"])
+            .assert()
+            .code(1)
+            .stderr(predicate::str::contains("Plan not found"));
+    }
+
+    #[test]
+    fn record_plan_creates_spec() {
+        let tmp = TempDir::new().unwrap();
+        let specs = tmp.path().join("specs");
+
+        // Create plan structure
+        let plan_dir = specs.join("_plans/test-plan/test/feature");
+        fs::create_dir_all(&plan_dir).unwrap();
+        fs::write(
+            plan_dir.join("spec.md"),
+            r#"# Feature: Test Feature
+
+A test feature.
+
+## Background
+
+* Test context.
+
+## Scenarios
+
+<!-- DELTA:NEW -->
+### Scenario: New test
+
+* *GIVEN* setup
+* *WHEN* action
+* *THEN* result SHALL happen
+<!-- /DELTA:NEW -->
+"#,
+        )
+        .unwrap();
+
+        // Create _recorded directory
+        fs::create_dir_all(specs.join("_recorded")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["record", "test-plan"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Recorded plan"))
+            .stdout(predicate::str::contains("test/feature"));
+
+        // Verify spec was created
+        let recorded_spec = specs.join("test/feature/spec.md");
+        assert!(recorded_spec.exists());
+
+        let content = fs::read_to_string(&recorded_spec).unwrap();
+        assert!(!content.contains("DELTA"));
+        assert!(content.contains("### Scenario: New test"));
+
+        // Verify plan was archived
+        assert!(specs.join("_recorded/test-plan").exists());
+        assert!(!specs.join("_plans/test-plan").exists());
+    }
+}

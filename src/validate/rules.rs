@@ -24,7 +24,11 @@ pub fn validate(spec: &FeatureSpec) -> ValidationResult {
 }
 
 fn validate_document_structure(spec: &FeatureSpec, result: &mut ValidationResult) {
-    if spec.description.is_none() || spec.description.as_ref().is_some_and(|d| d.trim().is_empty())
+    if spec.description.is_none()
+        || spec
+            .description
+            .as_ref()
+            .is_some_and(|d| d.trim().is_empty())
     {
         result.add_error(ValidationError::MissingFeatureDescription);
     }
@@ -164,9 +168,11 @@ mod tests {
         let mut spec = valid_spec();
         spec.description = None;
         let result = validate(&spec);
-        assert!(result
-            .errors
-            .contains(&ValidationError::MissingFeatureDescription));
+        assert!(
+            result
+                .errors
+                .contains(&ValidationError::MissingFeatureDescription)
+        );
     }
 
     #[test]
@@ -174,9 +180,11 @@ mod tests {
         let mut spec = valid_spec();
         spec.description = Some("   ".to_string());
         let result = validate(&spec);
-        assert!(result
-            .errors
-            .contains(&ValidationError::MissingFeatureDescription));
+        assert!(
+            result
+                .errors
+                .contains(&ValidationError::MissingFeatureDescription)
+        );
     }
 
     #[test]
@@ -184,9 +192,11 @@ mod tests {
         let mut spec = valid_spec();
         spec.has_background = false;
         let result = validate(&spec);
-        assert!(result
-            .errors
-            .contains(&ValidationError::MissingBackgroundSection));
+        assert!(
+            result
+                .errors
+                .contains(&ValidationError::MissingBackgroundSection)
+        );
     }
 
     #[test]
@@ -194,9 +204,11 @@ mod tests {
         let mut spec = valid_spec();
         spec.has_scenarios_section = false;
         let result = validate(&spec);
-        assert!(result
-            .errors
-            .contains(&ValidationError::MissingScenariosSection));
+        assert!(
+            result
+                .errors
+                .contains(&ValidationError::MissingScenariosSection)
+        );
     }
 
     #[test]
@@ -210,7 +222,9 @@ mod tests {
     #[test]
     fn error_when_scenario_missing_given() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps.retain(|s| s.kind != StepKind::Given);
+        spec.scenarios[0]
+            .steps
+            .retain(|s| s.kind != StepKind::Given);
         let result = validate(&spec);
         assert!(result.errors.iter().any(|e| matches!(
             e,
@@ -245,10 +259,12 @@ mod tests {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "something happens".to_string();
         let result = validate(&spec);
-        assert!(result.errors.iter().any(|e| matches!(
-            e,
-            ValidationError::StepMissingRfc2119Keyword { .. }
-        )));
+        assert!(
+            result
+                .errors
+                .iter()
+                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+        );
     }
 
     #[test]
@@ -256,10 +272,12 @@ mod tests {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "the system MUST respond".to_string();
         let result = validate(&spec);
-        assert!(!result.errors.iter().any(|e| matches!(
-            e,
-            ValidationError::StepMissingRfc2119Keyword { .. }
-        )));
+        assert!(
+            !result
+                .errors
+                .iter()
+                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+        );
     }
 
     #[test]
@@ -267,10 +285,12 @@ mod tests {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "the system SHOULD respond".to_string();
         let result = validate(&spec);
-        assert!(!result.errors.iter().any(|e| matches!(
-            e,
-            ValidationError::StepMissingRfc2119Keyword { .. }
-        )));
+        assert!(
+            !result
+                .errors
+                .iter()
+                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+        );
     }
 
     #[test]
@@ -278,10 +298,12 @@ mod tests {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "the system MAY respond".to_string();
         let result = validate(&spec);
-        assert!(!result.errors.iter().any(|e| matches!(
-            e,
-            ValidationError::StepMissingRfc2119Keyword { .. }
-        )));
+        assert!(
+            !result
+                .errors
+                .iter()
+                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+        );
     }
 
     #[test]
@@ -289,10 +311,12 @@ mod tests {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "the system shall respond".to_string();
         let result = validate(&spec);
-        assert!(result.errors.iter().any(|e| matches!(
-            e,
-            ValidationError::StepMissingRfc2119Keyword { .. }
-        )));
+        assert!(
+            result
+                .errors
+                .iter()
+                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+        );
     }
 
     #[test]

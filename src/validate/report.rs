@@ -80,24 +80,3 @@ impl std::fmt::Display for ValidationWarning {
         }
     }
 }
-
-pub fn print_result(result: &ValidationResult) {
-    for error in &result.errors {
-        eprintln!("ERROR: {error}");
-    }
-    for warning in &result.warnings {
-        eprintln!("WARNING: {warning}");
-    }
-    if result.is_success() {
-        if result.warnings.is_empty() {
-            println!("Validation passed.");
-        } else {
-            println!("Validation passed with warnings.");
-        }
-    } else {
-        println!(
-            "Validation failed with {} error(s).",
-            result.errors.len()
-        );
-    }
-}
