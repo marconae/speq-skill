@@ -58,7 +58,7 @@ The system SHALL validate documents.
 }
 
 fn cmd() -> Command {
-    Command::cargo_bin("speq").unwrap()
+    Command::new(assert_cmd::cargo::cargo_bin!("speq"))
 }
 
 mod feature_list {
@@ -173,6 +173,178 @@ mod feature_validate {
             .assert()
             .success()
             .stdout(predicate::str::contains("No features found"));
+    }
+}
+
+mod domain_list {
+    use super::*;
+
+    #[test]
+    fn lists_all_domains() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["domain", "list"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/"))
+            .stdout(predicate::str::contains("validation/"));
+    }
+
+    #[test]
+    fn empty_specs_shows_message() {
+        let tmp = TempDir::new().unwrap();
+        fs::create_dir_all(tmp.path().join("specs")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["domain", "list"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("No domains found"));
+    }
+}
+
+mod feature_get {
+    use super::*;
+
+    #[test]
+    fn gets_full_feature_spec() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "get", "cli/validate"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("CLI Validate"))
+            .stdout(predicate::str::contains("Basic test"));
+    }
+
+    #[test]
+    fn gets_single_scenario() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "get", "cli/validate/Basic test"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("cli/validate/Basic test"))
+            .stdout(predicate::str::contains("Given"));
+    }
+
+    #[test]
+    fn feature_not_found() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "get", "cli/nonexistent"])
+            .assert()
+            .code(1)
+            .stdout(predicate::str::contains("Feature not found"));
+    }
+
+    #[test]
+    fn scenario_not_found() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "get", "cli/validate/Missing"])
+            .assert()
+            .code(1)
+            .stdout(predicate::str::contains("Scenario 'Missing' not found"));
+    }
+}
+
+mod search {
+    use super::*;
+
+    #[test]
+    fn no_index_shows_error() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "query", "validation"])
+            .assert()
+            .code(1)
+            .stdout(predicate::str::contains("No search index found"));
+    }
+
+    #[test]
+    fn index_builds_successfully() {
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "index"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Building search index"))
+            .stdout(predicate::str::contains("Indexed"));
+    }
+
+    #[test]
+    fn search_finds_similar_scenarios() {
+        let tmp = setup_test_specs();
+
+        // First build the index
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        // Then search for validation-related content
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "query", "document validation"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("validation/document-structure"));
+    }
+
+    #[test]
+    fn search_with_limit() {
+        let tmp = setup_test_specs();
+
+        // First build the index
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        // Search with limit
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "query", "test", "--limit", "1"])
+            .assert()
+            .success();
+    }
+
+    #[test]
+    fn search_no_matches() {
+        let tmp = setup_test_specs();
+
+        // First build the index
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        // Search for something completely unrelated
+        // Note: Semantic search may still find some results, so we just verify it runs
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "query", "xyzzy12345nonexistent"])
+            .assert()
+            .success();
     }
 }
 

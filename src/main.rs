@@ -6,6 +6,7 @@ use clap::Parser;
 mod cli;
 mod feature;
 mod record;
+mod search;
 mod tree;
 mod validate;
 
@@ -13,8 +14,149 @@ fn main() -> ExitCode {
     let cli = cli::Cli::parse();
 
     match cli.command {
+        cli::Commands::Domain { command } => handle_domain_command(command),
         cli::Commands::Feature { command } => handle_feature_command(command),
         cli::Commands::Record { plan_name } => handle_record_command(&plan_name),
+        cli::Commands::Search { command } => handle_search_command(command),
+    }
+}
+
+fn handle_search_command(command: cli::SearchCommands) -> ExitCode {
+    let base = PathBuf::from("specs");
+
+    match command {
+        cli::SearchCommands::Index => {
+            println!("Building search index...");
+            match search::index_specs(&base) {
+                Ok(count) => {
+                    println!("Indexed {} scenarios.", count);
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    println!("Error: {}", e);
+                    ExitCode::from(1)
+                }
+            }
+        }
+        cli::SearchCommands::Query { query, limit } => {
+            match search::search_specs(&query, limit) {
+                Ok(results) => {
+                    if results.is_empty() {
+                        println!("No matches found.");
+                    } else {
+                        for result in results {
+                            println!(
+                                "{}/{}/{} (score: {:.3})",
+                                result.domain, result.feature, result.scenario, result.score
+                            );
+                            // Show first line of content as snippet
+                            if let Some(first_line) = result.content.lines().next() {
+                                println!("  {}", first_line);
+                            }
+                            println!();
+                        }
+                    }
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    println!("{}", e);
+                    ExitCode::from(1)
+                }
+            }
+        }
+    }
+}
+
+fn handle_domain_command(command: cli::DomainCommands) -> ExitCode {
+    let base = PathBuf::from("specs");
+
+    match command {
+        cli::DomainCommands::List => {
+            let domains = feature::discover_domains(&base);
+            if domains.is_empty() {
+                println!("No domains found.");
+            } else {
+                for domain in domains {
+                    println!("{}/", domain);
+                }
+            }
+            ExitCode::SUCCESS
+        }
+    }
+}
+
+fn handle_feature_get(base: &std::path::Path, path: &str) -> ExitCode {
+    // Parse path: domain/feature or domain/feature/scenario
+    let parts: Vec<&str> = path.splitn(3, '/').collect();
+
+    if parts.len() < 2 {
+        println!("Invalid path format. Use: domain/feature or domain/feature/scenario");
+        return ExitCode::from(1);
+    }
+
+    let domain = parts[0];
+    let feature_name = parts[1];
+    let scenario_name = parts.get(2).copied();
+
+    let fp = feature::FeaturePath::new(domain, feature_name);
+    let spec_path = fp.spec_path(base);
+
+    if !spec_path.exists() {
+        println!("Feature not found: {}/{}", domain, feature_name);
+        return ExitCode::from(1);
+    }
+
+    let content = match std::fs::read_to_string(&spec_path) {
+        Ok(c) => c,
+        Err(e) => {
+            println!("Error reading feature: {}", e);
+            return ExitCode::from(1);
+        }
+    };
+
+    let parsed = match validate::parser::parse(&content) {
+        Ok(p) => p,
+        Err(e) => {
+            println!("Error parsing feature: {}", e);
+            return ExitCode::from(1);
+        }
+    };
+
+    if let Some(scenario_name) = scenario_name {
+        // Find the specific scenario
+        if let Some(scenario) = parsed.scenarios.iter().find(|s| s.name == scenario_name) {
+            println!("{}/{}/{}", domain, feature_name, scenario_name);
+            println!();
+            for step in &scenario.steps {
+                println!("  {:?} {}", step.kind, step.text);
+            }
+            ExitCode::SUCCESS
+        } else {
+            println!(
+                "Scenario '{}' not found in {}/{}",
+                scenario_name, domain, feature_name
+            );
+            ExitCode::from(1)
+        }
+    } else {
+        // Display full feature
+        if let Some(name) = &parsed.feature_name {
+            println!("{}", name);
+        }
+        println!();
+        if let Some(desc) = &parsed.description {
+            println!("{}", desc);
+            println!();
+        }
+        for scenario in &parsed.scenarios {
+            println!("### {}", scenario.name);
+            println!();
+            for step in &scenario.steps {
+                println!("  {:?} {}", step.kind, step.text);
+            }
+            println!();
+        }
+        ExitCode::SUCCESS
     }
 }
 
@@ -22,6 +164,8 @@ fn handle_feature_command(command: cli::FeatureCommands) -> ExitCode {
     let base = PathBuf::from("specs");
 
     match command {
+        cli::FeatureCommands::Get { path } => handle_feature_get(&base, &path),
+
         cli::FeatureCommands::List { domain } => {
             if let Some(domain) = domain {
                 let features = feature::discover_features_in_domain(&base, &domain);

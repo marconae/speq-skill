@@ -11,6 +11,10 @@ path = "src/main.rs"
 clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
 thiserror = "2"
+fastembed = "4"
+dirs = "6"
+serde = { version = "1", features = ["derive"] }
+bincode = "1"
 
 [dev-dependencies]
 assert_cmd = "2"
