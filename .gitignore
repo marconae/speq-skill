@@ -27,5 +27,8 @@ target
 # Added by cargo
 /target
 
+# LLVM coverage data
+*.profraw
+
 # Project specific
 _ideas
