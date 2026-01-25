@@ -35,7 +35,6 @@
       "Bash(ls:*)",
       "Bash(cp:*)",
       "Bash(mv:*)",
-      "Bash(rm:*)",
       "Bash(lsof:*)",
       "Bash(for:*)",
       "Bash(done)",

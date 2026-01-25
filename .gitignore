@@ -32,3 +32,6 @@ target
 
 # Project specific
 _ideas
+
+# Built plugin (regenerate with scripts/build-plugin.sh)
+plugin/

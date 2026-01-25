@@ -31,23 +31,23 @@ Per-iteration checklist for implementing a single scenario or behavior.
 |------|--------|--------|
 | 1 | Write SIMPLEST code to pass | No extra features |
 | 2 | Run the test | Test passes |
-| 3 | Run ALL tests | No regressions |
-| 4 | Show output | Fresh output displayed in response |
+| 3 | Show output | Fresh output displayed in response |
+
+**Note:** Sub-agents run only the changed test. Full suite runs in verification phase.
 
 ### GREEN Checklist
 
 - [ ] Implementation is minimal (just enough to pass)
 - [ ] No "improvements" or "nice-to-haves" added
-- [ ] Single test passes
-- [ ] All existing tests still pass
-- [ ] Ran tests and showed output
+- [ ] Test passes
+- [ ] Ran test and showed output
 
 ## REFACTOR Phase
 
 | Step | Action | Verify |
 |------|--------|--------|
 | 1 | Improve code structure | Remove duplication, improve names |
-| 2 | Run ALL tests | Still passing |
+| 2 | Run the test | Still passing |
 | 3 | Run linter | No warnings |
 | 4 | Show output | Fresh output displayed in response |
 
@@ -56,9 +56,9 @@ Per-iteration checklist for implementing a single scenario or behavior.
 - [ ] No new behavior added
 - [ ] Duplication removed
 - [ ] Names are clear and descriptive
-- [ ] All tests still pass
+- [ ] Test still passes
 - [ ] Linter passes
-- [ ] Ran tests + lint and showed output
+- [ ] Ran test + lint and showed output
 
 ## Iteration Complete
 

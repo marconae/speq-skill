@@ -1,0 +1,13 @@
+{
+  "name": "speq",
+  "version": "0.1.0",
+  "description": "Spec-driven development workflow for Claude Code. Plan features with /speq:planner, implement with TDD via /speq:implementer, and record specs with /speq:recorder.",
+  "author": {
+    "name": "speq-skill contributors"
+  },
+  "repository": "https://github.com/marconae/speq-skill",
+  "license": "MIT",
+  "keywords": ["spec-driven", "tdd", "specifications", "planning", "workflow"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

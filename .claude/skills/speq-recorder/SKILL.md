@@ -1,9 +1,9 @@
 ---
-name: spec-recorder
+name: speq-recorder
 description: |
   Apply approved plan deltas to permanent feature specs.
   Use after a plan is approved to merge deltas from specs/_plans/<plan-name>/ into specs/.
-  Invoke explicitly with /spec-recorder <plan-name> to record approved changes.
+  Invoke explicitly with /speq-recorder <plan-name> to record approved changes.
   Handles NEW, CHANGED, and REMOVED scenarios from delta specs.
 ---
 
@@ -20,7 +20,7 @@ Get plan name from user prompt or ask if none specified.
 ```
 Check: specs/_plans/<plan-name>/verification-report.md exists?
 ├─ Yes → Proceed
-└─ No  → STOP: "Run /spec-implementer <plan-name> first."
+└─ No  → STOP: "Run /speq-implementer <plan-name> first."
 ```
 
 ### Phase 2: Load Plan

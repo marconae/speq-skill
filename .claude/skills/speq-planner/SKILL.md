@@ -1,16 +1,16 @@
 ---
-name: spec-planner
+name: speq-planner
 description: |
   Plan mode workflow for creating and managing feature specification deltas.
   Use when entering plan mode to define new features or changes to existing features.
-  Invoke explicitly with /spec-planner when planning implementation work.
+  Invoke explicitly with /speq-planner when planning implementation work.
   Creates delta specs in specs/_plans/<plan-name>/ following the plan template.
   Triggers: planning mode, feature specification, spec planning, implementation planning.
 ---
 
 # Spec Planner
 
-Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/spec-recorder`.
+Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/speq-recorder`.
 
 ## Guiding Principles
 

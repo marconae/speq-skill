@@ -1,4 +1,4 @@
-# Core Standards
+# Guardrails
 
 ## Verification Rule
 

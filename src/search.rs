@@ -52,7 +52,6 @@ pub fn get_index_path() -> PathBuf {
     cache.join("indexes").join(format!("{}.idx", slug))
 }
 
-
 /// Configure fastembed to use our cache directory
 fn configure_fastembed_cache() {
     if std::env::var("FASTEMBED_CACHE_DIR").is_err() {
