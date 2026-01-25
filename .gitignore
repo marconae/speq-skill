@@ -25,5 +25,7 @@ target
 .env
 
 # Added by cargo
-
 /target
+
+# Project specific
+_ideas
