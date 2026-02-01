@@ -1,45 +1,96 @@
 #!/bin/bash
 # Run integration test in Docker
-# Usage: ./tests/docker/test-docker.sh [version]
+# Usage: ./tests/docker/test-docker.sh
 #
-# This script tests the install.sh script by creating a mock marketplace archive.
-# For full binary testing, use CI which has access to released binaries.
+# This script tests the install.sh script by:
+# 1. Building the release binary locally (fast, native compilation)
+# 2. Creating a source tarball with the pre-built binary
+# 3. Running install.sh in Docker which extracts and installs
+#
+# Cross-platform note: When running on macOS but testing on Linux Docker,
+# a mock binary is used since the native binary won't work. For full binary
+# testing, run on a Linux host or in CI.
 set -euo pipefail
 
-VERSION="${1:-dev}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
-# Build plugin structure (no binary needed for script testing)
-echo "=== Building plugin structure ==="
-"$PROJECT_ROOT/scripts/plugin/build.sh"
+# Detect if we're cross-platform (macOS host testing Linux Docker)
+HOST_OS="$(uname -s)"
+CROSS_PLATFORM=false
+if [[ "$HOST_OS" == "Darwin" ]]; then
+    CROSS_PLATFORM=true
+    echo "=== Cross-platform detected: macOS host -> Linux Docker ==="
+    echo "Note: Using mock binary for script testing. Full binary testing requires Linux host."
+    echo ""
+fi
 
-# Create a mock marketplace archive with a placeholder binary
-echo "=== Creating mock marketplace archive ==="
-ARCHIVE_DIR="$PROJECT_ROOT/dist/docker-build/speq-marketplace-${VERSION}-x86_64-linux"
-rm -rf "$PROJECT_ROOT/dist/docker-build"
-mkdir -p "$ARCHIVE_DIR/bin"
-mkdir -p "$ARCHIVE_DIR/.claude-plugin"
-mkdir -p "$ARCHIVE_DIR/plugins"
+echo "=== Building release binary ==="
+cargo build --release
 
-# Create a mock binary (just a shell script for testing)
-cat > "$ARCHIVE_DIR/bin/speq" << 'EOF'
-#!/bin/bash
-echo "speq mock binary v${VERSION:-dev}"
-echo "This is a test placeholder"
+echo ""
+echo "=== Building plugin ==="
+./scripts/plugin/build.sh
+
+echo ""
+echo "=== Creating source tarball with pre-built binary ==="
+# Create tarball that mimics GitHub's archive structure
+TARBALL_DIR="$PROJECT_ROOT/dist/docker-build"
+rm -rf "$TARBALL_DIR"
+mkdir -p "$TARBALL_DIR/speq-skill-main"
+
+# Copy source files (excluding .git, target except release binary, dist)
+rsync -a \
+    --exclude='.git' \
+    --exclude='target' \
+    --exclude='dist' \
+    --exclude='.DS_Store' \
+    --exclude='._*' \
+    "$PROJECT_ROOT/" "$TARBALL_DIR/speq-skill-main/"
+
+# Include binary - use mock for cross-platform, real binary for same-platform
+mkdir -p "$TARBALL_DIR/speq-skill-main/target/release"
+if [[ "$CROSS_PLATFORM" == "true" ]]; then
+    # Create mock binary that simulates speq CLI
+    cat > "$TARBALL_DIR/speq-skill-main/target/release/speq" << 'MOCK_EOF'
+#!/bin/sh
+# Mock speq binary for cross-platform Docker testing
+VERSION="0.1.0-mock"
+case "$1" in
+    --version|-V)
+        echo "speq $VERSION"
+        ;;
+    --help|-h|"")
+        echo "speq $VERSION"
+        echo "Spec-driven development CLI (mock binary for testing)"
+        echo ""
+        echo "Usage: speq <COMMAND>"
+        echo ""
+        echo "Commands:"
+        echo "  tree      Show spec tree"
+        echo "  search    Search specs"
+        echo "  validate  Validate specs"
+        echo "  help      Print this message"
+        ;;
+    *)
+        echo "speq: mock command '$1' executed"
+        ;;
+esac
 exit 0
-EOF
-chmod +x "$ARCHIVE_DIR/bin/speq"
-
-cp -r "$PROJECT_ROOT/dist/marketplace/.claude-plugin/." "$ARCHIVE_DIR/.claude-plugin/"
-cp -r "$PROJECT_ROOT/dist/marketplace/plugins/." "$ARCHIVE_DIR/plugins/"
+MOCK_EOF
+    chmod +x "$TARBALL_DIR/speq-skill-main/target/release/speq"
+    echo "Created mock binary for cross-platform testing"
+else
+    cp "$PROJECT_ROOT/target/release/speq" "$TARBALL_DIR/speq-skill-main/target/release/"
+    echo "Using native binary"
+fi
 
 # Create tarball
-ARCHIVE="$PROJECT_ROOT/dist/docker-build/speq-marketplace-${VERSION}-x86_64-linux.tar.gz"
-tar -czf "$ARCHIVE" -C "$PROJECT_ROOT/dist/docker-build" "speq-marketplace-${VERSION}-x86_64-linux"
-echo "Created archive: $ARCHIVE"
+TARBALL="$TARBALL_DIR/source.tar.gz"
+tar -czf "$TARBALL" -C "$TARBALL_DIR" "speq-skill-main"
+echo "Created: $TARBALL"
 
 echo ""
 echo "=== Building Docker test image ==="
@@ -48,14 +99,17 @@ docker build -t speq-install-test -f tests/docker/Dockerfile .
 echo ""
 echo "=== Running integration test ==="
 docker run --rm \
-    -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
+    -v "$PROJECT_ROOT/scripts/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-install.sh:/home/testuser/test-install.sh:ro" \
-    -v "$ARCHIVE:/home/testuser/marketplace.tar.gz:ro" \
-    -e "SPEQ_LOCAL_ARCHIVE=/home/testuser/marketplace.tar.gz" \
+    -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
+    -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
+    -e "SPEQ_PREBUILT=1" \
     speq-install-test -c "/home/testuser/test-install.sh"
 
 echo ""
 echo "=== Docker integration test passed! ==="
-echo ""
-echo "Note: This test uses a mock binary. For full binary testing,"
-echo "run CI or use: SPEQ_LOCAL_ARCHIVE=<path> ./install.sh"
+if [[ "$CROSS_PLATFORM" == "true" ]]; then
+    echo ""
+    echo "Note: Cross-platform test used mock binary."
+    echo "For full binary testing, run on Linux host or in CI."
+fi

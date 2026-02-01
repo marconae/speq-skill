@@ -1,30 +1,63 @@
 #!/bin/bash
-# Integration test: verify install.sh works in minimal Linux environment
+# Integration test: verify install.sh works
 set -euo pipefail
 
 echo "=== Testing speq-skill installation in Docker ==="
 
-# Test 1: Run install script (downloads from GitHub releases)
-echo "Running install.sh..."
+# Test 1: Run install script
+echo ""
+echo "--- Test 1: Running install.sh ---"
 ./install.sh
 
-# Test 2: Verify speq CLI installed and works
-echo "Testing speq CLI..."
+# Test 2: Verify speq binary installed and works
+echo ""
+echo "--- Test 2: Verify speq binary ---"
 if ! ~/.local/bin/speq --help > /dev/null 2>&1; then
-    echo "FAIL: speq CLI not accessible"
+    echo "FAIL: speq --help failed"
     exit 1
 fi
-echo "PASS: speq CLI installed and functional"
+echo "PASS: speq --help works"
 
-# Test 3: Verify marketplace directory structure
-echo "Verifying marketplace structure..."
+# Verify version output
+VERSION_OUTPUT=$(~/.local/bin/speq --version 2>&1)
+if [[ -z "$VERSION_OUTPUT" ]]; then
+    echo "FAIL: speq --version returned empty"
+    exit 1
+fi
+echo "PASS: speq --version returns: $VERSION_OUTPUT"
+
+# Test 3: Verify marketplace structure
+echo ""
+echo "--- Test 3: Verify marketplace structure ---"
 if [[ ! -d ~/.speq-skill/.claude-plugin ]]; then
-    echo "FAIL: marketplace structure missing"
+    echo "FAIL: ~/.speq-skill/.claude-plugin missing"
     exit 1
 fi
-echo "PASS: marketplace structure valid"
+echo "PASS: marketplace .claude-plugin directory exists"
 
-# Test 4: Verify plugin commands were attempted
-# Note: Plugin install may require auth, but commands should not error
-# We test that install.sh handles missing auth gracefully
-echo "PASS: integration test complete"
+if [[ ! -f ~/.speq-skill/bin/speq ]]; then
+    echo "FAIL: ~/.speq-skill/bin/speq missing"
+    exit 1
+fi
+echo "PASS: marketplace bin/speq exists"
+
+# Test 4: Verify Claude plugin registration
+echo ""
+echo "--- Test 4: Verify Claude plugin registration ---"
+
+# Check marketplace was added
+if ! claude plugin marketplace list 2>/dev/null | grep -q "speq-skill"; then
+    echo "WARN: speq-skill marketplace not in list (may need auth)"
+else
+    echo "PASS: speq-skill marketplace registered"
+fi
+
+# Check plugin was installed
+if ! claude plugin list 2>/dev/null | grep -q "speq"; then
+    echo "WARN: speq plugin not in list (may need auth)"
+else
+    echo "PASS: speq plugin installed"
+fi
+
+echo ""
+echo "=== All installation tests passed! ==="
