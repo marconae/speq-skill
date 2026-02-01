@@ -72,7 +72,7 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
 
     // Initialize the embedding model
     let mut model = TextEmbedding::try_new(
-        InitOptions::new(EmbeddingModel::AllMiniLML6V2).with_show_download_progress(true),
+        InitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXS).with_show_download_progress(true),
     )
     .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
 
@@ -176,8 +176,9 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     }
 
     // Initialize the embedding model
-    let mut model = TextEmbedding::try_new(InitOptions::new(EmbeddingModel::AllMiniLML6V2))
-        .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
+    let mut model =
+        TextEmbedding::try_new(InitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXS))
+            .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
 
     // Generate query embedding
     let query_embeddings = model

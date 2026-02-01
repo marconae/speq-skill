@@ -154,6 +154,6 @@ The plugin depends on Serena and Context7 MCP servers. If you see connection err
 |------------|---------|---------|
 | [Serena](https://github.com/oraios/serena) | Semantic code navigation | MIT |
 | [Context7](https://github.com/upstash/context7) | Library documentation | MIT |
-| [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | Embeddings model (~23MB) | Apache 2.0 |
+| [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~23MB) | Apache 2.0 |
 
 The embeddings model downloads automatically on first `speq search` command.

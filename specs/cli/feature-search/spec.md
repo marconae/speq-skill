@@ -69,4 +69,5 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * *WHEN* the user runs `speq search index`
 * *THEN* the index file SHALL be stored at `/home/user/.cache/speq/indexes/-home-user-code-my-project.idx`
 * *AND* the embedding model SHALL be cached at `/home/user/.cache/speq/models/`
+* *AND* the model identity SHALL be `Snowflake/snowflake-arctic-embed-xs`
 * *AND* subsequent operations SHALL reuse the cached model

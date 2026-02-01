@@ -89,8 +89,8 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers (both MIT licensed).
 
-The `speq` CLI downloads the [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) embeddings model (~23MB) on first run for semantic search (Apache 2.0 licensed).
+The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search (Apache 2.0 licensed).
 
 ## License
 
-Free and open-source under MIT. See [LICENSE](LICENSE) for details.
+Free and open-source under [MIT](LICENSE).
