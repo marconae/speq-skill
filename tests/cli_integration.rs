@@ -1,5 +1,6 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
+use serial_test::serial;
 use std::fs;
 use tempfile::TempDir;
 
@@ -276,6 +277,7 @@ mod search {
     }
 
     #[test]
+    #[serial]
     fn index_builds_successfully() {
         let tmp = setup_test_specs();
 
@@ -289,6 +291,7 @@ mod search {
     }
 
     #[test]
+    #[serial]
     fn search_finds_similar_scenarios() {
         let tmp = setup_test_specs();
 
@@ -309,6 +312,7 @@ mod search {
     }
 
     #[test]
+    #[serial]
     fn search_with_limit() {
         let tmp = setup_test_specs();
 
@@ -328,6 +332,7 @@ mod search {
     }
 
     #[test]
+    #[serial]
     fn search_no_matches() {
         let tmp = setup_test_specs();
 

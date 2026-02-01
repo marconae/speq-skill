@@ -30,4 +30,5 @@ postcard = { version = "1.1", features = ["alloc"] }
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
+serial_test = "3"
 tempfile = "3"
