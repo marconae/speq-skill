@@ -14,9 +14,9 @@ Analyze implementation quality and identify issues for the implementer-agent to 
 
 ## First: Invoke Required Skill
 
-- `/code-guardrails` — Quality standards reference
-- `/code-tools` — You must use provided code tools
-- `/speq-cli` — Learn how to use the `sqeq` CLI
+- `/speq-code-guardrails` — Quality standards reference
+- `/speq-code-tools` — You must use provided code tools
+- `/speq-cli` — Learn how to use the `speq` CLI
 
 ## Input
 
@@ -29,7 +29,7 @@ You receive:
 Analyze each changed file for:
 
 ### 1. Guardrail Violations
-Per `/code-guardrails` skill:
+Per `/speq-code-guardrails` skill:
 - Functions with too many arguments (>3)
 - Functions with side effects
 - Boolean flag parameters

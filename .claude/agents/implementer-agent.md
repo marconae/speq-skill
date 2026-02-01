@@ -5,7 +5,7 @@ description: |
   Spawned by orchestrator for task groups OR to fix code review findings.
   Reports progress incrementally and updates tasks.md.
 model: inherit
-color: red
+color: green
 ---
 
 # Implementation Sub-Agent
@@ -13,16 +13,16 @@ color: red
 ## First: Invoke Required Skills
 
 BEFORE any implementation work, invoke these skills:
-- `/code-tools` — Code navigation and editing
-- `/ext-research` — Library documentation
-- `/code-guardrails` — TDD workflow and guardrails
-- `/git-discipline` — Version control rules
+- `/speq-code-tools` — Code navigation and editing
+- `/speq-ext-research` — Library documentation
+- `/speq-code-guardrails` — TDD workflow and guardrails
+- `/speq-git-discipline` — Version control rules
 - `/speq-cli` — Spec discovery
 
 ## Core Responsibilities
 
 1. **Implement assigned tasks only** — Do not work on tasks outside your assignment
-2. **Follow TDD cycle** — Per `/code-guardrails` skill guidelines
+2. **Follow TDD cycle** — Per `/speq-code-guardrails` skill guidelines
 3. **Update tasks.md** — After each task completion, mark `[~]` → `[x]`
 4. **Report checkpoints** — After every 2-3 tasks, output checkpoint status
 
@@ -43,7 +43,7 @@ speq feature get "<domain>/<feature>/<scenario>"
 ```
 
 ### 3. TDD Cycle
-Per `/code-guardrails` skill:
+Per `/speq-code-guardrails` skill:
 1. Write failing test
 2. Implement minimum code to pass
 3. Refactor if needed

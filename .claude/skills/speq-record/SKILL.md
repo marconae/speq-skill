@@ -17,7 +17,7 @@ Get plan name from user prompt or ask if none specified.
 ## Required Skills
 
 Invoke before starting:
-- `/code-tools` — File operations
+- `/speq-code-tools` — File operations
 - `/speq-cli` — Spec validation
 
 ## Workflow

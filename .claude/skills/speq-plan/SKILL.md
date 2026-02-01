@@ -15,8 +15,8 @@ Create and manage feature specification deltas. Deltas are recorded to permanent
 ## Required Skills
 
 Invoke before starting:
-- `/code-tools` — Codebase exploration
-- `/ext-research` — API docs and design research
+- `/speq-code-tools` — Codebase exploration
+- `/speq-ext-research` — API docs and design research
 - `/speq-cli` — Spec discovery and search
 
 ## Guiding Principles
@@ -48,7 +48,7 @@ speq feature get "cli/validate/Validation fails"    # Single scenario
 
 ### 2. Research
 
-Invoke `/ext-research` and conduct research for:
+Invoke `/speq-ext-research` and conduct research for:
 - External libraries and APIs
 - Design patterns and architecture
 

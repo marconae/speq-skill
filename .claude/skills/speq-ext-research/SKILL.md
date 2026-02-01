@@ -1,5 +1,5 @@
 ---
-name: ext-research
+name: speq-ext-research
 description: |
   External documentation and research via Context7 and WebSearch.
   Use for: library APIs, framework patterns, design questions, best practices.

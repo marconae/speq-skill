@@ -1,5 +1,5 @@
 ---
-name: git-discipline
+name: speq-git-discipline
 description: |
   Git read-only guardrails. Enforces inspection-only git usage.
   Use for: checking git status, reviewing changes, understanding history.

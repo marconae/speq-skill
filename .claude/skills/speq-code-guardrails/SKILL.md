@@ -1,5 +1,5 @@
 ---
-name: code-guardrails
+name: speq-code-guardrails
 description: |
   TDD workflow and code quality guardrails for implementation.
   Use for: writing production code, implementing features, fixing bugs.

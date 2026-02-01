@@ -1,5 +1,5 @@
 ---
-name: code-tools
+name: speq-code-tools
 description: |
   Semantic code navigation and editing via Serena MCP.
   Use for: exploring codebase structure, finding symbol definitions,

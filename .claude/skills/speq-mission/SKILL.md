@@ -17,8 +17,8 @@ You are creating a project mission file (`specs/mission.md`) through an interact
 ## Required Skills
 
 Invoke before starting:
-- `/code-tools` — Codebase exploration
-- `/ext-research` — Tech stack research
+- `/speq-code-tools` — Codebase exploration
+- `/speq-ext-research` — Tech stack research
 - `/speq-cli` — Spec structure
 
 ## Workflow

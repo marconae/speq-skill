@@ -17,12 +17,12 @@ Get plan name from user prompt or ask if none specified.
 ## Required Skills
 
 Invoke before starting:
-- `/code-tools` — Code navigation and editing
-- `/ext-research` — Library documentation
-- `/code-guardrails` — TDD cycle and quality standards
+- `/speq-code-tools` — Code navigation and editing
+- `/speq-ext-research` — Library documentation
+- `/speq-code-guardrails` — TDD cycle and quality standards
 - `/speq-cli` — Spec discovery
 
-Subagents must also invoke these skills plus `/git-discipline`.
+Subagents must also invoke these skills plus `/speq-git-discipline`.
 
 ## Orchestrator Role
 
