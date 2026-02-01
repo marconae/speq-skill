@@ -59,6 +59,7 @@ cp -r dist/marketplace/. "dist/${MARKETPLACE_ARCHIVE}/"
 mkdir -p "dist/${MARKETPLACE_ARCHIVE}/bin"
 cp "target/${TARGET}/release/speq" "dist/${MARKETPLACE_ARCHIVE}/bin/"
 cp LICENSE "dist/${MARKETPLACE_ARCHIVE}/bin/"
+cp dist/bin/THIRD_PARTY_LICENSES "dist/${MARKETPLACE_ARCHIVE}/bin/"
 
 tar -czvf "dist/${MARKETPLACE_ARCHIVE}.tar.gz" -C dist "${MARKETPLACE_ARCHIVE}"
 echo "Created: dist/${MARKETPLACE_ARCHIVE}.tar.gz"

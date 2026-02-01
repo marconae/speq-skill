@@ -17,11 +17,11 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
-thiserror = "2"
-fastembed = "5"
-dirs = "6"
-serde = { version = "1", features = ["derive"] }
-postcard = { version = "1", features = ["alloc"] }
+thiserror = "2.0"
+fastembed = "5.8"
+dirs = "6.0"
+serde = { version = "1.0", features = ["derive"] }
+postcard = { version = "1.1", features = ["alloc"] }
 
 [dev-dependencies]
 assert_cmd = "2"

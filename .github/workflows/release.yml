@@ -4,31 +4,15 @@ on:
   push:
     tags:
       - 'v[0-9]+.*'
+    branches:
+      - test-release
 
 permissions:
   contents: write
 
 jobs:
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
-          draft: false
-          prerelease: ${{ contains(github.ref_name, '-') }}
-
-  build:
-    name: Build ${{ matrix.short }}
-    needs: create-release
+  build-marketplace:
+    name: Build Marketplace ${{ matrix.short }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -55,6 +39,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine version
+        id: version
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "version=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=dev" >> $GITHUB_OUTPUT
+          fi
+
       - name: Install Rust
         uses: dtolnay/rust-action@stable
         with:
@@ -78,50 +71,53 @@ jobs:
       - name: Generate third-party licenses
         run: cargo about generate about.hbs > THIRD_PARTY_LICENSES
 
-      - name: Package release
-        run: |
-          ARCHIVE_NAME="speq-${{ github.ref_name }}-${{ matrix.short }}"
-          mkdir -p "dist/${ARCHIVE_NAME}"
-          cp "target/${{ matrix.target }}/release/speq" "dist/${ARCHIVE_NAME}/"
-          cp LICENSE "dist/${ARCHIVE_NAME}/"
-          cp THIRD_PARTY_LICENSES "dist/${ARCHIVE_NAME}/"
-          tar -czvf "dist/${ARCHIVE_NAME}.tar.gz" -C dist "${ARCHIVE_NAME}"
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/speq-${{ github.ref_name }}-${{ matrix.short }}.tar.gz
-          asset_name: speq-${{ github.ref_name }}-${{ matrix.short }}.tar.gz
-          asset_content_type: application/gzip
-
-  build-plugin:
-    name: Build Plugin
-    needs: create-release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build plugin
+      - name: Build plugin and marketplace structure
         run: ./scripts/plugin/build.sh
 
-      - name: Package plugin
+      - name: Package marketplace
         run: |
-          PLUGIN_ARCHIVE="speq-plugin-${{ github.ref_name }}"
-          mkdir -p "dist/${PLUGIN_ARCHIVE}"
-          # Copy all files including hidden directories (.claude-plugin)
-          cp -r plugin/. "dist/${PLUGIN_ARCHIVE}/"
-          tar -czvf "dist/${PLUGIN_ARCHIVE}.tar.gz" -C dist "${PLUGIN_ARCHIVE}"
+          VERSION="${{ steps.version.outputs.version }}"
+          MARKETPLACE_ARCHIVE="speq-marketplace-${VERSION}-${{ matrix.short }}"
+          mkdir -p "dist/${MARKETPLACE_ARCHIVE}"
 
-      - name: Upload Plugin Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Copy marketplace structure
+          cp -r dist/marketplace/. "dist/${MARKETPLACE_ARCHIVE}/"
+
+          # Stamp version in marketplace.json
+          sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" \
+            "dist/${MARKETPLACE_ARCHIVE}/.claude-plugin/marketplace.json"
+
+          # Add CLI for this platform only
+          mkdir -p "dist/${MARKETPLACE_ARCHIVE}/bin"
+          cp "target/${{ matrix.target }}/release/speq" "dist/${MARKETPLACE_ARCHIVE}/bin/"
+          cp LICENSE THIRD_PARTY_LICENSES "dist/${MARKETPLACE_ARCHIVE}/bin/"
+
+          tar -czvf "dist/${MARKETPLACE_ARCHIVE}.tar.gz" -C dist "${MARKETPLACE_ARCHIVE}"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: dist/speq-plugin-${{ github.ref_name }}.tar.gz
-          asset_name: speq-plugin-${{ github.ref_name }}.tar.gz
-          asset_content_type: application/gzip
+          name: speq-marketplace-${{ matrix.short }}
+          path: dist/*.tar.gz
+
+  release:
+    name: Create Release
+    needs: [build-marketplace]
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -la dist/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true

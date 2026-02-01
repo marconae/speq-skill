@@ -20,7 +20,6 @@
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
-claude plugin add ~/.claude/plugins/speq
 ```
 
 Then run `claude` and type `/speq:mission` to start.
@@ -85,7 +84,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 |-------|---------|
 | `/speq:code-tools` | Semantic code navigation via Serena MCP |
 | `/speq:ext-research` | External docs via Context7 and WebSearch |
-| `/speq:implementer` | TDD workflow and code quality guardrails |
+| `/speq:code-guardrails` | TDD workflow and code quality guardrails |
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:speq-cli` | speq CLI usage patterns |
 
@@ -170,41 +169,18 @@ specs/
 
 ## Installation
 
-**Quick Install (Recommended)**
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
-This installs:
-- `speq` CLI to `~/.local/bin`
-- Plugin to `~/.claude/plugins/speq`
+The installer automatically:
+- Downloads the marketplace to `~/.speq-skill/`
+- Symlinks `speq` CLI to `~/.local/bin/speq`
+- Installs the speq-skill plugin and dependencies (Serena, Context7)
 
-Then activate the plugin:
-```bash
-claude plugin add ~/.claude/plugins/speq
-```
+**Update:** Re-run the install script to get the latest version.
 
-**Options:**
-```bash
-# Install CLI only
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --cli-only
-
-# Install plugin only
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --plugin-only
-
-# Custom CLI location
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash -s -- --to ~/bin
-```
-
-**Update to Latest:**
-```bash
-# Re-run the same command - it always fetches and installs the latest version
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
-```
-
-**From Source**
-
+**From Source (CLI only):**
 ```bash
 cargo install --git https://github.com/marconae/speq-skill speq
 ```
