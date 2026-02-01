@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::Path;
 
+use chrono::Local;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -40,7 +41,10 @@ pub struct DeltaBlock {
 
 pub fn record_plan(specs_base: &Path, plan_name: &str) -> Result<Vec<String>, RecordError> {
     let plan_dir = specs_base.join("_plans").join(plan_name);
-    let recorded_dir = specs_base.join("_recorded").join(plan_name);
+    let date_prefix = Local::now().format("%Y-%m-%d").to_string();
+    let recorded_dir = specs_base
+        .join("_recorded")
+        .join(format!("{}-{}", date_prefix, plan_name));
 
     if !plan_dir.exists() {
         return Err(RecordError::PlanNotFound(plan_name.to_string()));
@@ -681,8 +685,29 @@ Description here.
         assert!(spec_content.contains("### Scenario: Test"));
         assert!(!spec_content.contains("DELTA"));
 
-        // Verify plan archived
-        assert!(specs.join("_recorded/test-plan").exists());
+        // Verify plan archived with date prefix
+        let recorded_dir = specs.join("_recorded");
+        let entries: Vec<_> = fs::read_dir(&recorded_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        assert_eq!(entries.len(), 1, "Expected exactly one recorded plan");
+
+        let archived_name = entries[0].file_name().to_string_lossy().to_string();
+        assert!(
+            archived_name.ends_with("-test-plan"),
+            "Archive should end with plan name"
+        );
+
+        // Verify date prefix format (YYYY-MM-DD-)
+        let date_prefix = &archived_name[..11];
+        assert!(
+            date_prefix.chars().nth(4) == Some('-')
+                && date_prefix.chars().nth(7) == Some('-')
+                && date_prefix.chars().nth(10) == Some('-'),
+            "Archive should have date prefix format YYYY-MM-DD-"
+        );
+
         assert!(!specs.join("_plans/test-plan").exists());
     }
 

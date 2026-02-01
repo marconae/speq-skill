@@ -75,7 +75,7 @@ Check thresholds after merging:
 ### Phase 5: Finalize
 
 1. Validate: `speq feature validate`
-2. Archive: `mv specs/_plans/<plan-name> specs/_recorded/<plan-name>`
+2. Archive: `mv specs/_plans/<plan-name> specs/_recorded/YYYY-MM-DD-<plan-name>`
 
 ```
 ✓ Verification report confirmed

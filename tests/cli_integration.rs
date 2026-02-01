@@ -419,8 +419,30 @@ A test feature.
         assert!(!content.contains("DELTA"));
         assert!(content.contains("### Scenario: New test"));
 
-        // Verify plan was archived
-        assert!(specs.join("_recorded/test-plan").exists());
+        // Verify plan was archived with date prefix
+        // The archive should be at _recorded/YYYY-MM-DD-test-plan
+        let recorded_dir = specs.join("_recorded");
+        let entries: Vec<_> = fs::read_dir(&recorded_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .collect();
+        assert_eq!(entries.len(), 1, "Expected exactly one recorded plan");
+
+        let archived_name = entries[0].file_name().to_string_lossy().to_string();
+        assert!(
+            archived_name.ends_with("-test-plan"),
+            "Archive should end with plan name"
+        );
+
+        // Verify date prefix format (YYYY-MM-DD-)
+        let date_prefix = &archived_name[..11];
+        assert!(
+            date_prefix.chars().nth(4) == Some('-')
+                && date_prefix.chars().nth(7) == Some('-')
+                && date_prefix.chars().nth(10) == Some('-'),
+            "Archive should have date prefix format YYYY-MM-DD-"
+        );
+
         assert!(!specs.join("_plans/test-plan").exists());
     }
 }
