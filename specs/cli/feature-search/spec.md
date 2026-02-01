@@ -13,6 +13,7 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * Slug format: absolute project path with `/` replaced by `-` (e.g., `/home/user/code/my-project` → `-home-user-code-my-project`)
 * Searchable units: scenarios (domain/feature/scenario granularity)
 * Results ranked by cosine similarity
+* If no index exists when searching, the system SHALL automatically build it
 * Exit code 0 regardless of match count
 
 ## Scenarios
@@ -47,9 +48,11 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 ### Scenario: No index exists
 
 * *GIVEN* no search index exists for the project
-* *WHEN* the user runs `speq search query "some query"`
-* *THEN* the system SHALL display an error "No search index found. Run 'speq search index' first."
-* *AND* the system SHALL exit with code 1
+* *WHEN* the user runs `speq search query "validation"`
+* *THEN* the system SHALL automatically build the search index
+* *AND* the system SHALL execute the search query
+* *AND* the system SHALL display results if any match
+* *AND* the system SHALL exit with code 0
 
 ### Scenario: No matches found
 

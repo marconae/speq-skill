@@ -69,3 +69,11 @@ The CLI SHALL provide a command to record approved plan deltas into permanent fe
 * *THEN* the system SHALL report an error
 * *AND* the system SHALL NOT archive the plan
 * *AND* the system SHALL exit with code 1
+
+### Scenario: Rebuild index after recording
+
+* *GIVEN* a successful recording of plan `my-plan`
+* *AND* a search index exists
+* *WHEN* the recording completes
+* *THEN* the system SHALL rebuild the search index
+* *AND* the system SHALL display the number of scenarios indexed
