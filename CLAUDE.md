@@ -81,6 +81,42 @@ scripts/
 ./scripts/plugin/build.sh
 ```
 
+## Testing Rules
+
+### Integration Tests
+
+Integration tests SHALL use test fixtures instead of inline strings.
+
+```
+tests/
+└── fixtures/           # Test fixture files
+    ├── valid-plan/
+    │   ├── plan.md
+    │   └── domain/feature/spec.md
+    └── invalid-spec/
+        └── spec.md
+```
+
+**Do:**
+```rust
+let fixture_path = Path::new("tests/fixtures/valid-plan");
+let result = validate_plan(fixture_path, "valid-plan");
+```
+
+**Don't:**
+```rust
+let content = r#"# Feature: Test
+## Background
+* context
+## Scenarios
+### Scenario: Test
+* *GIVEN* setup
+"#;
+fs::write(tmp.path().join("spec.md"), content).unwrap();
+```
+
+**Rationale:** Fixtures are easier to maintain, can be validated by the tool itself, and provide realistic test data.
+
 ## Mission Reference for speq CLI
 
 See `specs/mission.md` for purpose, tech stack, commands, and architecture of the speq CLI.
