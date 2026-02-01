@@ -1,3 +1,6 @@
+# Project
+Read @CLAUDE.md
+
 # Commit Conventions
 
 The commit message SHALL be structured like this:
