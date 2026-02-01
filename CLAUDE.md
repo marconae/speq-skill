@@ -6,38 +6,38 @@ You are **building speq-skill while using it**.
 
 `.claude/skills/` contains skills that serve two roles:
 1. **Development usage** — Used directly when working on this repo
-2. **Plugin source** — Transformed by `scripts/build-plugin.sh` into distributable `plugin/`
+2. **Plugin source** — Transformed by `scripts/plugin/build.sh` into distributable `dist/plugin/`
 
 ### Directory Structure
 
 ```
 .claude/skills/
-├── speq-plan/                   # Workflow skill (speq- prefix)
+├── speq-plan/                   # Workflow skill
 ├── speq-implement/              # Workflow skill
 ├── speq-record/                 # Workflow skill
 ├── speq-mission/                # Workflow skill
-├── code-guardrails/             # Utility skill (no prefix)
-├── code-tools/                  # Utility skill
-├── ext-research/                # Utility skill
-├── git-discipline/              # Utility skill
+├── speq-code-guardrails/        # Utility skill
+├── speq-code-tools/             # Utility skill
+├── speq-ext-research/           # Utility skill
+├── speq-git-discipline/         # Utility skill
 └── speq-cli/                    # Utility skill
 ```
 
 ### Build Script
 
 The build script (`scripts/plugin/build.sh`):
-- Copies utility skills from `.claude/skills/` to `plugin/skills/`
-- Copies workflow skills from `.claude/skills/speq-*` to `plugin/skills/*` (drops `speq-` prefix)
-- Updates skill name prefixes from local (`speq-*`) to plugin (`speq:*`)
-- Updates skill cross-references for plugin context
-- Generates `plugin.json` manifest
+- Copies all skills from `.claude/skills/speq-*` to `dist/plugin/skills/*` (drops `speq-` prefix)
+- Transforms frontmatter names: `name: speq-*` → `name: speq:*`
+- Transforms references: `/speq-*` → `/speq:*`
+- Stamps version and author from `Cargo.toml` into `plugin.json`
+- Builds marketplace structure in `dist/marketplace/`
 
 ### Invocation Patterns
 
 | Context | Workflow Skills | Utility Skills |
 |---------|-----------------|----------------|
-| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/code-guardrails`, `/code-tools`, `/ext-research`, `/git-discipline`, `/speq-cli` |
-| Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-guardrails`, `/speq:code-tools`, `/speq:ext-research`, `/speq:git-discipline`, `/speq:speq-cli` |
+| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
+| Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
 
 ## speq CLI Invocation
 
