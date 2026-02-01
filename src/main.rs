@@ -358,7 +358,18 @@ fn handle_record_command(plan_name: &str) -> ExitCode {
             if has_errors {
                 ExitCode::from(1)
             } else {
-                ExitCode::SUCCESS
+                // Rebuild search index after successful recording
+                println!("\nRebuilding search index...");
+                match search::index_specs(&base) {
+                    Ok(count) => {
+                        println!("Indexed {} scenarios.", count);
+                        ExitCode::SUCCESS
+                    }
+                    Err(e) => {
+                        println!("Warning: Failed to rebuild index: {}", e);
+                        ExitCode::SUCCESS // Still return success since recording succeeded
+                    }
+                }
             }
         }
         Err(e) => {

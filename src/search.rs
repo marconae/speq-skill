@@ -160,10 +160,11 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     // Configure fastembed cache before model initialization
     configure_fastembed_cache();
 
-    // Load the index
+    // Load the index, auto-building if missing
     let index_path = get_index_path();
     if !index_path.exists() {
-        return Err("No search index found. Run 'speq search index' first.".to_string());
+        let base = Path::new("specs");
+        index_specs(base)?;
     }
 
     let data = std::fs::read(&index_path).map_err(|e| format!("Failed to read index: {}", e))?;

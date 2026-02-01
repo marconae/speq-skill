@@ -265,15 +265,18 @@ mod search {
     use super::*;
 
     #[test]
-    fn no_index_shows_error() {
+    #[serial]
+    fn auto_indexes_on_first_search() {
         let tmp = setup_test_specs();
 
+        // Search WITHOUT running 'speq search index' first
+        // Should auto-build index and return results
         cmd()
             .current_dir(tmp.path())
             .args(["search", "query", "validation"])
             .assert()
-            .code(1)
-            .stdout(predicate::str::contains("No search index found"));
+            .success()
+            .stdout(predicate::str::contains("validation/document-structure"));
     }
 
     #[test]
@@ -444,5 +447,88 @@ A test feature.
         );
 
         assert!(!specs.join("_plans/test-plan").exists());
+    }
+
+    #[test]
+    #[serial]
+    fn record_rebuilds_search_index() {
+        let tmp = TempDir::new().unwrap();
+        let specs = tmp.path().join("specs");
+
+        // Create an existing feature to establish an initial index
+        let existing_dir = specs.join("existing/feature");
+        fs::create_dir_all(&existing_dir).unwrap();
+        fs::write(
+            existing_dir.join("spec.md"),
+            r#"# Feature: Existing Feature
+
+An existing feature.
+
+## Background
+
+* Context.
+
+## Scenarios
+
+### Scenario: Original scenario
+
+* *GIVEN* original setup
+* *WHEN* original action
+* *THEN* original result SHALL happen
+"#,
+        )
+        .unwrap();
+
+        // Build initial index
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        // Create plan with new scenario
+        let plan_dir = specs.join("_plans/test-plan/new/feature");
+        fs::create_dir_all(&plan_dir).unwrap();
+        fs::write(
+            plan_dir.join("spec.md"),
+            r#"# Feature: New Feature
+
+A new feature added via plan.
+
+## Background
+
+* New context.
+
+## Scenarios
+
+<!-- DELTA:NEW -->
+### Scenario: Unique searchable scenario
+
+* *GIVEN* unique searchable setup
+* *WHEN* unique searchable action
+* *THEN* unique searchable result SHALL happen
+<!-- /DELTA:NEW -->
+"#,
+        )
+        .unwrap();
+
+        // Create _recorded directory
+        fs::create_dir_all(specs.join("_recorded")).unwrap();
+
+        // Record the plan - should rebuild index and show indexed count
+        cmd()
+            .current_dir(tmp.path())
+            .args(["record", "test-plan"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Indexed"));
+
+        // Verify the new scenario is now searchable
+        cmd()
+            .current_dir(tmp.path())
+            .args(["search", "query", "unique searchable"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("new/feature"));
     }
 }
