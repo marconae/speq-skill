@@ -5,9 +5,9 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 ## Background
 
 * Command syntax: `speq search query <query>` for searching, `speq search index` for rebuilding
-* Search uses fastembed-rs with all-MiniLM-L6-v2 embeddings (ONNX-based, no protoc required)
+* Search uses vector embeddings for semantic similarity
 * Single app cache at `$XDG_CACHE_HOME/speq/` containing:
-  - `models/` - downloaded ONNX embedding model
+  - `models/` - downloaded embedding model
   - `indexes/` - binary index files, one per project
 * Index file named after project path slug (e.g., `-home-user-code-my-project.idx`)
 * Slug format: absolute project path with `/` replaced by `-` (e.g., `/home/user/code/my-project` → `-home-user-code-my-project`)
@@ -22,7 +22,7 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * *GIVEN* a specs directory with feature specifications
 * *WHEN* the user runs `speq search index`
 * *THEN* the system SHALL parse all spec files
-* *AND* the system SHALL generate embeddings for each scenario using fastembed
+* *AND* the system SHALL generate embeddings for each scenario
 * *AND* the system SHALL store vectors in binary index file named after project slug
 * *AND* the system SHALL display the number of scenarios indexed
 * *AND* the system SHALL exit with code 0
@@ -65,5 +65,5 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * *AND* the project path is `/home/user/code/my-project`
 * *WHEN* the user runs `speq search index`
 * *THEN* the index file SHALL be stored at `/home/user/.cache/speq/indexes/-home-user-code-my-project.idx`
-* *AND* the ONNX model SHALL be cached at `/home/user/.cache/speq/models/`
+* *AND* the embedding model SHALL be cached at `/home/user/.cache/speq/models/`
 * *AND* subsequent operations SHALL reuse the cached model

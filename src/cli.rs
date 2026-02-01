@@ -51,12 +51,6 @@ pub enum SearchCommands {
     },
 }
 
-// Note: The spec specifies `speq search <query>` syntax, but clap requires
-// subcommands. Users should use `speq search query "their query"` instead.
-// Alternatively, we could add a positional arg directly to Search, but that
-// conflicts with the subcommand pattern. The current design prioritizes
-// explicit commands over implicit behavior.
-
 #[derive(Subcommand)]
 pub enum DomainCommands {
     /// List all domains in the specs directory

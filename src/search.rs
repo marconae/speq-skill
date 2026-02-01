@@ -188,7 +188,7 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     let mut scored: Vec<(f32, &IndexedScenario)> = index
         .scenarios
         .iter()
-        .map(|s| (cosine_similarity(query_embedding, &s.embedding), s))
+        .map(|s| (cosine_similarity(&query_embedding, &s.embedding), s))
         .collect();
 
     // Sort by score descending

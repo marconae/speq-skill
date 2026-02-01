@@ -20,6 +20,6 @@ accepted = [
     "NCSA",
 ]
 
-# Only include runtime dependencies (not build or dev dependencies)
-ignore-build-dependencies = true
-ignore-dev-dependencies = true
+# Clarify multi-licensed crates - pick MIT for r-efi if it's in the tree
+[r-efi]
+accepted = ["MIT"]
