@@ -22,6 +22,9 @@ jobs:
       - name: Clippy
         run: cargo clippy -- -D warnings
 
+      - name: Check licenses and advisories
+        uses: EmbarkStudios/cargo-deny-action@v2
+
   build:
     runs-on: ubuntu-latest
     steps:
