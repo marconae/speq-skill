@@ -5,11 +5,22 @@
 set -euo pipefail
 
 BIN_PATH="${HOME}/.local/bin/speq"
-PLUGIN_DIR="${HOME}/.claude/plugins/speq-skill"
+INSTALL_DIR="${HOME}/.speq-skill"
 
 echo "=== Uninstalling speq-skill ==="
 
-# Remove CLI binary
+# 1. Uninstall Claude plugin
+if command -v claude &> /dev/null; then
+    echo "Uninstalling speq-skill plugin..."
+    claude plugin uninstall speq-skill@speq-skill 2>/dev/null || echo "  Plugin not installed or already removed"
+
+    echo "Removing speq-skill marketplace..."
+    claude plugin marketplace remove speq-skill 2>/dev/null || echo "  Marketplace not installed or already removed"
+else
+    echo "Claude CLI not found, skipping plugin removal"
+fi
+
+# 2. Remove CLI binary
 if [ -f "$BIN_PATH" ]; then
     echo "Removing CLI: ${BIN_PATH}"
     rm -f "$BIN_PATH"
@@ -17,12 +28,10 @@ else
     echo "CLI not found: ${BIN_PATH}"
 fi
 
-# Remove Claude plugin
-if [ -d "$PLUGIN_DIR" ]; then
-    echo "Removing plugin: ${PLUGIN_DIR}"
-    rm -rf "$PLUGIN_DIR"
-else
-    echo "Plugin not found: ${PLUGIN_DIR}"
+# 3. Remove marketplace installation directory (if exists from remote install)
+if [ -d "$INSTALL_DIR" ]; then
+    echo "Removing installation directory: ${INSTALL_DIR}"
+    rm -rf "$INSTALL_DIR"
 fi
 
 echo ""
