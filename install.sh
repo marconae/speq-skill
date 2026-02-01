@@ -1,51 +1,12 @@
 #!/bin/bash
-# Install speq CLI and Claude Code plugin
+# Install speq-skill marketplace and CLI
 # Usage: curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
-# Or: curl -fsSL ... | bash -s -- --to ~/bin --plugin-only
 
 set -euo pipefail
 
 REPO="marconae/speq-skill"
-INSTALL_DIR="${HOME}/.local/bin"
-PLUGIN_DIR="${HOME}/.claude/plugins/speq"
-INSTALL_CLI=true
-INSTALL_PLUGIN=true
-
-# Parse arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --to)
-            INSTALL_DIR="$2"
-            shift 2
-            ;;
-        --plugin-only)
-            INSTALL_CLI=false
-            shift
-            ;;
-        --cli-only)
-            INSTALL_PLUGIN=false
-            shift
-            ;;
-        --help|-h)
-            echo "Install speq CLI and Claude Code plugin"
-            echo ""
-            echo "Usage:"
-            echo "  curl -fsSL https://raw.githubusercontent.com/$REPO/main/install.sh | bash"
-            echo "  curl -fsSL ... | bash -s -- [options]"
-            echo ""
-            echo "Options:"
-            echo "  --to DIR       Install CLI to custom directory (default: ~/.local/bin)"
-            echo "  --cli-only     Install only the CLI, skip plugin"
-            echo "  --plugin-only  Install only the plugin, skip CLI"
-            echo "  --help         Show this help message"
-            exit 0
-            ;;
-        *)
-            echo "Unknown option: $1"
-            exit 1
-            ;;
-    esac
-done
+INSTALL_DIR="${HOME}/.speq-skill"
+BIN_DIR="${HOME}/.local/bin"
 
 # Detect OS and architecture (short names)
 detect_platform() {
@@ -76,71 +37,12 @@ get_latest_version() {
         | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-install_cli() {
-    local version="$1"
-    local platform="$2"
-    local tmpdir="$3"
-
-    local archive_name="speq-${version}-${platform}.tar.gz"
-    local download_url="https://github.com/${REPO}/releases/download/${version}/${archive_name}"
-
-    echo "Downloading CLI: ${archive_name}..."
-    if ! curl -fsSL "$download_url" -o "$tmpdir/cli.tar.gz"; then
-        echo "Error: Failed to download CLI from ${download_url}"
-        exit 1
-    fi
-
-    tar -xzf "$tmpdir/cli.tar.gz" -C "$tmpdir"
-    mkdir -p "$INSTALL_DIR"
-    cp "$tmpdir/speq-${version}-${platform}/speq" "$INSTALL_DIR/speq"
-    chmod +x "$INSTALL_DIR/speq"
-
-    echo "Installed CLI to ${INSTALL_DIR}/speq"
-
-    if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-        echo ""
-        echo "Warning: ${INSTALL_DIR} is not in your PATH."
-        echo "Add to your shell profile: export PATH=\"${INSTALL_DIR}:\$PATH\""
-    fi
-}
-
-install_plugin() {
-    local version="$1"
-    local tmpdir="$2"
-
-    local archive_name="speq-plugin-${version}.tar.gz"
-    local download_url="https://github.com/${REPO}/releases/download/${version}/${archive_name}"
-
-    echo "Downloading plugin: ${archive_name}..."
-    if ! curl -fsSL "$download_url" -o "$tmpdir/plugin.tar.gz"; then
-        echo "Error: Failed to download plugin from ${download_url}"
-        exit 1
-    fi
-
-    tar -xzf "$tmpdir/plugin.tar.gz" -C "$tmpdir"
-
-    # Remove existing plugin installation
-    if [ -d "$PLUGIN_DIR" ]; then
-        echo "Removing existing plugin installation..."
-        rm -rf "$PLUGIN_DIR"
-    fi
-
-    # Install plugin
-    mkdir -p "$(dirname "$PLUGIN_DIR")"
-    cp -r "$tmpdir/speq-plugin-${version}" "$PLUGIN_DIR"
-
-    echo "Installed plugin to ${PLUGIN_DIR}"
-    echo ""
-    echo "To activate the plugin, run:"
-    echo "  claude plugin add $PLUGIN_DIR"
-}
-
 main() {
-    echo "Installing speq..."
+    echo "Installing speq-skill..."
 
     local platform
     platform=$(detect_platform)
-    echo "Detected platform: ${platform}"
+    echo "Platform: ${platform}"
 
     local version
     version=$(get_latest_version)
@@ -148,28 +50,50 @@ main() {
         echo "Error: Could not determine latest version"
         exit 1
     fi
-    echo "Latest version: ${version}"
+    echo "Version: ${version}"
+
+    # Download only the archive for this platform
+    local archive="speq-marketplace-${version}-${platform}.tar.gz"
+    local url="https://github.com/${REPO}/releases/download/${version}/${archive}"
 
     local tmpdir
     tmpdir=$(mktemp -d)
     trap "rm -rf $tmpdir" EXIT
 
-    if [ "$INSTALL_CLI" = true ]; then
-        install_cli "$version" "$platform" "$tmpdir"
+    echo "Downloading ${archive}..."
+    if ! curl -fsSL "$url" -o "$tmpdir/marketplace.tar.gz"; then
+        echo "Error: Failed to download from ${url}"
+        exit 1
     fi
 
-    if [ "$INSTALL_PLUGIN" = true ]; then
-        install_plugin "$version" "$tmpdir"
+    # Remove old installation
+    if [ -d "$INSTALL_DIR" ]; then
+        echo "Removing old installation..."
+        rm -rf "$INSTALL_DIR"
     fi
+    mkdir -p "$INSTALL_DIR"
+
+    # Extract marketplace
+    tar -xzf "$tmpdir/marketplace.tar.gz" -C "$tmpdir"
+    cp -r "$tmpdir/speq-marketplace-${version}-${platform}/." "$INSTALL_DIR/"
+
+    # Symlink CLI to bin
+    mkdir -p "$BIN_DIR"
+    ln -sf "$INSTALL_DIR/bin/speq" "$BIN_DIR/speq"
+    chmod +x "$INSTALL_DIR/bin/speq"
 
     echo ""
-    echo "Installation complete!"
+    echo "Installed to: $INSTALL_DIR"
+    echo "CLI symlinked: $BIN_DIR/speq -> $INSTALL_DIR/bin/speq"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Add marketplace:  claude plugin marketplace add $INSTALL_DIR"
+    echo "  2. Install plugin:   claude plugin install speq@speq-skill"
+    echo "  3. Start using:      claude -> /speq:mission"
 
-    if [ "$INSTALL_CLI" = true ]; then
-        echo "  CLI: speq --help"
-    fi
-    if [ "$INSTALL_PLUGIN" = true ]; then
-        echo "  Plugin: claude plugin add $PLUGIN_DIR"
+    if ! echo "$PATH" | grep -q "$BIN_DIR"; then
+        echo ""
+        echo "Note: Add to PATH: export PATH=\"$BIN_DIR:\$PATH\""
     fi
 }
 

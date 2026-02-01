@@ -26,8 +26,7 @@ get_short_platform() {
 
 TARGET="${TARGET:-$(rustc -vV | sed -n 's/host: //p')}"
 SHORT_PLATFORM=$(get_short_platform "$TARGET")
-CLI_ARCHIVE="dist/speq-${VERSION}-${SHORT_PLATFORM}.tar.gz"
-PLUGIN_ARCHIVE="dist/speq-plugin-${VERSION}.tar.gz"
+MARKETPLACE_ARCHIVE="dist/speq-marketplace-${VERSION}-${SHORT_PLATFORM}.tar.gz"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -37,14 +36,14 @@ cd "$PROJECT_ROOT"
 echo "=== Testing release artifacts ==="
 
 # 1. Build if not exists
-if [ ! -f "$CLI_ARCHIVE" ]; then
+if [ ! -f "$MARKETPLACE_ARCHIVE" ]; then
     echo "Building release..."
     ./scripts/release/build.sh "$VERSION"
 fi
 
-# 2. Verify CLI archive exists
-if [ ! -f "$CLI_ARCHIVE" ]; then
-    echo "ERROR: CLI archive not found: $CLI_ARCHIVE"
+# 2. Verify marketplace archive exists
+if [ ! -f "$MARKETPLACE_ARCHIVE" ]; then
+    echo "ERROR: Marketplace archive not found: $MARKETPLACE_ARCHIVE"
     exit 1
 fi
 
@@ -52,74 +51,89 @@ fi
 TMPDIR=$(mktemp -d)
 trap "rm -rf $TMPDIR" EXIT
 
-echo "Extracting CLI to $TMPDIR..."
-tar -xzf "$CLI_ARCHIVE" -C "$TMPDIR"
+echo "Extracting marketplace to $TMPDIR..."
+tar -xzf "$MARKETPLACE_ARCHIVE" -C "$TMPDIR"
 
-# 4. Verify CLI contents
+# 4. Verify archive contents
 echo ""
-echo "=== CLI archive contents ==="
-tar -tzf "$CLI_ARCHIVE"
+echo "=== Marketplace archive contents ==="
+tar -tzf "$MARKETPLACE_ARCHIVE"
 
+EXTRACT_DIR="$TMPDIR/speq-marketplace-${VERSION}-${SHORT_PLATFORM}"
+
+# 5. Check marketplace structure
 echo ""
-echo "=== Checking CLI required files ==="
-CLI_EXTRACT_DIR="$TMPDIR/speq-${VERSION}-${SHORT_PLATFORM}"
+echo "=== Checking marketplace structure ==="
 
-for file in speq LICENSE THIRD_PARTY_LICENSES; do
-    if [ -f "$CLI_EXTRACT_DIR/$file" ]; then
-        echo "✓ $file"
+for file in .claude-plugin/marketplace.json bin/speq bin/LICENSE bin/THIRD_PARTY_LICENSES; do
+    if [ -f "$EXTRACT_DIR/$file" ]; then
+        echo "OK $file"
     else
-        echo "✗ $file (MISSING)"
+        echo "MISSING $file"
         exit 1
     fi
 done
 
-# 5. Test binary
+for dir in plugins/speq-skill plugins/speq-skill/.claude-plugin plugins/speq-skill/skills; do
+    if [ -d "$EXTRACT_DIR/$dir" ]; then
+        echo "OK $dir/"
+    else
+        echo "MISSING $dir/"
+        exit 1
+    fi
+done
+
+# 6. Test binary
 echo ""
 echo "=== Testing binary ==="
-"$CLI_EXTRACT_DIR/speq" --help
+"$EXTRACT_DIR/bin/speq" --help
 
-# 6. Verify THIRD_PARTY_LICENSES content
+# 7. Verify marketplace.json version is stamped
 echo ""
-echo "=== THIRD_PARTY_LICENSES preview (first 30 lines) ==="
-head -30 "$CLI_EXTRACT_DIR/THIRD_PARTY_LICENSES"
-
-# 7. Check for required licenses (fastembed is Apache-2.0)
-echo ""
-echo "=== Checking for required licenses ==="
-if grep -q "Apache" "$CLI_EXTRACT_DIR/THIRD_PARTY_LICENSES"; then
-    echo "✓ Apache license found (required for fastembed)"
+echo "=== Checking marketplace.json ==="
+if grep -q "\"version\": \"${VERSION}\"" "$EXTRACT_DIR/.claude-plugin/marketplace.json"; then
+    echo "OK Version stamped correctly: ${VERSION}"
 else
-    echo "✗ Apache license NOT found"
+    echo "ERROR: Version not stamped in marketplace.json"
+    cat "$EXTRACT_DIR/.claude-plugin/marketplace.json"
     exit 1
 fi
 
-# 8. Test plugin artifact
+# 8. Check plugin structure
 echo ""
-echo "=== Testing plugin artifact ==="
+echo "=== Checking plugin structure ==="
+PLUGIN_DIR="$EXTRACT_DIR/plugins/speq-skill"
 
-if [ -f "$PLUGIN_ARCHIVE" ]; then
-    echo "Plugin archive found: $PLUGIN_ARCHIVE"
-    tar -xzf "$PLUGIN_ARCHIVE" -C "$TMPDIR"
-    PLUGIN_DIR="$TMPDIR/speq-plugin-${VERSION}"
+for file in .claude-plugin/plugin.json skills/plan/SKILL.md skills/implement/SKILL.md skills/record/SKILL.md skills/mission/SKILL.md; do
+    if [ -f "$PLUGIN_DIR/$file" ]; then
+        echo "OK $file"
+    else
+        echo "MISSING $file"
+        exit 1
+    fi
+done
 
-    echo ""
-    echo "=== Plugin archive contents ==="
-    tar -tzf "$PLUGIN_ARCHIVE"
+# 9. Verify THIRD_PARTY_LICENSES content
+echo ""
+echo "=== THIRD_PARTY_LICENSES preview (first 30 lines) ==="
+head -30 "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"
 
-    echo ""
-    echo "=== Checking plugin required files ==="
-    for file in .claude-plugin/plugin.json skills/plan/SKILL.md skills/implement/SKILL.md; do
-        if [ -f "$PLUGIN_DIR/$file" ]; then
-            echo "✓ $file"
-        else
-            echo "✗ $file (MISSING)"
-            exit 1
-        fi
-    done
+# 10. Check for required licenses (fastembed is Apache-2.0)
+echo ""
+echo "=== Checking for required licenses ==="
+if grep -q "Apache" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
+    echo "OK Apache license found (required for fastembed)"
 else
-    echo "⚠ Plugin archive not found: $PLUGIN_ARCHIVE"
-    echo "  (Plugin is built alongside CLI, re-run build.sh if needed)"
+    echo "ERROR: Apache license NOT found"
+    exit 1
 fi
 
 echo ""
 echo "=== All tests passed ==="
+echo ""
+echo "To test installation locally:"
+echo "  1. Extract: tar -xzf $MARKETPLACE_ARCHIVE -C /tmp"
+echo "  2. Move: mv /tmp/speq-marketplace-${VERSION}-${SHORT_PLATFORM} ~/.speq-skill"
+echo "  3. Symlink CLI: ln -sf ~/.speq-skill/bin/speq ~/.local/bin/speq"
+echo "  4. Add marketplace: claude plugin marketplace add ~/.speq-skill"
+echo "  5. Install plugin: claude plugin install speq@speq-skill"

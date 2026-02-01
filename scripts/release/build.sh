@@ -26,8 +26,7 @@ get_short_platform() {
 
 TARGET="${TARGET:-$(rustc -vV | sed -n 's/host: //p')}"
 SHORT_PLATFORM=$(get_short_platform "$TARGET")
-CLI_ARCHIVE="speq-${VERSION}-${SHORT_PLATFORM}"
-PLUGIN_ARCHIVE="speq-plugin-${VERSION}"
+MARKETPLACE_ARCHIVE="speq-marketplace-${VERSION}-${SHORT_PLATFORM}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -44,24 +43,22 @@ if ! command -v cargo-about &> /dev/null; then
     echo "Installing cargo-about..."
     cargo install cargo-about
 fi
-cargo about generate about.hbs > THIRD_PARTY_LICENSES
+cargo about generate about.hbs > dist/bin/THIRD_PARTY_LICENSES
 
-# 3. Package CLI
-mkdir -p "dist/${CLI_ARCHIVE}"
-cp "target/${TARGET}/release/speq" "dist/${CLI_ARCHIVE}/"
-cp LICENSE "dist/${CLI_ARCHIVE}/"
-cp THIRD_PARTY_LICENSES "dist/${CLI_ARCHIVE}/"
-tar -czvf "dist/${CLI_ARCHIVE}.tar.gz" -C dist "${CLI_ARCHIVE}"
-echo "Created: dist/${CLI_ARCHIVE}.tar.gz"
+# 3. Build plugin and marketplace structure (outputs to dist/)
+echo "Building speq plugin and marketplace structure..."
+./scripts/plugin/build.sh
 
-# 4. Build plugin (only once per release, not per platform)
-if [ ! -f "dist/${PLUGIN_ARCHIVE}.tar.gz" ]; then
-    echo "Building speq plugin..."
-    ./scripts/plugin/build.sh
+# 4. Package marketplace (includes CLI for this platform only)
+mkdir -p "dist/${MARKETPLACE_ARCHIVE}"
 
-    mkdir -p "dist/${PLUGIN_ARCHIVE}"
-    # Copy all files including hidden directories (.claude-plugin)
-    cp -r plugin/. "dist/${PLUGIN_ARCHIVE}/"
-    tar -czvf "dist/${PLUGIN_ARCHIVE}.tar.gz" -C dist "${PLUGIN_ARCHIVE}"
-    echo "Created: dist/${PLUGIN_ARCHIVE}.tar.gz"
-fi
+# Copy marketplace structure from dist/marketplace/
+cp -r dist/marketplace/. "dist/${MARKETPLACE_ARCHIVE}/"
+
+# Add CLI binary for this platform only
+mkdir -p "dist/${MARKETPLACE_ARCHIVE}/bin"
+cp "target/${TARGET}/release/speq" "dist/${MARKETPLACE_ARCHIVE}/bin/"
+cp LICENSE "dist/${MARKETPLACE_ARCHIVE}/bin/"
+
+tar -czvf "dist/${MARKETPLACE_ARCHIVE}.tar.gz" -C dist "${MARKETPLACE_ARCHIVE}"
+echo "Created: dist/${MARKETPLACE_ARCHIVE}.tar.gz"
