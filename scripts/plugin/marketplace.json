@@ -1,0 +1,29 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "speq-skill",
+  "version": "VERSION_PLACEHOLDER",
+  "description": "Spec-driven development for Claude Code",
+  "owner": {
+    "name": "AUTHOR_PLACEHOLDER"
+  },
+  "metadata": {
+    "description": "speq-skill: A light-weight system for spec-driven development",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "speq-skill",
+      "source": "./plugins/speq-skill",
+      "description": "Spec-driven development workflow skills and agents",
+      "version": "VERSION_PLACEHOLDER",
+      "author": {
+        "name": "AUTHOR_PLACEHOLDER"
+      },
+      "homepage": "https://github.com/marconae/speq-skill",
+      "repository": "https://github.com/marconae/speq-skill",
+      "license": "MIT",
+      "keywords": ["spec-driven development", "tdd", "specs", "workflow"],
+      "category": "development"
+    }
+  ]
+}
