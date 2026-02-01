@@ -66,6 +66,8 @@ pub enum ValidationError {
 #[derive(Debug, PartialEq)]
 pub enum ValidationWarning {
     TooManyAndSteps { scenario: String, count: usize },
+    LowercaseStepKeyword { keyword: String },
+    LowercaseRfcKeyword { keyword: String, step: String },
 }
 
 impl std::fmt::Display for ValidationWarning {
@@ -75,6 +77,19 @@ impl std::fmt::Display for ValidationWarning {
                 write!(
                     f,
                     "Scenario '{scenario}' has {count} AND steps (recommended: 3 or fewer)"
+                )
+            }
+            ValidationWarning::LowercaseStepKeyword { keyword } => {
+                write!(
+                    f,
+                    "Step keyword '{keyword}' should be uppercase: {}",
+                    keyword.to_uppercase()
+                )
+            }
+            ValidationWarning::LowercaseRfcKeyword { keyword, step } => {
+                write!(
+                    f,
+                    "RFC 2119 keyword '{keyword}' should be uppercase in step: {step}"
                 )
             }
         }

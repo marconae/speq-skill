@@ -84,20 +84,10 @@ fn validate_scenario(scenario: &Scenario, result: &mut ValidationResult) {
         match step.kind {
             StepKind::Then => {
                 in_then_section = true;
-                if !contains_rfc2119_keyword(&step.text) {
-                    result.add_error(ValidationError::StepMissingRfc2119Keyword {
-                        scenario: scenario.name.clone(),
-                        step: step.text.clone(),
-                    });
-                }
+                check_rfc2119_in_step(&step.text, &scenario.name, result);
             }
             StepKind::And if in_then_section => {
-                if !contains_rfc2119_keyword(&step.text) {
-                    result.add_error(ValidationError::StepMissingRfc2119Keyword {
-                        scenario: scenario.name.clone(),
-                        step: step.text.clone(),
-                    });
-                }
+                check_rfc2119_in_step(&step.text, &scenario.name, result);
             }
             StepKind::Given | StepKind::When => {
                 in_then_section = false;
@@ -120,8 +110,71 @@ fn validate_scenario(scenario: &Scenario, result: &mut ValidationResult) {
     }
 }
 
+fn check_rfc2119_in_step(step_text: &str, scenario_name: &str, result: &mut ValidationResult) {
+    // Check for uppercase RFC 2119 keyword first
+    if contains_rfc2119_keyword(step_text) {
+        // Also check if there's a lowercase version alongside (we warn about it)
+        if let Some(keyword) = find_lowercase_rfc2119_keyword(step_text) {
+            result.add_warning(ValidationWarning::LowercaseRfcKeyword {
+                keyword,
+                step: step_text.to_string(),
+            });
+        }
+        return;
+    }
+
+    // No uppercase keyword found, check for lowercase version
+    if let Some(keyword) = find_lowercase_rfc2119_keyword(step_text) {
+        // Lowercase keyword found - this counts as having a keyword, but warn
+        result.add_warning(ValidationWarning::LowercaseRfcKeyword {
+            keyword,
+            step: step_text.to_string(),
+        });
+    } else {
+        // No RFC 2119 keyword at all - this is an error
+        result.add_error(ValidationError::StepMissingRfc2119Keyword {
+            scenario: scenario_name.to_string(),
+            step: step_text.to_string(),
+        });
+    }
+}
+
 fn contains_rfc2119_keyword(text: &str) -> bool {
     RFC2119_KEYWORDS.iter().any(|kw| text.contains(kw))
+}
+
+fn find_lowercase_rfc2119_keyword(text: &str) -> Option<String> {
+    // Check for lowercase versions of RFC 2119 keywords
+    let lowercase_patterns = [
+        ("must not", "MUST NOT"),
+        ("shall not", "SHALL NOT"),
+        ("should not", "SHOULD NOT"),
+        ("must", "MUST"),
+        ("shall", "SHALL"),
+        ("should", "SHOULD"),
+        ("may", "MAY"),
+    ];
+
+    // Convert to lowercase for case-insensitive matching
+    let text_lower = text.to_lowercase();
+
+    for (pattern, _) in lowercase_patterns {
+        if text_lower.contains(pattern) {
+            // Check if it's not already uppercase in the original text
+            // by looking for the pattern in a case that's not fully uppercase
+            if !text.contains(&pattern.to_uppercase()) {
+                // Find the actual text that matched
+                if let Some(start) = text_lower.find(pattern) {
+                    let actual = &text[start..start + pattern.len()];
+                    // Only warn if not all uppercase
+                    if actual != pattern.to_uppercase() {
+                        return Some(actual.to_string());
+                    }
+                }
+            }
+        }
+    }
+    None
 }
 
 #[cfg(test)]
@@ -307,15 +360,40 @@ mod tests {
     }
 
     #[test]
-    fn rejects_lowercase_keyword() {
+    fn warns_on_lowercase_rfc_keyword() {
         let mut spec = valid_spec();
         spec.scenarios[0].steps[2].text = "the system shall respond".to_string();
         let result = validate(&spec);
+        // Should be a warning, not an error
+        assert!(result.is_success());
+        assert!(result.warnings.iter().any(|w| matches!(
+            w,
+            ValidationWarning::LowercaseRfcKeyword { keyword, .. } if keyword == "shall"
+        )));
+    }
+
+    #[test]
+    fn warns_on_lowercase_must_keyword() {
+        let mut spec = valid_spec();
+        spec.scenarios[0].steps[2].text = "the system must respond".to_string();
+        let result = validate(&spec);
+        assert!(result.is_success());
+        assert!(result.warnings.iter().any(|w| matches!(
+            w,
+            ValidationWarning::LowercaseRfcKeyword { keyword, .. } if keyword == "must"
+        )));
+    }
+
+    #[test]
+    fn no_warning_for_uppercase_rfc_keywords() {
+        let spec = valid_spec();
+        let result = validate(&spec);
+        assert!(result.is_success());
         assert!(
             result
-                .errors
+                .warnings
                 .iter()
-                .any(|e| matches!(e, ValidationError::StepMissingRfc2119Keyword { .. }))
+                .all(|w| !matches!(w, ValidationWarning::LowercaseRfcKeyword { .. }))
         );
     }
 

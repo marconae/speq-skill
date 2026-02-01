@@ -106,9 +106,47 @@ Skip for minor fixes.
 2. Use `references/plan-template.md` as structure guide
 3. Generate concrete content (no template placeholders)
 
-### 5. Exit Plan Mode
+**Critical:** plan.md SHALL only **reference** spec delta files, never embed their content.
 
-Call `ExitPlanMode` when complete.
+```markdown
+## Features
+
+| Feature | Status | Spec |
+|---------|--------|------|
+| Plan validation | NEW | `cli/plan-validate/spec.md` |
+| Keyword casing | CHANGED | `validation/keyword-casing/spec.md` |
+```
+
+The actual spec content lives in `specs/_plans/<plan-name>/<domain>/<feature>/spec.md` files.
+
+### 5. Validate Plan
+
+Run CLI validation before exiting:
+
+```bash
+speq plan validate <plan-name>
+```
+
+**Validation checks:**
+- Plan directory exists (`specs/_plans/<plan-name>/`)
+- `plan.md` is present
+- Delta markers are properly formatted (CHANGED, NEW, REMOVED blocks closed)
+- Spec syntax is valid (RFC 2119 keywords, step formatting)
+
+**On failure:** Fix issues before proceeding. Common fixes:
+- Close unclosed delta markers with `<!-- /CHANGED -->`, `<!-- /NEW -->`, `<!-- /REMOVED -->`
+- Uppercase RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+- Fix step formatting (bold keywords with `*GIVEN*`, `*WHEN*`, `*THEN*`, `*AND*`)
+
+**On warnings:** Review and fix if appropriate. Warnings don't block but indicate style issues.
+
+### 6. Explain next steps
+
+* Inform the user that the plan is created and ready for review
+* List all created files in the plan.
+* Inform the user to call `/speq-implement <plan-name>` to continue.
+* Inform the user to call `/clear` to start implementing with a fresh context window.
+* If in Claude Code is in "plan mode" then call `ExitPlanMode`.
 
 ## Spec Hierarchy
 

@@ -5,6 +5,7 @@ use clap::Parser;
 
 mod cli;
 mod feature;
+mod plan;
 mod record;
 mod search;
 mod tree;
@@ -16,6 +17,7 @@ fn main() -> ExitCode {
     match cli.command {
         cli::Commands::Domain { command } => handle_domain_command(command),
         cli::Commands::Feature { command } => handle_feature_command(command),
+        cli::Commands::Plan { command } => handle_plan_command(command),
         cli::Commands::Record { plan_name } => handle_record_command(&plan_name),
         cli::Commands::Search { command } => handle_search_command(command),
     }
@@ -64,6 +66,76 @@ fn handle_search_command(command: cli::SearchCommands) -> ExitCode {
                 }
             }
         }
+    }
+}
+
+fn print_spec_warnings(warnings: &[plan::SpecValidationResult]) {
+    if warnings.is_empty() {
+        return;
+    }
+    println!();
+    println!("Warnings:");
+    for spec_result in warnings {
+        println!("  {}:", spec_result.spec_path);
+        for warning in &spec_result.warnings {
+            println!("    WARN: {}", warning);
+        }
+    }
+}
+
+fn handle_plan_command(command: cli::PlanCommands) -> ExitCode {
+    let base = PathBuf::from("specs");
+
+    match command {
+        cli::PlanCommands::Validate { plan_name } => match plan::validate_plan(&base, &plan_name) {
+            Ok(result) => {
+                if result.is_success() {
+                    println!("Plan '{}' validation passed.", plan_name);
+                    if result.spec_paths.is_empty() {
+                        println!("Note: No delta specs found in plan.");
+                    } else {
+                        println!("Validated {} delta spec(s):", result.spec_paths.len());
+                        for path in &result.spec_paths {
+                            println!("  {}", path);
+                        }
+                    }
+
+                    print_spec_warnings(&result.spec_validation_warnings);
+                    ExitCode::SUCCESS
+                } else {
+                    println!("Plan '{}' validation failed:", plan_name);
+
+                    // General errors
+                    for error in &result.errors {
+                        println!("  ERROR: {}", error);
+                    }
+
+                    // Delta marker errors
+                    for error in &result.delta_marker_errors {
+                        println!(
+                            "  ERROR: {} (line {}): DELTA:{} not closed",
+                            error.file_path, error.line_number, error.marker_type
+                        );
+                    }
+
+                    // Spec validation errors (grouped by file)
+                    for spec_result in &result.spec_validation_errors {
+                        println!();
+                        println!("  {}:", spec_result.spec_path);
+                        for error in &spec_result.errors {
+                            println!("    ERROR: {}", error);
+                        }
+                    }
+
+                    print_spec_warnings(&result.spec_validation_warnings);
+                    ExitCode::from(1)
+                }
+            }
+            Err(e) => {
+                println!("{}", e);
+                ExitCode::from(1)
+            }
+        },
     }
 }
 
@@ -124,7 +196,12 @@ fn handle_feature_get(base: &std::path::Path, path: &str) -> ExitCode {
 
     if let Some(scenario_name) = scenario_name {
         // Find the specific scenario
-        if let Some(scenario) = parsed.scenarios.iter().find(|s| s.name == scenario_name) {
+        if let Some(scenario) = parsed
+            .spec
+            .scenarios
+            .iter()
+            .find(|s| s.name == scenario_name)
+        {
             println!("{}/{}/{}", domain, feature_name, scenario_name);
             println!();
             for step in &scenario.steps {
@@ -140,15 +217,15 @@ fn handle_feature_get(base: &std::path::Path, path: &str) -> ExitCode {
         }
     } else {
         // Display full feature
-        if let Some(name) = &parsed.feature_name {
+        if let Some(name) = &parsed.spec.feature_name {
             println!("{}", name);
         }
         println!();
-        if let Some(desc) = &parsed.description {
+        if let Some(desc) = &parsed.spec.description {
             println!("{}", desc);
             println!();
         }
-        for scenario in &parsed.scenarios {
+        for scenario in &parsed.spec.scenarios {
             println!("### {}", scenario.name);
             println!();
             for step in &scenario.steps {

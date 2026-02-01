@@ -108,7 +108,7 @@ pub fn record_plan(specs_base: &Path, plan_name: &str) -> Result<Vec<String>, Re
     Ok(recorded_features)
 }
 
-fn find_delta_specs(plan_dir: &Path) -> Result<Vec<std::path::PathBuf>, RecordError> {
+pub fn find_delta_specs(plan_dir: &Path) -> Result<Vec<std::path::PathBuf>, RecordError> {
     let mut specs = Vec::new();
     find_delta_specs_recursive(plan_dir, &mut specs)?;
     Ok(specs)

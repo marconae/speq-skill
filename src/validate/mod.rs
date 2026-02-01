@@ -12,8 +12,15 @@ pub fn run(path: &Path) -> Result<ValidationResult, ValidationError> {
         path: path.display().to_string(),
     })?;
 
-    let spec = parser::parse(&content)?;
-    Ok(rules::validate(&spec))
+    let parse_result = parser::parse(&content)?;
+    let mut validation_result = rules::validate(&parse_result.spec);
+
+    // Merge parser warnings into validation result
+    for warning in parse_result.warnings {
+        validation_result.add_warning(warning);
+    }
+
+    Ok(validation_result)
 }
 
 pub fn run_all(base: &Path) -> Vec<(FeaturePath, Result<ValidationResult, ValidationError>)> {

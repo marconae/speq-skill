@@ -1,6 +1,12 @@
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd};
 
-use crate::validate::report::ValidationError;
+use crate::validate::report::{ValidationError, ValidationWarning};
+
+#[derive(Debug)]
+pub struct ParseResult {
+    pub spec: FeatureSpec,
+    pub warnings: Vec<ValidationWarning>,
+}
 
 #[derive(Debug, Default)]
 pub struct FeatureSpec {
@@ -53,9 +59,10 @@ struct ParseContext {
     heading_text: String,
     description_buffer: String,
     in_list_item: bool,
+    warnings: Vec<ValidationWarning>,
 }
 
-pub fn parse(content: &str) -> Result<FeatureSpec, ValidationError> {
+pub fn parse(content: &str) -> Result<ParseResult, ValidationError> {
     let parser = Parser::new(content);
     let mut spec = FeatureSpec::default();
     let mut ctx = ParseContext::default();
@@ -98,7 +105,10 @@ pub fn parse(content: &str) -> Result<FeatureSpec, ValidationError> {
         spec.scenarios.push(scenario);
     }
 
-    Ok(spec)
+    Ok(ParseResult {
+        spec,
+        warnings: ctx.warnings,
+    })
 }
 
 fn handle_heading_start(spec: &mut FeatureSpec, ctx: &mut ParseContext, level: HeadingLevel) {
@@ -136,12 +146,39 @@ fn handle_text(ctx: &mut ParseContext, text: &str) {
 }
 
 fn handle_emphasis_text(ctx: &mut ParseContext, text: &str) {
-    match text.trim() {
-        "GIVEN" => ctx.current_step_kind = Some(StepKind::Given),
-        "WHEN" => ctx.current_step_kind = Some(StepKind::When),
-        "THEN" => ctx.current_step_kind = Some(StepKind::Then),
-        "AND" => ctx.current_step_kind = Some(StepKind::And),
-        _ => ctx.current_step_text.push_str(text),
+    let trimmed = text.trim();
+
+    // Only look for step keywords if we haven't found one yet for this step
+    // This prevents emphasized text within step content from being misinterpreted
+    if ctx.current_step_kind.is_some() {
+        ctx.current_step_text.push_str(text);
+        return;
+    }
+
+    let step_kind = match trimmed {
+        "GIVEN" => Some((StepKind::Given, false)),
+        "WHEN" => Some((StepKind::When, false)),
+        "THEN" => Some((StepKind::Then, false)),
+        "AND" => Some((StepKind::And, false)),
+        _ => match trimmed.to_uppercase().as_str() {
+            "GIVEN" => Some((StepKind::Given, true)),
+            "WHEN" => Some((StepKind::When, true)),
+            "THEN" => Some((StepKind::Then, true)),
+            "AND" => Some((StepKind::And, true)),
+            _ => None,
+        },
+    };
+
+    match step_kind {
+        Some((kind, is_lowercase)) => {
+            if is_lowercase {
+                ctx.warnings.push(ValidationWarning::LowercaseStepKeyword {
+                    keyword: trimmed.to_string(),
+                });
+            }
+            ctx.current_step_kind = Some(kind);
+        }
+        None => ctx.current_step_text.push_str(text),
     }
 }
 
@@ -218,16 +255,16 @@ mod tests {
     #[test]
     fn parses_feature_heading() {
         let md = "# Feature: User Login\n\nDescription here";
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.feature_name, Some("User Login".to_string()));
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.feature_name, Some("User Login".to_string()));
     }
 
     #[test]
     fn parses_feature_description() {
         let md = "# Feature: User Login\n\nThis is the description.\n\n## Background";
-        let spec = parse(md).unwrap();
+        let result = parse(md).unwrap();
         assert_eq!(
-            spec.description,
+            result.spec.description,
             Some("This is the description.".to_string())
         );
     }
@@ -235,15 +272,15 @@ mod tests {
     #[test]
     fn parses_background_section() {
         let md = "# Feature: Test\n\nDesc\n\n## Background\n\nSome background";
-        let spec = parse(md).unwrap();
-        assert!(spec.has_background);
+        let result = parse(md).unwrap();
+        assert!(result.spec.has_background);
     }
 
     #[test]
     fn parses_scenarios_section() {
         let md = "# Feature: Test\n\nDesc\n\n## Background\n\n## Scenarios\n\n### Scenario: First";
-        let spec = parse(md).unwrap();
-        assert!(spec.has_scenarios_section);
+        let result = parse(md).unwrap();
+        assert!(result.spec.has_scenarios_section);
     }
 
     #[test]
@@ -260,9 +297,9 @@ Desc
 
 * *GIVEN* a user exists
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios.len(), 1);
-        assert_eq!(spec.scenarios[0].name, "User logs in");
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios.len(), 1);
+        assert_eq!(result.spec.scenarios[0].name, "User logs in");
     }
 
     #[test]
@@ -279,10 +316,10 @@ Desc
 
 * *GIVEN* a precondition
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios[0].steps.len(), 1);
-        assert_eq!(spec.scenarios[0].steps[0].kind, StepKind::Given);
-        assert_eq!(spec.scenarios[0].steps[0].text, "a precondition");
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps.len(), 1);
+        assert_eq!(result.spec.scenarios[0].steps[0].kind, StepKind::Given);
+        assert_eq!(result.spec.scenarios[0].steps[0].text, "a precondition");
     }
 
     #[test]
@@ -299,8 +336,8 @@ Desc
 
 * *WHEN* something happens
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios[0].steps[0].kind, StepKind::When);
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps[0].kind, StepKind::When);
     }
 
     #[test]
@@ -317,8 +354,8 @@ Desc
 
 * *THEN* the system SHALL respond
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios[0].steps[0].kind, StepKind::Then);
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps[0].kind, StepKind::Then);
     }
 
     #[test]
@@ -336,9 +373,9 @@ Desc
 * *GIVEN* first
 * *AND* second
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios[0].steps.len(), 2);
-        assert_eq!(spec.scenarios[0].steps[1].kind, StepKind::And);
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps.len(), 2);
+        assert_eq!(result.spec.scenarios[0].steps[1].kind, StepKind::And);
     }
 
     #[test]
@@ -359,18 +396,84 @@ Desc
 
 * *WHEN* another thing
 "#;
-        let spec = parse(md).unwrap();
-        assert_eq!(spec.scenarios.len(), 2);
-        assert_eq!(spec.scenarios[0].name, "First");
-        assert_eq!(spec.scenarios[1].name, "Second");
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios.len(), 2);
+        assert_eq!(result.spec.scenarios[0].name, "First");
+        assert_eq!(result.spec.scenarios[1].name, "Second");
     }
 
     #[test]
     fn handles_empty_content() {
-        let spec = parse("").unwrap();
-        assert!(spec.feature_name.is_none());
-        assert!(spec.description.is_none());
-        assert!(!spec.has_background);
-        assert!(spec.scenarios.is_empty());
+        let result = parse("").unwrap();
+        assert!(result.spec.feature_name.is_none());
+        assert!(result.spec.description.is_none());
+        assert!(!result.spec.has_background);
+        assert!(result.spec.scenarios.is_empty());
+    }
+
+    #[test]
+    fn warns_on_lowercase_step_keyword() {
+        let md = r#"# Feature: Test
+
+Desc
+
+## Background
+
+## Scenarios
+
+### Scenario: Test
+
+* *given* a precondition
+"#;
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps.len(), 1);
+        assert_eq!(result.spec.scenarios[0].steps[0].kind, StepKind::Given);
+        assert!(result.warnings.iter().any(|w| matches!(
+            w,
+            ValidationWarning::LowercaseStepKeyword { keyword } if keyword == "given"
+        )));
+    }
+
+    #[test]
+    fn warns_on_lowercase_when_keyword() {
+        let md = r#"# Feature: Test
+
+Desc
+
+## Background
+
+## Scenarios
+
+### Scenario: Test
+
+* *when* something happens
+"#;
+        let result = parse(md).unwrap();
+        assert_eq!(result.spec.scenarios[0].steps[0].kind, StepKind::When);
+        assert!(result.warnings.iter().any(|w| matches!(
+            w,
+            ValidationWarning::LowercaseStepKeyword { keyword } if keyword == "when"
+        )));
+    }
+
+    #[test]
+    fn no_warning_for_uppercase_step_keywords() {
+        let md = r#"# Feature: Test
+
+Desc
+
+## Background
+
+## Scenarios
+
+### Scenario: Test
+
+* *GIVEN* a precondition
+* *WHEN* something happens
+* *THEN* the system SHALL respond
+* *AND* something else
+"#;
+        let result = parse(md).unwrap();
+        assert!(result.warnings.is_empty());
     }
 }

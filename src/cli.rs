@@ -23,6 +23,12 @@ pub enum Commands {
         command: FeatureCommands,
     },
 
+    /// Manage plans
+    Plan {
+        #[command(subcommand)]
+        command: PlanCommands,
+    },
+
     /// Record approved plan deltas to permanent specs
     Record {
         /// Name of the plan to record
@@ -49,6 +55,15 @@ pub enum SearchCommands {
         /// Maximum number of results
         #[arg(long, default_value = "10")]
         limit: usize,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum PlanCommands {
+    /// Validate plan structure and spec delta formatting
+    Validate {
+        /// Name of the plan to validate
+        plan_name: String,
     },
 }
 

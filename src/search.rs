@@ -56,7 +56,7 @@ pub fn get_index_path() -> PathBuf {
 fn configure_fastembed_cache() {
     if std::env::var("FASTEMBED_CACHE_DIR").is_err() {
         let cache_dir = get_cache_path().join("fastembed");
-        // SAFETY: We only set this once at startup before any concurrent access
+        // Only sets if not already set, avoiding race conditions in typical single-threaded CLI usage
         unsafe {
             std::env::set_var("FASTEMBED_CACHE_DIR", cache_dir);
         }
@@ -91,7 +91,7 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
 
         let parsed = parser::parse(&content).map_err(|e| format!("Failed to parse: {}", e))?;
 
-        for scenario in &parsed.scenarios {
+        for scenario in &parsed.spec.scenarios {
             // Build scenario content for embedding
             let steps_text: String = scenario
                 .steps
@@ -188,7 +188,7 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     let mut scored: Vec<(f32, &IndexedScenario)> = index
         .scenarios
         .iter()
-        .map(|s| (cosine_similarity(&query_embedding, &s.embedding), s))
+        .map(|s| (cosine_similarity(query_embedding, &s.embedding), s))
         .collect();
 
     // Sort by score descending
