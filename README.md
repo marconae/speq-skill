@@ -19,7 +19,7 @@
 ## Getting Started
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/remote-install.sh | bash
 ```
 
 Then run `claude` and type `/speq:mission` to start.
@@ -170,7 +170,7 @@ specs/
 ## Installation
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/remote-install.sh | bash
 ```
 
 The installer automatically:
@@ -180,9 +180,11 @@ The installer automatically:
 
 **Update:** Re-run the install script to get the latest version.
 
-**From Source (CLI only):**
+**From Source:**
 ```bash
-cargo install --git https://github.com/marconae/speq-skill speq
+git clone https://github.com/marconae/speq-skill && cd speq-skill
+./scripts/local-install.sh    # Builds and installs CLI + plugin
+./scripts/uninstall.sh        # Removes CLI + plugin
 ```
 
 ---

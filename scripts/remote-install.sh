@@ -1,9 +1,9 @@
 #!/bin/bash
 # Install speq-skill marketplace and CLI
-# Usage: curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/remote-install.sh | bash
 #
 # For local testing (skips download):
-#   SPEQ_LOCAL_ARCHIVE=/path/to/marketplace.tar.gz ./install.sh
+#   SPEQ_LOCAL_ARCHIVE=/path/to/marketplace.tar.gz ./scripts/remote-install.sh
 
 set -euo pipefail
 

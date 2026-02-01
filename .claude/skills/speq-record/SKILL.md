@@ -12,7 +12,7 @@ description: |
 
 Merge plan deltas into permanent specs and archive completed plans.
 
-Get plan name from user prompt or ask if none specified.
+Get plan name from user prompt or ask (via `AskUserTool` present a list) if none specified.
 
 ## Required Skills
 

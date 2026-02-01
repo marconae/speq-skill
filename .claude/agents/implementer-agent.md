@@ -4,8 +4,6 @@ description: |
   Implementation worker for spec-driven development.
   Spawned by orchestrator for task groups OR to fix code review findings.
   Reports progress incrementally and updates tasks.md.
-model: inherit
-color: green
 ---
 
 # Implementation Sub-Agent

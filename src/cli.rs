@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "speq")]
+#[command(version)]
 #[command(about = "Feature specification toolkit")]
 pub struct Cli {
     #[command(subcommand)]

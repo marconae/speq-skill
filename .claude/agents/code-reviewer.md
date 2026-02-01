@@ -4,8 +4,6 @@ description: |
   Code quality reviewer for spec-driven development.
   Analyzes changed files after implementation completes.
   Identifies: guardrail violations, dead code, obsolete tests, bad comments, optimization opportunities.
-model: inherit
-color: yellow
 ---
 
 # Code Reviewer
