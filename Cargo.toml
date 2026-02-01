@@ -2,6 +2,7 @@
 name = "speq-skill"
 version = "0.1.0"
 edition = "2024"
+authors = ["marconae"]
 license = "MIT"
 description = "Spec-driven development CLI for Claude Code"
 repository = "https://github.com/marconae/speq-skill"
@@ -20,7 +21,7 @@ thiserror = "2"
 fastembed = "5"
 dirs = "6"
 serde = { version = "1", features = ["derive"] }
-bincode = { version = "2", features = ["serde"] }
+postcard = { version = "1", features = ["alloc"] }
 
 [dev-dependencies]
 assert_cmd = "2"

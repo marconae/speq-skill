@@ -146,8 +146,8 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
             .map_err(|e| format!("Failed to create index directory: {}", e))?;
     }
 
-    let encoded = bincode::serde::encode_to_vec(&index, bincode::config::standard())
-        .map_err(|e| format!("Failed to serialize: {}", e))?;
+    let encoded =
+        postcard::to_allocvec(&index).map_err(|e| format!("Failed to serialize: {}", e))?;
     std::fs::write(&index_path, encoded).map_err(|e| format!("Failed to write index: {}", e))?;
 
     Ok(count)
@@ -167,9 +167,8 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     }
 
     let data = std::fs::read(&index_path).map_err(|e| format!("Failed to read index: {}", e))?;
-    let (index, _): (SearchIndex, usize) =
-        bincode::serde::decode_from_slice(&data, bincode::config::standard())
-            .map_err(|e| format!("Failed to deserialize index: {}", e))?;
+    let index: SearchIndex =
+        postcard::from_bytes(&data).map_err(|e| format!("Failed to deserialize index: {}", e))?;
 
     if index.scenarios.is_empty() {
         return Ok(Vec::new());
