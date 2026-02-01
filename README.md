@@ -30,9 +30,12 @@ Then run `claude` and type `/speq:mission` to start.
 
 I want to leverage Claude Code as an effective tool to write software.
 
-There are other spec-driven development tools out there; OpenSpec, BMAD, SpecKit... But I was missing the following:
-1. A straightforward repeatable workflow (`plan → implement → record`)
-2. A system that is not primped on one language or framework (e.g., Python or TypeScript)
+There are other spec-driven development tools out there; OpenSpec, BMAD, SpecKit... 
+
+But I was missing the following:
+
+1. A system that is not primped on one language or framework (e.g., Python or TypeScript)
+2. A straightforward repeatable workflow (`plan → implement → record`)
 3. A **permanent** and growing spec-library
 4. A system that keeps the specs **small** to avoid context cluttering
 5. A system that keeps **asking me instead of making assumptions**
@@ -41,7 +44,7 @@ So I built `speq-skill`. It combines Skills and Agents with a simple CLI called 
 
 ## Who should use it?
 
-Vibe Coding does not scale. `speq-skill` fixes this.
+Vibe Coding does not scale. `speq-skill` adds the missing workflow and guardrails.
 
 If you want to describe what you want and have a coding agent build the code for you, then you should give `speq-skill` a try!
 
@@ -80,7 +83,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ## Important
 
-`speq-skill` is a plugin for Claude Code and compatible AI coding assistants. This tool provides workflow structure and spec management only—**the AI / coding agent (such as Claude Code) generates all code, specs, or other artifacts**.
+`speq-skill` is a plugin for Claude Code and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent (such as Claude Code) generates all code, specs, or other artifacts**.
 
 ## Dependencies
 
