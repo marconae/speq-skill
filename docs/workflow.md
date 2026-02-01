@@ -99,11 +99,11 @@ Examples: `add-user-auth`, `fix-validation-edge-case`, `refactor-search-module`
 
 ## `/speq:implement`
 
-Execute TDD implementation of approved plan deltas.
+Execute Test-Driven Development (TDD) implementation of approved plan deltas.
 
 ### Purpose
 
-- Implement features following TDD cycle
+- Implement features following the TDD cycle
 - Generate verification evidence
 - Prepare for recording to permanent specs
 
@@ -123,7 +123,8 @@ GREEN  → Minimal code to pass, run test, show pass
 REFACTOR → Clean up, run test + lint, show output
 ```
 
-**Golden Rule:** No production code without a failing test first.
+> [!IMPORTANT]
+> **Golden Rule:** No production code without a failing test first.
 
 ### Sub-Agents
 
@@ -206,9 +207,9 @@ Reusable guidance invoked by workflow skills:
 
 | Skill | Purpose |
 |-------|---------|
-| `/speq:code-tools` | Semantic code navigation via Serena MCP |
+| `/speq:code-tools` | Semantic code navigation via Serena Model Context Protocol (MCP) |
 | `/speq:ext-research` | External docs via Context7 and WebSearch |
-| `/speq:code-guardrails` | TDD workflow and code quality guardrails |
+| `/speq:code-guardrails` | TDD cycle and code quality guardrails |
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:cli` | speq CLI usage patterns |
 
@@ -247,4 +248,5 @@ Keep specs focused:
 
 ### Clean Context
 
-Use `/clear` between workflow phases to start with fresh context windows.
+> [!TIP]
+> Use `/clear` between workflow phases to start with fresh context windows.

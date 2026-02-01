@@ -19,8 +19,11 @@
 ## Getting Started
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
+
+> [!NOTE]
+> The installer builds `speq` from source using the Rust toolchain (installed automatically if missing). There is no binary distribution. See [Installation](./docs/installation.md) for details.
 
 Then run `claude` and type `/speq:mission` to start.
 
@@ -87,10 +90,18 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ## Dependencies
 
-This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers (both MIT licensed).
+This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers (both MIT licensed). The installer sets them up as a convenience — they are standard open-source servers installed from their respective repositories. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier (1,000 calls/month) — see [Context7 plans](https://context7.com/plans).
 
 The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search (Apache 2.0 licensed).
 
 ## License
 
 Free and open-source under [MIT](LICENSE).
+
+---
+
+<div align="center">
+
+Build with Rust 🦀 and made with ❤️ by [marconae](https://deliberate.codes).
+
+</div>

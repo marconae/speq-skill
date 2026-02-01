@@ -23,16 +23,6 @@
 
 ---
 
-## Getting Started
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install.sh | bash
-```
-
-Then run `claude` and type `/speq:mission` to start.
-
----
-
 ## Components
 
 ### CLI (`speq`)
@@ -54,7 +44,7 @@ The core spec-driven development flow:
 |-------|---------|
 | `/speq:mission` | Interview user, explore codebase, generate `specs/mission.md` |
 | `/speq:plan` | Search specs, interview user, create plan with deltas |
-| `/speq:implement` | TDD cycle with mandatory evidence, generate verification report |
+| `/speq:implement` | Test-Driven Development (TDD) cycle with mandatory evidence, generate verification report |
 | `/speq:record` | Merge deltas to permanent specs, validate, archive plan |
 
 See [Workflow](./workflow.md) for detailed documentation.
@@ -65,15 +55,15 @@ Reusable guidance invoked by workflow skills:
 
 | Skill | Purpose |
 |-------|---------|
-| `/speq:code-tools` | Semantic code navigation via Serena MCP |
+| `/speq:code-tools` | Semantic code navigation via Serena Model Context Protocol (MCP) |
 | `/speq:ext-research` | External docs via Context7 and WebSearch |
-| `/speq:code-guardrails` | TDD workflow and code quality guardrails |
+| `/speq:code-guardrails` | TDD cycle and code quality guardrails |
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:cli` | speq CLI usage patterns |
 
 ### MCP Servers
 
-External tools integrated via Model Context Protocol:
+External tools integrated via MCP:
 
 | Server | Purpose |
 |--------|---------|

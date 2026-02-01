@@ -7,14 +7,19 @@
 ## Quick Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
+
+> [!NOTE]
+> The installer builds `speq` from source using the Rust toolchain. There is no binary distribution. If you don't have Rust installed, the installer will offer to install it for you via [rustup](https://rustup.rs/).
+
+Then run `claude` and type `/speq:mission` to start.
 
 ---
 
 ## Prerequisites
 
-- **macOS or Linux** (Windows via WSL)
+- **macOS or Linux** (Windows via Windows Subsystem for Linux (WSL))
 - **Claude Code CLI** installed and configured
 - **Rust toolchain** (installed if missing or via [rustup](https://rustup.rs/))
 
@@ -32,7 +37,7 @@ The installer automatically:
 - Downloads the latest release from GitHub
 - Symlinks the `speq` CLI to your PATH
 - Installs the speq-skill plugin for Claude Code
-- Installs required MCP servers (Serena, Context7)
+- Installs required Model Context Protocol (MCP) servers (Serena, Context7)
 
 ---
 
@@ -46,7 +51,8 @@ git clone https://github.com/marconae/speq-skill && cd speq-skill
 ./scripts/local-install.sh
 ```
 
-Requires Rust toolchain (install via [rustup](https://rustup.rs/)).
+> [!NOTE]
+> Requires Rust toolchain (install via [rustup](https://rustup.rs/)).
 
 ---
 
@@ -71,7 +77,7 @@ claude
 Re-run the install script to get the latest version:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
 ---
@@ -156,4 +162,5 @@ The plugin depends on Serena and Context7 MCP servers. If you see connection err
 | [Context7](https://github.com/upstash/context7) | Library documentation | MIT |
 | [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~23MB) | Apache 2.0 |
 
-The embeddings model downloads automatically on first `speq search` command.
+> [!NOTE]
+> The embeddings model downloads automatically on first `speq search` command.

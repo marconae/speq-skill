@@ -99,7 +99,7 @@ docker build -t speq-install-test -f tests/docker/Dockerfile .
 echo ""
 echo "=== Running integration test ==="
 docker run --rm \
-    -v "$PROJECT_ROOT/scripts/install.sh:/home/testuser/install.sh:ro" \
+    -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-install.sh:/home/testuser/test-install.sh:ro" \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \

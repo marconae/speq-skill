@@ -15,7 +15,7 @@ speq-skill integrates with MCP (Model Context Protocol) servers for enhanced cod
 | [Serena](https://github.com/oraios/serena) | Semantic code navigation and editing |
 | [Context7](https://github.com/upstash/context7) | Library documentation lookup |
 
-Both servers are installed automatically by the speq-skill installer.
+Both servers are installed automatically by the speq-skill installer as a convenience. They are standard open-source MCP servers installed from their respective repositories — speq-skill does not bundle or modify them. Their behavior, limitations, and licensing are governed by their own documentation.
 
 ---
 
@@ -45,6 +45,9 @@ Need library API details?
 ```
 
 **Context7** — Queries library documentation for correct, up-to-date API usage. Prevents hallucinated method names or deprecated patterns.
+
+> [!NOTE]
+> The Context7 MCP server is open source (MIT licensed), but it connects to a cloud service with a free tier of 1,000 API calls/month. See [Context7 plans](https://context7.com/plans) for details.
 
 **WebSearch** — Researches design patterns, architecture decisions, and industry best practices.
 
