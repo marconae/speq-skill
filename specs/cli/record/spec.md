@@ -6,7 +6,7 @@ The CLI SHALL provide a command to record approved plan deltas into permanent fe
 
 * Command syntax: `speq record <plan-name>`
 * Plans are located at `specs/_plans/<plan-name>/`
-* Recorded plans are archived to `specs/_recorded/<plan-name>/`
+* Recorded plans are archived to `specs/_recorded/YYYY-MM-DD-<plan-name>/`
 * Delta markers: `<!-- DELTA:NEW -->`, `<!-- DELTA:CHANGED -->`, `<!-- DELTA:REMOVED -->`
 * Exit code 0 on success, 1 on error
 
@@ -44,8 +44,9 @@ The CLI SHALL provide a command to record approved plan deltas into permanent fe
 ### Scenario: Archive plan after recording
 
 * *GIVEN* a successful recording of plan `my-plan`
+* *AND* today's date is `2025-03-15`
 * *WHEN* the recording completes
-* *THEN* the system SHALL move `specs/_plans/my-plan/` to `specs/_recorded/my-plan/`
+* *THEN* the system SHALL move `specs/_plans/my-plan/` to `specs/_recorded/2025-03-15-my-plan/`
 
 ### Scenario: Validate after merge
 
