@@ -1,4 +1,4 @@
-project_name: "scope-kit"
+project_name: "speq-skill"
 
 languages:
 - rust
@@ -12,10 +12,20 @@ ignored_paths: []
 
 read_only: false
 
-excluded_tools: [
-  "read_memory", "write_memory", "list_memories", "delete_memory", "onboarding", "check_onboarding_performed"
-]
+excluded_tools:
+- "read_memory"
+- "write_memory"
+- "list_memories"
+- "delete_memory"
+- "onboarding"
+- "check_onboarding_performed"
 
 included_optional_tools: []
 
 initial_prompt: ""
+
+base_modes:
+
+default_modes:
+
+fixed_tools: []
