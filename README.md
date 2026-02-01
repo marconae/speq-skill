@@ -11,7 +11,7 @@
 [![CI](https://github.com/marconae/speq-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/marconae/speq-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Getting Started](#getting-started) • [Why](#why-i-built-it) • [How It Works](#how-does-it-work) • [Reference](#reference) • [Installation](#installation)
+[Getting Started](#getting-started) • [Why](#why-i-built-it) • [How It Works](#how-does-it-work) • [Documentation](./docs/) • [Installation](./docs/installation.md)
 </div>
 
 ---
@@ -19,7 +19,7 @@
 ## Getting Started
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/remote-install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install.sh | bash
 ```
 
 Then run `claude` and type `/speq:mission` to start.
@@ -41,9 +41,11 @@ So I built `speq-skill`. It combines Skills and Agents with a simple CLI called 
 
 ## Who should use it?
 
-If you want to describe what you want and have a coding agent build the code for you. If you can answer this question with "yes," then you should give `speq-skill` a try!
+Vibe Coding does not scale. `speq-skill` fixes this.
 
-Vibe Coding does not scale. `speq-skill` fixes this. It adds a lightweight and straightforward system for spec-driven development that engineers the context for the coding agent.
+If you want to describe what you want and have a coding agent build the code for you, then you should give `speq-skill` a try!
+
+ It adds a lightweight and straightforward system for spec-driven development that engineers the context for the coding agent.
 
 ---
 
@@ -65,127 +67,14 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ---
 
-## Reference
+## Documentation
 
-### Skills
-
-**Workflow Skills** — The core spec-driven development flow:
-
-| Skill | Trigger | Purpose |
-|-------|---------|---------|
-| `/speq:mission` | Project init, specs setup | Interview user, explore codebase, generate `specs/mission.md` |
-| `/speq:plan` | Plan mode, feature planning | Search specs, interview user, create plan with deltas |
-| `/speq:implement` | Implement plan | TDD cycle with mandatory evidence, generate verification report |
-| `/speq:record` | Record approved plan | Merge deltas to permanent specs, validate, archive plan |
-
-**Utility Skills** — Reusable guidance invoked by workflow skills:
-
-| Skill | Purpose |
-|-------|---------|
-| `/speq:code-tools` | Semantic code navigation via Serena MCP |
-| `/speq:ext-research` | External docs via Context7 and WebSearch |
-| `/speq:code-guardrails` | TDD workflow and code quality guardrails |
-| `/speq:git-discipline` | Git read-only rules |
-| `/speq:speq-cli` | speq CLI usage patterns |
-
-### CLI
-
-`speq` provides spec discovery and semantic search:
-
-```bash
-# Structure
-speq domain list                              # List all domains
-speq feature list                             # Tree view of all features
-speq feature list <domain>                    # Features in one domain
-
-# Content
-speq feature get cli/validate                 # Full feature spec
-speq feature get "cli/validate/Error case"   # Single scenario
-
-# Search
-speq search query "error handling"            # Semantic search across all scenarios
-speq search query "validation" --limit 5      # Limit results
-
-# Validation
-speq feature validate                         # Validate all specs
-speq feature validate cli                     # Validate domain
-speq feature validate cli/validate            # Validate single feature
-
-# Recording
-speq record <plan-name>                       # Merge plan deltas to permanent specs
-```
-
-### Spec Format
-
-Specs use Gherkin-like Markdown with RFC 2119 keywords:
-
-```markdown
-# Feature: User Login
-
-The system SHALL provide a secure login mechanism for registered users.
-
-## Background
-
-* The system has a registered user with email "user@example.com"
-* The user is not currently authenticated
-
-## Scenarios
-
-### Scenario: Successful login
-
-* *GIVEN* valid credentials are provided
-* *WHEN* the user submits the login form
-* *THEN* the system SHALL authenticate the user
-* *AND* the system SHALL redirect to the dashboard
-
-### Scenario: Invalid password
-
-* *GIVEN* an incorrect password is provided
-* *WHEN* the user submits the login form
-* *THEN* the system MUST reject the authentication
-* *AND* the system MUST display an error message
-```
-
-**Keywords:** `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
-
-### Structure of your Spec Library
-
-```
-specs/
-├── mission.md                    # Project purpose, tech stack, commands
-├── <domain>/
-│   └── <feature>/
-│       └── spec.md               # Permanent specs
-├── _plans/
-│   └── <plan-name>/
-│       ├── plan.md               # Implementation plan
-│       ├── verification-report.md
-│       └── <domain>/<feature>/spec.md  # Delta specs
-└── _recorded/
-    └── <plan-name>/              # Archived completed plans
-```
-
----
-
-## Installation
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/remote-install.sh | bash
-```
-
-The installer automatically:
-- Downloads the marketplace to `~/.speq-skill/`
-- Symlinks `speq` CLI to `~/.local/bin/speq`
-- Installs the speq-skill plugin and dependencies (Serena, Context7)
-
-**Update:** Re-run the install script to get the latest version.
-
-**From Source:**
-```bash
-git clone https://github.com/marconae/speq-skill && cd speq-skill
-./scripts/local-install.sh    # Builds and installs CLI + plugin
-./scripts/uninstall.sh        # Removes CLI + plugin
-```
+| Guide | Description |
+|-------|-------------|
+| [Installation](./docs/installation.md) | Setup CLI and plugin |
+| [Workflow](./docs/workflow.md) | Plan → Implement → Record cycle |
+| [CLI Reference](./docs/cli-reference.md) | All CLI commands |
+| [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
 
 ---
 
