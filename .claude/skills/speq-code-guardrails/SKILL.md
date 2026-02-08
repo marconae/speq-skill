@@ -1,11 +1,6 @@
 ---
 name: speq-code-guardrails
-description: |
-  TDD workflow and code quality guardrails for implementation.
-  Use for: writing production code, implementing features, fixing bugs.
-  Triggers: implement, code, TDD, test-driven, write code, fix bug.
-  Core rule: No production code without failing test first.
-  Evidence rule: No claim without running command and showing output.
+description: "TDD and code quality guardrails. Use when writing or modifying code during speq implementation. Triggers: during speq-implement, implementation and code changes, writing tests."
 ---
 
 # Code Guardrails

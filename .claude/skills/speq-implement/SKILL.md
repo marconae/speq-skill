@@ -1,11 +1,6 @@
 ---
 name: speq-implement
-description: |
-  Implementation workflow for executing approved plan deltas.
-  Use after /speq-plan creates a plan in specs/_plans/<plan-name>/.
-  Invoke with /speq-implement <plan-name> to implement features.
-  Orchestrator spawns sub-agents for parallel task execution.
-  Triggers: implement plan, execute implementation, TDD workflow, build feature.
+description: "Orchestrate implementation of reviewed plans according to the spec deltas. Arg: <plan-name>."
 ---
 
 # Spec Implementer

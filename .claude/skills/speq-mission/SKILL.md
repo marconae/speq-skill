@@ -1,11 +1,6 @@
 ---
 name: speq-mission
-description: |
-  Interactive workflow for creating project mission files.
-  Use when initializing specs or documenting existing projects.
-  Invoke with /speq-mission to start mission creation.
-  Detects brownfield vs greenfield and adapts interview.
-  Triggers: mission creation, project initialization, specs setup, document project.
+description: Create specs/mission.md via interactive interview. Detects brownfield vs greenfield.
 ---
 
 # Mission Creator

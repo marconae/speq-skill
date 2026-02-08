@@ -1,11 +1,6 @@
 ---
 name: speq-cli
-description: |
-  speq CLI usage for spec-driven development.
-  Use for: discovering specs, searching scenarios, validating spec structure.
-  Triggers: find spec, search scenario, spec validation, feature lookup.
-  Rule: Search first—never read full spec files without searching.
-  Benefit: Reduces context window usage, finds relevant content faster.
+description: Query specs via speq CLI. Search scenarios, list features, validate structure.
 ---
 
 # speq CLI

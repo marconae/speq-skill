@@ -1,11 +1,6 @@
 ---
 name: speq-plan
-description: |
-  Plan mode workflow for creating feature specification deltas.
-  Use when entering plan mode to define new features or changes.
-  Invoke with /speq-plan when planning implementation work.
-  Creates delta specs in specs/_plans/<plan-name>/.
-  Triggers: planning mode, feature specification, spec planning, plan feature.
+description: Plan and create spec deltas for new features or changes to existing features.
 ---
 
 # Spec Planner

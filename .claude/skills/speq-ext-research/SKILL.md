@@ -1,12 +1,6 @@
 ---
 name: speq-ext-research
-description: |
-  External documentation and research via Context7 and WebSearch.
-  Use for: library APIs, framework patterns, design questions, best practices.
-  Triggers: library docs, API reference, external patterns, design research,
-  "how does X library work", "what's the best practice for Y".
-  Priority: Context7 for library APIs, WebSearch for design/architecture.
-  Rule: Never assume library behavior—verify first.
+description: "External documentation via Context7 and WebSearch. Use when library APIs or design patterns need verification. Triggers: library docs lookup, API reference check, framework patterns, \"how does X work\". Rule: verify — never assume."
 ---
 
 # External Research

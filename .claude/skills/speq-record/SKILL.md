@@ -1,11 +1,6 @@
 ---
 name: speq-record
-description: |
-  Apply approved plan deltas to permanent feature specs.
-  Use after implementation is verified via /speq-implement.
-  Invoke with /speq-record <plan-name> to record changes.
-  Merges DELTA markers from plan into permanent specs.
-  Triggers: record changes, merge deltas, archive plan, finalize spec.
+description: Merge implemented deltas into permanent specs library
 ---
 
 # Spec Recorder

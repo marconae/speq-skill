@@ -1,11 +1,6 @@
 ---
 name: speq-git-discipline
-description: |
-  Git read-only guardrails. Enforces inspection-only git usage.
-  Use for: checking git status, reviewing changes, understanding history.
-  Triggers: git operations, version control, check status, review diff.
-  Rule: READ ONLY. User controls all git writes.
-  Forbidden: add, commit, push, pull, merge, rebase, checkout, reset, stash.
+description: "Git read-only guardrails. Use during any git inspection within speq workflows. Triggers: checking status, reviewing diffs, examining commit history. Rule: read-only — user controls all writes."
 ---
 
 # Git Discipline
