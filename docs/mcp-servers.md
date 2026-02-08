@@ -4,7 +4,7 @@
 
 # MCP Servers
 
-speq-skill integrates with MCP (Model Context Protocol) servers for enhanced code comprehension and research capabilities.
+speq-skill integrates with popular MCP (Model Context Protocol) servers for enhanced code comprehension and research capabilities.
 
 ---
 
@@ -47,7 +47,7 @@ Need library API details?
 **Context7** — Queries library documentation for correct, up-to-date API usage. Prevents hallucinated method names or deprecated patterns.
 
 > [!NOTE]
-> The Context7 MCP server is open source (MIT licensed), but it connects to a cloud service with a free tier of 1,000 API calls/month. See [Context7 plans](https://context7.com/plans) for details.
+> The Context7 MCP server is open source (MIT licensed), but it connects to a cloud service. See [Context7](https://context7.com) for details.
 
 **WebSearch** — Researches design patterns, architecture decisions, and industry best practices.
 

@@ -31,11 +31,11 @@ Then run `claude` and type `/speq:mission` to start.
 |-----------|----------|
 | `speq` CLI | `~/.local/bin/speq` |
 | Plugin files | `~/.speq-skill/` |
-| Claude plugins | `~/.claude/plugins/` (symlinked) |
+| Claude plugins | `~/.claude/plugins/` |
 
 The installer automatically:
-- Downloads the latest release from GitHub
-- Symlinks the `speq` CLI to your PATH
+- Downloads the sources of the latest release from GitHub
+- Build and copies the `speq` CLI to your PATH
 - Installs the speq-skill plugin for Claude Code
 - Installs required Model Context Protocol (MCP) servers (Serena, Context7)
 
@@ -67,7 +67,7 @@ ls ~/.claude/plugins/speq-skill
 
 # Test in Claude Code
 claude
-/speq:mission  # Should show the mission creator workflow
+/plugin # should show speq:* skills
 ```
 
 ---
@@ -100,15 +100,7 @@ rm ~/.claude/plugins/speq-skill
 
 ### `speq: command not found`
 
-Add `~/.local/bin` to your PATH:
-
-```bash
-# Add to ~/.bashrc or ~/.zshrc
-export PATH="$HOME/.local/bin:$PATH"
-
-# Reload shell
-source ~/.bashrc  # or ~/.zshrc
-```
+Add `~/.local/bin` to your PATH.
 
 ### Rust build errors
 

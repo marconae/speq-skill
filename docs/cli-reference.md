@@ -142,7 +142,7 @@ This command:
 1. Reads delta specs from `specs/_plans/<plan-name>/`
 2. Merges deltas into permanent specs in `specs/<domain>/<feature>/`
 3. Strips DELTA markers
-4. Archives plan to `specs/_recorded/<plan-name>/`
+4. Archives plan to `specs/_recorded/YYYY-MM-DD-<plan-name>/`
 
 ---
 
@@ -181,98 +181,6 @@ Output includes:
 
 ---
 
-## Spec Format
+## Spec Format and Library Structure
 
-Specs use Gherkin-like Markdown with RFC 2119 keywords.
-
-### Example Spec
-
-```markdown
-# Feature: User Login
-
-The system SHALL provide a secure login mechanism for registered users.
-
-## Background
-
-* The system has a registered user with email "user@example.com"
-* The user is not currently authenticated
-
-## Scenarios
-
-### Scenario: Successful login
-
-* *GIVEN* valid credentials are provided
-* *WHEN* the user submits the login form
-* *THEN* the system SHALL authenticate the user
-* *AND* the system SHALL redirect to the dashboard
-
-### Scenario: Invalid password
-
-* *GIVEN* an incorrect password is provided
-* *WHEN* the user submits the login form
-* *THEN* the system MUST reject the authentication
-* *AND* the system MUST display an error message
-```
-
-### RFC 2119 Keywords
-
-Use these keywords in `*THEN*` steps to specify requirements:
-
-| Keyword | Meaning |
-|---------|---------|
-| `MUST` | Absolute requirement |
-| `MUST NOT` | Absolute prohibition |
-| `SHALL` | Same as MUST |
-| `SHALL NOT` | Same as MUST NOT |
-| `SHOULD` | Recommended |
-| `SHOULD NOT` | Not recommended |
-| `MAY` | Optional |
-
-### Step Formatting
-
-Steps use bold keywords with asterisks:
-
-```markdown
-* *GIVEN* <precondition>
-* *WHEN* <action>
-* *THEN* <expected result>
-* *AND* <additional condition>
-```
-
----
-
-## Directory Structure
-
-```
-specs/
-├── mission.md                    # Project purpose, tech stack, commands
-├── <domain>/
-│   └── <feature>/
-│       └── spec.md               # Permanent specs
-├── _plans/
-│   └── <plan-name>/
-│       ├── plan.md               # Implementation plan
-│       ├── tasks.md              # Task tracking
-│       ├── verification-report.md
-│       └── <domain>/<feature>/spec.md  # Delta specs
-└── _recorded/
-    └── <plan-name>/              # Archived completed plans
-```
-
-### Directories
-
-| Directory | Purpose |
-|-----------|---------|
-| `specs/<domain>/<feature>/` | Permanent feature specs |
-| `specs/_plans/` | Active plans with delta specs |
-| `specs/_recorded/` | Archived completed plans |
-
-### Files
-
-| File | Purpose |
-|------|---------|
-| `mission.md` | Project overview, tech stack, commands |
-| `spec.md` | Feature specification |
-| `plan.md` | Implementation plan with delta references |
-| `tasks.md` | Task tracking during implementation |
-| `verification-report.md` | Implementation verification evidence |
+See [Spec Library](./spec-library.md) for the full spec format reference, including BDD/Gherkin structure, RFC 2119 keywords, and step formatting rules.

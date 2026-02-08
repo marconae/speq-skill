@@ -4,15 +4,25 @@
 
 # Workflow Guide
 
-The speq-skill workflow follows a three-phase cycle: **Plan → Implement → Record**.
+The speq-skill workflow starts with a one-time **Mission** bootstrap, then follows a repeating **Plan → Implement → Record** cycle.
 
 ```
-/speq:plan     →    /speq:implement    →    /speq:record
-     │                   │                       │
-     ▼                   ▼                       ▼
-Creates plan.md     Implementation          Merges deltas into
-with deltas         + verification          permanent specs library
+/speq:mission → specs/mission.md  (once per project)
+                       │
+      ┌────────────────┼────────────────┐
+      ▼                ▼                ▼
+/speq:plan    →  /speq:implement  →  /speq:record     (repeat)
 ```
+
+### Steps & References
+
+| Step | Description |
+|------|-------------|
+| [/speq:mission](#speqmission) | One-time project bootstrap |
+| [/speq:plan](#speqplan) | Create spec deltas |
+| [/speq:implement](#speqimplement) | Implement plan deltas |
+| [/speq:record](#speqrecord) | Merge deltas into permanent specs |
+| [Utility Skills](#utility-skills) | Reusable skills |
 
 ---
 
@@ -34,30 +44,43 @@ Create a project mission file through an interactive interview.
 
 ### What It Does
 
-1. **Project Detection** — Determines brownfield (existing code) vs greenfield (new project)
+1. **Project Type** — Determines brownfield (existing code) vs. greenfield (new project)
 2. **Exploration** — For brownfield projects, explores tech stack, commands, structure
 3. **Interview** — Asks clarifying questions about purpose, users, capabilities
 4. **Generation** — Creates `specs/mission.md` with all gathered information
 
-### Invoked Skills
+### Interview Topics
 
-| Skill | Purpose |
-|-------|---------|
-| `/speq:code-tools` | Codebase exploration |
-| `/speq:ext-research` | Tech stack research |
-| `/speq:cli` | Spec structure reference |
+The agent covers 11 areas, grouping related questions to keep the interview focused:
+
+| Topic | What the agent asks about |
+|-------|--------------------------|
+| Identity & Purpose | Project name, one-sentence summary, problem statement |
+| Target Users | Personas, goals, typical workflows |
+| Core Capabilities | 3–5 things the system does (what, not how) |
+| Out of Scope | Explicit non-goals and unsupported features |
+| Domain Glossary | Project-specific terms and their meanings |
+| Tech Stack | Language, runtime, framework, database, testing |
+| Commands | Build, test, lint/format, coverage |
+| Project Structure | Directory layout and purpose of each directory |
+| Architecture | High-level pattern, key components, data flow |
+| Constraints | Technical, business, and performance limits |
+| External Dependencies | Services/APIs the project depends on |
+
+> [!NOTE]
+> `/speq:mission` runs once per project. The following three steps form the repeating development cycle.
 
 ---
 
 ## `/speq:plan`
 
-Create feature specification deltas for implementation.
+Create feature spec deltas including an implementation plan.
 
 ### Purpose
 
 - Define new features or changes as spec deltas
 - Stage changes in `specs/_plans/<plan-name>/`
-- Prepare for implementation with clear specifications
+- Prepare for implementation with a comprehensive plan
 
 ### When to Use
 
@@ -87,80 +110,40 @@ Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 
 Examples: `add-user-auth`, `fix-validation-edge-case`, `refactor-search-module`
 
-### Invoked Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `/speq:code-tools` | Codebase exploration |
-| `/speq:ext-research` | API docs and design research |
-| `/speq:cli` | Spec discovery and search |
-
 ---
 
 ## `/speq:implement`
 
-Execute Test-Driven Development (TDD) implementation of approved plan deltas.
+Implement approved plan deltas — orchestrates tasks, delegates to sub-agents, reviews code, and produces a verification report.
 
 ### Purpose
 
-- Implement features following the TDD cycle
+- Implement planned features and changes according to the spec deltas
+- Guide implementation with targeted guardrails
 - Generate verification evidence
-- Prepare for recording to permanent specs
 
 ### When to Use
 
-After `/speq:plan` creates a plan:
+After `/speq:plan` to implement a plan:
 
 ```bash
 /speq:implement <plan-name>
 ```
 
-### TDD Cycle
+### What It Does
 
-```
-RED    → Write failing test, run it, show failure
-GREEN  → Minimal code to pass, run test, show pass
-REFACTOR → Clean up, run test + lint, show output
-```
-
-> [!IMPORTANT]
-> **Golden Rule:** No production code without a failing test first.
-
-### Sub-Agents
-
-The orchestrator spawns specialized sub-agents:
-
-| Agent | Purpose |
-|-------|---------|
-| `implementer-agent` | Executes implementation tasks |
-| `code-reviewer` | Reviews changed files for quality |
-
-Sub-agents rotate to maintain fresh context windows.
-
-### Verification Report
-
-After implementation, generates `verification-report.md` with:
-
-- Build status
-- Test results
-- Lint output
-- Manual testing evidence
-
-### Invoked Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `/speq:code-tools` | Code navigation and editing |
-| `/speq:ext-research` | Library documentation |
-| `/speq:code-guardrails` | TDD cycle and quality standards |
-| `/speq:cli` | Spec discovery |
-| `/speq:git-discipline` | Git read-only rules (sub-agents) |
+1. Loads the plan and creates a task breakdown
+2. Spawns sub-agents to work through tasks (with context rotation)
+3. Loads targeted guardrails for clean code, unit testing and integration testing
+4. Runs code review on changed files
+5. Executes build, test, and lint verification
+6. Generates a verification report
 
 ---
 
 ## `/speq:record`
 
-Merge approved plan deltas into permanent specs.
+Merge implemented spec deltas into the permanent spec library.
 
 ### Purpose
 
@@ -170,7 +153,7 @@ Merge approved plan deltas into permanent specs.
 
 ### When to Use
 
-After `/speq:implement` generates a verification report:
+After a successful `/speq:implement`:
 
 ```bash
 /speq:record <plan-name>
@@ -190,14 +173,8 @@ After `/speq:implement` generates a verification report:
 
 4. **Clean** — Strips all DELTA markers
 5. **Validate** — Runs `speq feature validate`
-6. **Archive** — Moves plan to `specs/_recorded/<plan-name>/`
-
-### Invoked Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `/speq:code-tools` | File operations |
-| `/speq:cli` | Spec validation |
+6. **Optimize** — Check whether the specs should be re-organized so that the files are kept short and focused
+7. **Archive** — Moves plan to `specs/_recorded/<plan-name>/`
 
 ---
 
@@ -209,44 +186,8 @@ Reusable guidance invoked by workflow skills:
 |-------|---------|
 | `/speq:code-tools` | Semantic code navigation via Serena Model Context Protocol (MCP) |
 | `/speq:ext-research` | External docs via Context7 and WebSearch |
-| `/speq:code-guardrails` | TDD cycle and code quality guardrails |
+| `/speq:code-guardrails` | Code quality guardrails |
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:cli` | speq CLI usage patterns |
 
 See [MCP Servers](./mcp-servers.md) for details on Serena and Context7.
-
----
-
-## Best Practices
-
-### Search First
-
-Before modifying behavior, search for related specs:
-
-```bash
-speq search query "error handling"
-speq search query "validation"
-```
-
-### Never Assume
-
-Use `AskUserQuestion` for:
-- Clarifying vague requirements
-- Choosing between alternatives
-- Confirming design tradeoffs
-
-### Evidence Rule
-
-No claim without evidence. Run commands, show output, then claim.
-
-### Small Specs
-
-Keep specs focused:
-- Max ~10 scenarios per spec
-- Split large features into sub-features
-- Use domains to organize related features
-
-### Clean Context
-
-> [!TIP]
-> Use `/clear` between workflow phases to start with fresh context windows.
