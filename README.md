@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/speq-skill-logo.svg" alt="Speq Skill Logo" width="200">
+<img src="assets/speq-skill-logo.svg" alt="speq-skill Logo" width="200">
 
 # speq-skill
 
@@ -33,9 +33,9 @@ Then run `claude` and type `/speq:mission` to start.
 
 I want to leverage Claude Code as an effective tool to write software.
 
-There are other spec-driven development tools out there; OpenSpec, BMAD, SpecKit... 
+There are many other spec-driven development tools out there: OpenSpec, BMAD, SpecKit... 
 
-But I was missing the following:
+...but I was missing the following:
 
 1. A system that is not primped on one language or framework (e.g., Python or TypeScript)
 2. A straightforward repeatable workflow (`plan → implement → record`)
@@ -43,31 +43,34 @@ But I was missing the following:
 4. A system that keeps the specs **small** to avoid context cluttering
 5. A system that keeps **asking me instead of making assumptions**
 
-So I built `speq-skill`. It combines Skills and Agents with a simple CLI called `speq` that adds a semantical search layer to the spec library. The search empowers the coding agent to find the right feature scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window.
+So I built `speq-skill`. 
+
+It combines skills with a simple CLI called `speq` that adds a semantical search layer to the permanent spec library. The search empowers the coding agent to find the right feature or scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window.
 
 ## Who should use it?
 
 Vibe Coding does not scale. `speq-skill` adds the missing workflow and guardrails.
 
-If you want to describe what you want and have a coding agent build the code for you, then you should give `speq-skill` a try!
+If you want to describe what you want and have a coding agent generate the code for you, then you should give `speq-skill` a try!
 
- It adds a lightweight and straightforward system for spec-driven development that engineers the context for the coding agent.
+It introduces a lightweight workflow for spec-driven development. It adds a CLI to enable the coding agent to search the permanent spec library.
 
 ---
 
 ## How Does it Work?
 
 ```
-/speq:plan     →    /speq:implement    →    /speq:record
-     │                   │                       │
-     ▼                   ▼                       ▼
-Creates plan.md     Implementation          Merges deltas into
-with deltas         + verification          permanent specs library
+/speq:mission → specs/mission.md (once per project)
+                       │
+      ┌────────────────┼────────────────┐
+      ▼                ▼                ▼
+/speq:plan  →  /speq:implement  →  /speq:record  (repeat)
 ```
 
-1. **Plan** — Describe what you want. The agent searches existing specs, asks clarifying questions, and creates a plan with spec deltas.
-2. **Implement** — The agent implements features using TDD. Each scenario gets a failing test first, then minimal code to pass.
-3. **Record** — Review newly built feature and merge planned deltas into permanent specs. The plan archives to `_recorded/`.
+1. **Mission** — Do it once. The coding agent explores your codebase (or interviews you for a greenfield project) and generates `specs/mission.md`.
+2. **Plan** — Describe what you want. The coding agent searches existing specs, asks clarifying questions, and creates a plan with spec deltas.
+3. **Implement** — The coding agent implements the plan, guided by guardrails for code quality, testing and more.
+4. **Record** — The coding agent merges implemented spec deltas into the permanent spec library.
 
 Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
 
@@ -78,7 +81,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 | Guide | Description |
 |-------|-------------|
 | [Installation](./docs/installation.md) | Setup CLI and plugin |
-| [Workflow](./docs/workflow.md) | Plan → Implement → Record cycle |
+| [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
 
@@ -90,13 +93,13 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ## Dependencies
 
-This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers (both MIT licensed). The installer sets them up as a convenience — they are standard open-source servers installed from their respective repositories. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier (1,000 calls/month) — see [Context7 plans](https://context7.com/plans).
+This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers. The installer sets them up as a convenience — they are standard open-source servers installed from their respective repositories. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier — see [Context7](https://context7.com).
 
-The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search (Apache 2.0 licensed).
+The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search.
 
 ## License
 
-Free and open-source under [MIT](LICENSE).
+[MIT](LICENSE)
 
 ---
 
