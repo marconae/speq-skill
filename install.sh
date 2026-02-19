@@ -47,14 +47,20 @@ install_rust() {
     echo "speq requires Rust to build from source."
     echo "Would you like to install Rust via rustup? (recommended)"
     echo ""
-    read -p "Install Rust? [y/N] " -n 1 -r
-    echo ""
+
+    if [[ -e /dev/tty ]]; then
+        read -p "Install Rust? [y/N] " -n 1 -r < /dev/tty
+        echo ""
+    else
+        # Non-interactive (CI/Docker) — auto-install
+        REPLY="y"
+    fi
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         info "Installing Rust via rustup..."
         curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         # Source cargo env for this session
-        source "$HOME/.cargo/env"
+        source "$HOME/.cargo/env" || true
         info "Rust installed successfully!"
     else
         error "Rust is required. Install manually: https://rustup.rs"
