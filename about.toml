@@ -1,0 +1,31 @@
+# cargo-about configuration
+# https://embarkstudios.github.io/cargo-about/
+
+# Licenses we accept for dependencies
+# Keep in sync with deny.toml [licenses.allow]
+accepted = [
+    # Permissive
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "ISC",
+    "Zlib",
+    "0BSD",
+    # Public domain
+    "CC0-1.0",
+    "Unlicense",
+    # Data/content
+    "Unicode-3.0",
+    "CDLA-Permissive-2.0",
+    # Weak copyleft (file-level, MIT-compatible)
+    "MPL-2.0",
+    # Academic
+    "NCSA",
+]
+
+# Only include runtime dependencies (not build or dev dependencies)
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
