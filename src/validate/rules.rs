@@ -139,12 +139,32 @@ fn check_rfc2119_in_step(step_text: &str, scenario_name: &str, result: &mut Vali
     }
 }
 
+fn is_word_boundary(text: &str, pos: usize) -> bool {
+    if pos == 0 || pos >= text.len() {
+        return true;
+    }
+    let bytes = text.as_bytes();
+    let before = bytes[pos - 1].is_ascii_alphanumeric();
+    let after = bytes[pos].is_ascii_alphanumeric();
+    before != after
+}
+
 fn contains_rfc2119_keyword(text: &str) -> bool {
-    RFC2119_KEYWORDS.iter().any(|kw| text.contains(kw))
+    RFC2119_KEYWORDS.iter().any(|kw| {
+        let mut start = 0;
+        while let Some(pos) = text[start..].find(kw) {
+            let abs_pos = start + pos;
+            let end_pos = abs_pos + kw.len();
+            if is_word_boundary(text, abs_pos) && is_word_boundary(text, end_pos) {
+                return true;
+            }
+            start = abs_pos + 1;
+        }
+        false
+    })
 }
 
 fn find_lowercase_rfc2119_keyword(text: &str) -> Option<String> {
-    // Check for lowercase versions of RFC 2119 keywords
     let lowercase_patterns = [
         ("must not", "MUST NOT"),
         ("shall not", "SHALL NOT"),
@@ -155,23 +175,22 @@ fn find_lowercase_rfc2119_keyword(text: &str) -> Option<String> {
         ("may", "MAY"),
     ];
 
-    // Convert to lowercase for case-insensitive matching
     let text_lower = text.to_lowercase();
 
-    for (pattern, _) in lowercase_patterns {
-        if text_lower.contains(pattern) {
-            // Check if it's not already uppercase in the original text
-            // by looking for the pattern in a case that's not fully uppercase
-            if !text.contains(&pattern.to_uppercase()) {
-                // Find the actual text that matched
-                if let Some(start) = text_lower.find(pattern) {
-                    let actual = &text[start..start + pattern.len()];
-                    // Only warn if not all uppercase
-                    if actual != pattern.to_uppercase() {
-                        return Some(actual.to_string());
-                    }
+    for (pattern, uppercase) in lowercase_patterns {
+        let mut start = 0;
+        while let Some(pos) = text_lower[start..].find(pattern) {
+            let abs_pos = start + pos;
+            let end_pos = abs_pos + pattern.len();
+
+            if is_word_boundary(&text_lower, abs_pos) && is_word_boundary(&text_lower, end_pos) {
+                let actual = &text[abs_pos..end_pos];
+                if actual != uppercase {
+                    return Some(actual.to_string());
                 }
             }
+
+            start = abs_pos + 1;
         }
     }
     None
@@ -424,5 +443,49 @@ mod tests {
         }
         let result = validate(&spec);
         assert!(result.warnings.is_empty());
+    }
+
+    #[test]
+    fn no_false_positive_must_substring() {
+        let text = "mustard is good";
+        assert!(
+            find_lowercase_rfc2119_keyword(text).is_none(),
+            "should not flag 'must' inside 'mustard'"
+        );
+    }
+
+    #[test]
+    fn no_false_positive_may_substring() {
+        let text = "maybe the system responds";
+        assert!(
+            find_lowercase_rfc2119_keyword(text).is_none(),
+            "should not flag 'may' inside 'maybe'"
+        );
+    }
+
+    #[test]
+    fn no_false_positive_should_substring() {
+        let text = "shoulder the burden";
+        assert!(
+            find_lowercase_rfc2119_keyword(text).is_none(),
+            "should not flag 'should' inside 'shoulder'"
+        );
+    }
+
+    #[test]
+    fn no_false_positive_note_not_not() {
+        let text = "SHALL note that sources will handle this";
+        assert!(
+            find_lowercase_rfc2119_keyword(text).is_none(),
+            "should not flag 'not' inside 'note'"
+        );
+    }
+
+    #[test]
+    fn no_false_positive_contains_uppercase_keyword_as_substring() {
+        assert!(
+            !contains_rfc2119_keyword("MUSTard is good"),
+            "should not match MUST inside MUSTard"
+        );
     }
 }

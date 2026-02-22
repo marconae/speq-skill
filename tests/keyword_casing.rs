@@ -132,4 +132,17 @@ mod rfc_keywords {
             .success()
             .stdout(predicate::str::contains("0 warnings"));
     }
+
+    #[test]
+    fn no_false_positive_for_keyword_substring() {
+        let tmp = TempDir::new().unwrap();
+        setup_fixture(&tmp, "keyword-substring");
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate", "test/feature"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("0 warnings"));
+    }
 }
