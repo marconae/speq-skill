@@ -55,3 +55,10 @@ The validator SHALL ensure that scenario steps use RFC 2119 keywords to express 
 * *WHEN* the validator checks the step for RFC 2119 compliance
 * *THEN* the system SHALL report an error indicating the step is missing a normative keyword
 * *AND* the system SHALL NOT accept lowercase variants as valid keywords
+
+### Scenario: Word containing keyword substring not treated as keyword
+
+* *GIVEN* a scenario step containing "SHALL note" where "note" is a regular word
+* *WHEN* the validator checks the step for RFC 2119 compliance
+* *THEN* the system SHALL NOT treat partial word matches as RFC 2119 keywords
+* *AND* the system SHALL accept the step as valid because it contains "SHALL"

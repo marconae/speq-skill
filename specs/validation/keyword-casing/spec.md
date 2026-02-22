@@ -38,3 +38,17 @@ Validates that step keywords and RFC 2119 keywords use uppercase formatting. Pro
 * *GIVEN* a spec with THEN steps containing uppercase MUST, SHALL, SHOULD, or MAY
 * *WHEN* the validator checks the spec
 * *THEN* the system SHALL NOT report any casing warnings
+
+### Scenario: No false positive when RFC keyword is substring of another word
+
+* *GIVEN* a spec with a THEN step containing "SHALL note" where "note" is a regular word
+* *WHEN* the validator checks the spec
+* *THEN* the system SHALL NOT report a warning about lowercase RFC keyword
+* *AND* the system SHALL NOT report any errors
+
+### Scenario: No false positive for keyword substrings in regular words
+
+* *GIVEN* a spec with THEN steps containing words like "mustard", "maybe", "shoulder", or "notify"
+* *WHEN* the validator checks the spec
+* *THEN* the system SHALL NOT report warnings about lowercase RFC keywords for these words
+* *AND* the system SHALL only match whole words as RFC 2119 keywords
