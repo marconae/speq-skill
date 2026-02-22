@@ -1,8 +1,8 @@
-FROM node:22-bookworm-slim
+FROM ubuntu:24.04
 
-# Install minimal dependencies for Claude Code
+# Install dependencies (including Node.js for Claude Code CLI)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash curl git ripgrep ca-certificates \
+    bash curl git ripgrep ca-certificates nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Create test user with home directory
