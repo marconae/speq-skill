@@ -42,6 +42,20 @@ jobs:
       - name: Test
         run: cargo test
 
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run Docker integration tests
+        run: ./tests/docker/test-docker.sh
+
   coverage:
     runs-on: ubuntu-latest
     steps:
