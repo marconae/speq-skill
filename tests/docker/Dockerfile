@@ -1,10 +1,12 @@
-FROM node:22-alpine
+FROM node:22-bookworm-slim
 
-# Install minimal dependencies for Claude Code (Alpine-specific)
-RUN apk --no-cache add bash curl git libgcc libstdc++ ripgrep
+# Install minimal dependencies for Claude Code
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash curl git ripgrep ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create test user with home directory
-RUN adduser -D -s /bin/bash testuser
+RUN useradd -m -s /bin/bash testuser
 
 # Switch to test user for Claude CLI installation
 USER testuser
