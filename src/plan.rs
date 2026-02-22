@@ -91,6 +91,23 @@ impl PlanValidationResult {
     }
 }
 
+pub fn list_plans(base: &Path) -> Vec<String> {
+    let plans_dir = base.join("_plans");
+    let Ok(entries) = std::fs::read_dir(&plans_dir) else {
+        return Vec::new();
+    };
+
+    let mut plans: Vec<String> = entries
+        .filter_map(Result::ok)
+        .filter(|e| e.path().is_dir())
+        .filter_map(|e| e.file_name().into_string().ok())
+        .filter(|name| !name.starts_with('.'))
+        .collect();
+
+    plans.sort();
+    plans
+}
+
 pub fn validate_plan(
     base: &Path,
     plan_name: &str,

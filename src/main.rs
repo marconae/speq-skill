@@ -87,6 +87,17 @@ fn handle_plan_command(command: cli::PlanCommands) -> ExitCode {
     let base = PathBuf::from("specs");
 
     match command {
+        cli::PlanCommands::List => {
+            let plans = plan::list_plans(&base);
+            if plans.is_empty() {
+                println!("No active plans.");
+            } else {
+                for plan in plans {
+                    println!("{}", plan);
+                }
+            }
+            ExitCode::SUCCESS
+        }
         cli::PlanCommands::Validate { plan_name } => match plan::validate_plan(&base, &plan_name) {
             Ok(result) => {
                 if result.is_success() {

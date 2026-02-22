@@ -18,7 +18,7 @@ speq <command> [subcommand] [options]
 |---------|---------|
 | `domain` | List and explore spec domains |
 | `feature` | List, get, and validate feature specs |
-| `plan` | Validate implementation plans |
+| `plan` | List and validate implementation plans |
 | `record` | Merge plan deltas into permanent specs |
 | `search` | Semantic search across scenarios |
 
@@ -111,6 +111,22 @@ Validation checks:
 ---
 
 ## Plan Commands
+
+### `speq plan list`
+
+List all active plans in `specs/_plans/`.
+
+```bash
+speq plan list
+```
+
+Output:
+```
+add-auth
+fix-validation
+```
+
+Plans are listed alphabetically, one per line. Prints "No active plans." if none exist.
 
 ### `speq plan validate`
 

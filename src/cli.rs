@@ -65,6 +65,9 @@ pub enum PlanCommands {
         /// Name of the plan to validate
         plan_name: String,
     },
+
+    /// List all active plans
+    List,
 }
 
 #[derive(Subcommand)]
