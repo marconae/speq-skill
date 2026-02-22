@@ -207,6 +207,46 @@ mod domain_list {
     }
 }
 
+mod plan_list {
+    use super::*;
+
+    #[test]
+    fn lists_active_plans() {
+        cmd()
+            .current_dir("tests/fixtures/plan_list")
+            .args(["plan", "list"])
+            .assert()
+            .success()
+            .stdout("add-auth\nfix-validation\n");
+    }
+
+    #[test]
+    fn no_plans_shows_message() {
+        let tmp = TempDir::new().unwrap();
+        fs::create_dir_all(tmp.path().join("specs/_plans")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["plan", "list"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("No active plans"));
+    }
+
+    #[test]
+    fn missing_plans_dir_shows_message() {
+        let tmp = TempDir::new().unwrap();
+        fs::create_dir_all(tmp.path().join("specs")).unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["plan", "list"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("No active plans"));
+    }
+}
+
 mod feature_get {
     use super::*;
 
