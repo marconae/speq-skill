@@ -7,8 +7,8 @@
         "git+https://github.com/oraios/serena",
         "serena",
         "start-mcp-server",
-        "--project",
-        "${PWD}"
+        "--context", "claude-code",
+        "--project", "${PWD}"
       ]
     },
     "context7": {
