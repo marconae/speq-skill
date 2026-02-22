@@ -85,13 +85,13 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 ## Uninstall
 
 ```bash
-# If installed from source
-./scripts/uninstall.sh
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/uninstall.sh | bash
+```
 
-# If installed via quick install
-rm -rf ~/.speq-skill
-rm ~/.local/bin/speq
-rm ~/.claude/plugins/speq-skill
+If installed from source, you can also run locally:
+
+```bash
+./scripts/uninstall.sh
 ```
 
 ---

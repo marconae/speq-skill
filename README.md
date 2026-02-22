@@ -27,6 +27,20 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 
 Then run `claude` and type `/speq:mission` to start.
 
+<details>
+<summary>What does the installer do?</summary>
+
+- Downloads the latest release source from GitHub
+- Installs the Rust toolchain if missing (via [rustup](https://rustup.rs/))
+- Builds the `speq` CLI from source
+- Installs the CLI to `~/.local/bin/speq`
+- Installs plugin files to `~/.speq-skill/`
+- Registers the plugin with Claude Code
+
+To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall).
+
+</details>
+
 ---
 
 ## Why I Built It

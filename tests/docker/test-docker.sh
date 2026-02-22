@@ -97,7 +97,7 @@ echo "=== Building Docker test image ==="
 docker build -t speq-install-test -f tests/docker/Dockerfile .
 
 echo ""
-echo "=== Running integration test ==="
+echo "=== Running install integration test ==="
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-install.sh:/home/testuser/test-install.sh:ro" \
@@ -107,7 +107,19 @@ docker run --rm \
     speq-install-test -c "/home/testuser/test-install.sh"
 
 echo ""
-echo "=== Docker integration test passed! ==="
+echo "=== Running uninstall integration test ==="
+docker run --rm \
+    -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
+    -v "$PROJECT_ROOT/uninstall.sh:/home/testuser/uninstall.sh:ro" \
+    -v "$PROJECT_ROOT/tests/docker/test-install.sh:/home/testuser/test-install.sh:ro" \
+    -v "$PROJECT_ROOT/tests/docker/test-uninstall.sh:/home/testuser/test-uninstall.sh:ro" \
+    -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
+    -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
+    -e "SPEQ_PREBUILT=1" \
+    speq-install-test -c "/home/testuser/test-install.sh && /home/testuser/test-uninstall.sh"
+
+echo ""
+echo "=== Docker integration tests passed! ==="
 if [[ "$CROSS_PLATFORM" == "true" ]]; then
     echo ""
     echo "Note: Cross-platform test used mock binary."
