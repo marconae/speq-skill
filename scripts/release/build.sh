@@ -38,28 +38,23 @@ echo "Building speq CLI for ${TARGET}..."
 # 1. Build release binary
 cargo build --release --target "${TARGET}"
 
-# 2. Generate third-party licenses (requires cargo-about)
+# 2. Build plugin and marketplace structure (outputs to dist/marketplace/)
+echo "Building speq plugin and marketplace structure..."
+./scripts/plugin/build.sh
+
+# 3. Add CLI binary and licenses into dist/marketplace/bin/
 if ! command -v cargo-about &> /dev/null; then
     echo "Installing cargo-about..."
     cargo install cargo-about
 fi
-cargo about generate about.hbs > dist/bin/THIRD_PARTY_LICENSES
 
-# 3. Build plugin and marketplace structure (outputs to dist/)
-echo "Building speq plugin and marketplace structure..."
-./scripts/plugin/build.sh
+cp "target/${TARGET}/release/speq" dist/marketplace/bin/
+cp LICENSE dist/marketplace/bin/
+cargo about generate about.hbs > dist/marketplace/bin/THIRD_PARTY_LICENSES
 
-# 4. Package marketplace (includes CLI for this platform only)
-mkdir -p "dist/${MARKETPLACE_ARCHIVE}"
-
-# Copy marketplace structure from dist/marketplace/
-cp -r dist/marketplace/. "dist/${MARKETPLACE_ARCHIVE}/"
-
-# Add CLI binary for this platform only
-mkdir -p "dist/${MARKETPLACE_ARCHIVE}/bin"
-cp "target/${TARGET}/release/speq" "dist/${MARKETPLACE_ARCHIVE}/bin/"
-cp LICENSE "dist/${MARKETPLACE_ARCHIVE}/bin/"
-cp dist/bin/THIRD_PARTY_LICENSES "dist/${MARKETPLACE_ARCHIVE}/bin/"
-
-tar -czvf "dist/${MARKETPLACE_ARCHIVE}.tar.gz" -C dist "${MARKETPLACE_ARCHIVE}"
+# 4. Tar directly from dist/marketplace/ with versioned prefix
+mkdir -p dist/bin
+tar -czvf "dist/${MARKETPLACE_ARCHIVE}.tar.gz" \
+    -s ",^marketplace/,${MARKETPLACE_ARCHIVE}/," \
+    -C dist marketplace/
 echo "Created: dist/${MARKETPLACE_ARCHIVE}.tar.gz"

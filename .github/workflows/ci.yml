@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  check:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,57 +24,44 @@ jobs:
 
       - name: Check licenses and advisories
         uses: EmbarkStudios/cargo-deny-action@v2
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
+        with:
+          command: check licenses advisories
 
       - name: Build
         run: cargo build --release
 
-      - name: Test
-        run: cargo test
-
-  docker:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run Docker integration tests
-        run: ./tests/docker/test-docker.sh
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache
-        uses: Swatinem/rust-cache@v2
-
       - name: Install cargo-tarpaulin
         run: cargo install cargo-tarpaulin
 
-      - name: Generate coverage
+      - name: Test with coverage
         run: cargo tarpaulin --out html --output-dir coverage
+
+      - name: Docker integration tests
+        run: ./tests/docker/test-docker.sh
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: coverage/*

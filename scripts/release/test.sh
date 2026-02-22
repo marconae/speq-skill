@@ -89,10 +89,12 @@ echo "=== Testing binary ==="
 "$EXTRACT_DIR/bin/speq" --help
 
 # 7. Verify marketplace.json version is stamped
+# Strip v prefix — build.sh stamps the bare semver from Cargo.toml (e.g. "0.2.5" not "v0.2.5")
+BARE_VERSION="${VERSION#v}"
 echo ""
 echo "=== Checking marketplace.json ==="
-if grep -q "\"version\": \"${VERSION}\"" "$EXTRACT_DIR/.claude-plugin/marketplace.json"; then
-    echo "OK Version stamped correctly: ${VERSION}"
+if grep -q "\"version\": \"${BARE_VERSION}\"" "$EXTRACT_DIR/.claude-plugin/marketplace.json"; then
+    echo "OK Version stamped correctly: ${BARE_VERSION}"
 else
     echo "ERROR: Version not stamped in marketplace.json"
     cat "$EXTRACT_DIR/.claude-plugin/marketplace.json"

@@ -3,14 +3,14 @@ set -euo pipefail
 
 # Build speq plugin from .claude/ source
 # Transforms skills and generates plugin.json
-# Outputs to dist/plugin/ and dist/marketplace/
+# Outputs to dist/marketplace/
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SOURCE_DIR="$PROJECT_ROOT/.claude"
 DIST_DIR="$PROJECT_ROOT/dist"
-PLUGIN_DIR="$DIST_DIR/plugin"
 MARKETPLACE_DIR="$DIST_DIR/marketplace"
+PLUGIN_DIR="$MARKETPLACE_DIR/plugins/speq-skill"
 
 # Colors for output
 RED='\033[0;31m'
@@ -32,10 +32,13 @@ get_author() {
     grep '^authors' "$PROJECT_ROOT/Cargo.toml" | sed 's/.*\["\([^"]*\)".*/\1/'
 }
 
-# Clean and create plugin directory
-setup_plugin_dir() {
-    log_info "Setting up plugin directory..."
-    rm -rf "$PLUGIN_DIR"
+# Clean and create marketplace + plugin directories
+setup_dirs() {
+    log_info "Setting up marketplace directory..."
+    rm -rf "$MARKETPLACE_DIR"
+    mkdir -p "$MARKETPLACE_DIR/.claude-plugin"
+    mkdir -p "$MARKETPLACE_DIR/plugins"
+    mkdir -p "$MARKETPLACE_DIR/bin"
     mkdir -p "$PLUGIN_DIR/.claude-plugin"
     mkdir -p "$PLUGIN_DIR/skills"
     mkdir -p "$PLUGIN_DIR/agents"
@@ -133,19 +136,12 @@ generate_mcp_config() {
     cp "$SCRIPT_DIR/mcp.json" "$PLUGIN_DIR/.mcp.json"
 }
 
-# Build marketplace structure
-build_marketplace() {
+# Stamp marketplace manifest
+stamp_marketplace() {
     local version="$1"
     local author="$2"
 
-    log_info "Building marketplace structure..."
-
-    rm -rf "$MARKETPLACE_DIR"
-    mkdir -p "$MARKETPLACE_DIR/.claude-plugin"
-    mkdir -p "$MARKETPLACE_DIR/plugins"
-    mkdir -p "$MARKETPLACE_DIR/bin"
-
-    # Copy and stamp marketplace manifest
+    log_info "Stamping marketplace.json (version=$version, author=$author)..."
     cp "$SCRIPT_DIR/marketplace.json" "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
     if [[ "$OSTYPE" == "darwin"* ]]; then
         sed -i '' "s/VERSION_PLACEHOLDER/$version/g" "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
@@ -154,11 +150,6 @@ build_marketplace() {
         sed -i "s/VERSION_PLACEHOLDER/$version/g" "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
         sed -i "s/AUTHOR_PLACEHOLDER/$author/g" "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
     fi
-
-    # Copy plugin as speq-skill
-    cp -r "$PLUGIN_DIR" "$MARKETPLACE_DIR/plugins/speq-skill"
-
-    log_info "Marketplace structure built at: $MARKETPLACE_DIR"
 }
 
 # Main build process
@@ -173,11 +164,12 @@ main() {
     log_info "Author: $author (from Cargo.toml)"
     echo ""
 
-    setup_plugin_dir
+    setup_dirs
     copy_skills
     copy_agents
     generate_manifest "$version" "$author"
     generate_mcp_config
+    stamp_marketplace "$version" "$author"
 
     echo ""
     log_info "Plugin built successfully!"
@@ -191,9 +183,7 @@ main() {
     log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission"
     log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:cli"
     log_info "Agents: implementer-agent, code-reviewer"
-
-    # Build marketplace structure
-    build_marketplace "$version" "$author"
+    log_info "Marketplace structure built at: $MARKETPLACE_DIR"
 }
 
 main "$@"
