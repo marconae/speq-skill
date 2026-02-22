@@ -128,6 +128,9 @@ build_from_source() {
     # Register with Claude CLI
     if command -v claude &> /dev/null; then
         info "Registering plugin with Claude CLI..."
+        # Unregister old plugin/marketplace first (idempotent for updates)
+        claude plugin uninstall speq-skill@speq-skill 2>/dev/null || true
+        claude plugin marketplace remove speq-skill 2>/dev/null || true
         claude plugin marketplace add "$MARKETPLACE_DIR" 2>/dev/null || true
         claude plugin install speq-skill@speq-skill 2>/dev/null || true
     else

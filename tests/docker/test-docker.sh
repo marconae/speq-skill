@@ -107,6 +107,16 @@ docker run --rm \
     speq-install-test -c "/home/testuser/test-install.sh"
 
 echo ""
+echo "=== Running update integration test ==="
+docker run --rm \
+    -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
+    -v "$PROJECT_ROOT/tests/docker/test-update.sh:/home/testuser/test-update.sh:ro" \
+    -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
+    -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
+    -e "SPEQ_PREBUILT=1" \
+    speq-install-test -c "/home/testuser/test-update.sh"
+
+echo ""
 echo "=== Running uninstall integration test ==="
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
