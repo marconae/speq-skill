@@ -15,10 +15,10 @@
     <rect x="0" y="0" width="100" height="130" rx="6" fill="white" stroke="#E2E8F0" stroke-width="2"/>
     
     <!-- "speq" text line 1 -->
-    <text x="15" y="28" font-family="JetBrains Mono, SF Mono, Consolas, monospace" font-size="18" font-weight="700" fill="url(#rustGrad)">speq</text>
+    <text x="15" y="28" font-family="JetBrains Mono, monospace" font-size="18" font-weight="700" fill="url(#rustGrad)">speq</text>
     
     <!-- "skill" text line 2 in grey -->
-    <text x="15" y="46" font-family="JetBrains Mono, SF Mono, Consolas, monospace" font-size="14" font-weight="500" fill="#A0AEC0">skill</text>
+    <text x="15" y="46" font-family="JetBrains Mono, monospace" font-size="14" font-weight="500" fill="#A0AEC0">skill</text>
     
     <!-- Code/spec lines -->
     <rect x="18" y="60" width="64" height="5" rx="2.5" fill="#CBD5E0"/>
