@@ -78,12 +78,27 @@ specs/<domain>/<feature>/spec.md exists?
 Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
-#### 4.3 Test Mapping
+#### 4.3 Test Mapping and Verification
 
-| Scenario Type | Test Type |
-|---------------|-----------|
-| Multiple components | Integration |
-| Single isolated unit | Unit |
+Every scenario requires two forms of external proof. No claims — only evidence.
+
+**Integration tests** (mandatory per scenario):
+- Map each scenario → integration test (file path + test name)
+- Integration tests run outside the SUT and form a regression harness for future changes
+- One test per scenario by default; combine only when scenarios share setup and assertions
+- Unit tests: only for pure computation with no I/O
+
+**Manual invocation** (mandatory per feature):
+- Plan concrete commands that invoke the built software
+- Define expected observable output for each command
+- Manual steps confirm end-to-end behavior beyond automated tests
+
+**Output:** Populate `## Verification` in plan.md per `references/plan-template.md`:
+1. **Scenario Coverage** — every scenario → test location + test name (no gaps)
+2. **Manual Testing** — every feature → invocation command with expected output
+3. **Checklist** — build/test/lint/format commands from `specs/mission.md`
+
+A feature is incomplete until every scenario has a mapped integration test and every feature has manual test steps.
 
 #### 4.4 Design Section
 
@@ -156,14 +171,3 @@ specs/
 
 THEN steps use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
 
-## Verification Section
-
-Read `specs/mission.md § Commands` for project-specific build/test/lint/format commands.
-
-The plan's `## Verification` section MUST include tasks that produce evidence:
-
-1. **Checklist tasks** — Build, test, lint, format commands from mission.md
-2. **Manual testing tasks** — Concrete steps for each feature in the plan
-3. **Scenario coverage** — Map each spec scenario to its test location
-
-No placeholders. Use actual commands from the project's mission.md.

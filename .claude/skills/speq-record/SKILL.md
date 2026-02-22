@@ -1,6 +1,6 @@
 ---
 name: speq-record
-description: Merge implemented deltas into permanent specs library
+description: Merge implemented spec deltas into permanent specs library.
 ---
 
 # Spec Recorder

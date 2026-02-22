@@ -12,10 +12,10 @@ Get plan name from user prompt or ask if none specified.
 ## Required Skills
 
 Invoke before starting:
-- `/speq-code-tools` — Code navigation and editing
-- `/speq-ext-research` — Library documentation
+- `/speq-code-tools` — Semantic code navigation and editing
+- `/speq-ext-research` — Library documentation and research
 - `/speq-code-guardrails` — TDD cycle and quality standards
-- `/speq-cli` — Spec discovery
+- `/speq-cli` — spec discovery
 
 Subagents must also invoke these skills plus `/speq-git-discipline`.
 
@@ -92,7 +92,7 @@ For each task in tasks.md:
 
 For each parallel group in plan's `## Parallelization`:
 
-1. **Mark started** — Update tasks.md: `[ ]` → `[~]` for group tasks
+1. **Mark started** — Update tasks.md: `[ ]` → `[~]`
 2. **Spawn subagent** — Use `implementer-agent` agent
 3. **Await completion** — Sub-agent returns with results or rotation signal
 4. **Handle rotation** — If sub-agent signals rotation, spawn fresh agent
@@ -150,12 +150,29 @@ After implementation completes, review all changed files.
 
 ### Phase 5: Verification
 
-Execute commands from plan's `## Verification` section:
+#### 5a. Automated Checks
+
+Execute commands from plan's `## Verification > Checklist`:
 
 - Build → exit 0
 - Test → 0 failures
 - Lint → 0 errors
 - Format → no changes
+
+#### 5b. Scenario Coverage Audit
+
+Cross-reference plan's `## Verification > Scenario Coverage` against test results:
+
+- Every listed scenario → corresponding test exists and passes
+- Flag any scenario without a passing test as incomplete
+
+#### 5c. Manual Verification
+
+Execute each step from plan's `## Verification > Manual Testing`:
+
+- Run documented commands against the built software
+- Capture actual output as evidence for the verification report
+- Mark pass/fail per feature
 
 Update tasks.md verification tasks as completed.
 

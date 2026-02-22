@@ -1,6 +1,6 @@
 ---
 name: speq-code-guardrails
-description: "TDD and code quality guardrails. Use when writing or modifying code during speq implementation. Triggers: during speq-implement, implementation and code changes, writing tests."
+description: TDD and code quality guardrails triggered by speq-implement.
 ---
 
 # Code Guardrails

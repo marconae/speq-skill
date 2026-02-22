@@ -5,7 +5,7 @@ description: Query specs via speq CLI. Search scenarios, list features, validate
 
 # speq CLI
 
-Spec-driven development via the speq CLI.
+Spec-driven development via the speq CLI. The spec CLI is installed locally and available in the path. Invoke via `speq`.
 
 ## Search-First Rule
 

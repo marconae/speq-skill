@@ -1,6 +1,6 @@
 ---
 name: speq-code-tools
-description: "Semantic code navigation and editing via Serena MCP. Use for codebase exploration and symbol-level editing. Triggers: finding definitions, tracing references, refactoring symbols, exploring code structure. Prefer over: grep, find, read/edit file cycles."
+description: Semantic code navigation and editing triggered by speq-skills.
 ---
 
 # Code Tools

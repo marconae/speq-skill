@@ -40,9 +40,9 @@
 
 ## Scenario Coverage
 
-| Domain | Feature | Scenario | Implemented | Tested |
-|--------|---------|----------|-------------|--------|
-| | | | ✓/✗ | ✓/✗ |
+| Domain | Feature | Scenario | Test Location | Test Name | Passes |
+|--------|---------|----------|---------------|-----------|--------|
+| | | | `<path>` | `<name>` | Pass/Fail |
 
 ## Notes
 

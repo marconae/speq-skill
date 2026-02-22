@@ -1,9 +1,7 @@
 ---
 name: code-reviewer
-description: |
-  Code quality reviewer for spec-driven development.
-  Analyzes changed files after implementation completes.
-  Identifies: guardrail violations, dead code, obsolete tests, bad comments, optimization opportunities.
+description: Code quality reviewer for spec-driven development spawned by orchestrator.
+color: yellow
 ---
 
 # Code Reviewer

@@ -1,6 +1,6 @@
 ---
 name: speq-ext-research
-description: "External documentation via Context7 and WebSearch. Use when library APIs or design patterns need verification. Triggers: library docs lookup, API reference check, framework patterns, \"how does X work\". Rule: verify — never assume."
+description: Search for external documentation and research triggered by speq-skills.
 ---
 
 # External Research

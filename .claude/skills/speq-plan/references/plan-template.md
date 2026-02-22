@@ -111,9 +111,29 @@ IMPORTANT: Generate actual commands from specs/mission.md § Commands.
 Do NOT copy placeholders below. Replace with real values.
 -->
 
+### Scenario Coverage
+
+<!-- Map EVERY scenario from feature specs to an integration test. No gaps allowed. -->
+
+| Scenario | Test Type | Test Location | Test Name |
+|----------|-----------|---------------|-----------|
+| <scenario from spec> | Integration / Unit | `<test-file-path>` | `<test_function_name>` |
+
+- **Integration test** — default for all scenarios
+- **Unit test** — only for pure computation with no I/O or side effects
+- A feature is complete when ALL its scenarios have passing tests
+
+### Manual Testing
+
+<!-- One entry per feature. Concrete commands against the built software. -->
+
+| Feature | Command | Expected Output |
+|---------|---------|-----------------|
+| <feature from table above> | `<actual CLI command or action>` | <observable outcome> |
+
 ### Checklist
 
-<!-- Read specs/mission.md and fill with ACTUAL commands -->
+<!-- Read specs/mission.md § Commands. Fill with ACTUAL commands, no placeholders. -->
 
 | Step | Command | Expected |
 |------|---------|----------|
@@ -121,25 +141,3 @@ Do NOT copy placeholders below. Replace with real values.
 | Test | `<from mission.md>` | 0 failures |
 | Lint | `<from mission.md>` | 0 errors/warnings |
 | Format | `<from mission.md>` | No changes |
-| Coverage | `<from mission.md>` | ≥80% |
-
-### Manual Testing
-
-<!-- Generate from Features table above. One row per feature with concrete steps. -->
-
-| Feature | Test Steps | Expected Result |
-|---------|------------|-----------------|
-| <feature from table above> | <actual CLI command or UI action> | <observable outcome> |
-
-### Scenario Verification
-
-<!-- Map each scenario from feature specs to a test -->
-
-| Scenario | Test Type | Test Location |
-|----------|-----------|---------------|
-| <scenario-name> | Integration / Unit | `<test-path>` |
-
-- **Integration test** — Default for all scenarios
-- **Unit test** — Only if scenario is isolated and small
-
-A feature is complete when ALL scenarios have passing integration tests.

@@ -1,9 +1,7 @@
 ---
 name: implementer-agent
-description: |
-  Implementation worker for spec-driven development.
-  Spawned by orchestrator for task groups OR to fix code review findings.
-  Reports progress incrementally and updates tasks.md.
+description: Implementation worker for spec-driven development spawned by orchestrator.
+color: red
 ---
 
 # Implementation Sub-Agent
