@@ -2,7 +2,7 @@ FROM ubuntu:24.04
 
 # Install dependencies (including Node.js for Claude Code CLI)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    bash curl git ripgrep ca-certificates nodejs npm \
+    bash curl git ripgrep ca-certificates nodejs npm pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create test user with home directory

@@ -18,6 +18,7 @@ NC='\033[0m'
 info() { echo -e "${GREEN}==>${NC} $1"; }
 warn() { echo -e "${YELLOW}Warning:${NC} $1"; }
 error() { echo -e "${RED}Error:${NC} $1"; exit 1; }
+error_noexit() { echo -e "${RED}Error:${NC} $1"; }
 step() { echo -e "${BLUE}[${1}/${2}]${NC} $3"; }
 
 # Get latest release tag from GitHub API
@@ -29,6 +30,51 @@ get_latest_version() {
         return
     }
     echo "$response" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+# Check Linux build dependencies (OpenSSL dev headers, pkg-config)
+check_linux_deps() {
+    local os
+    os=$(uname -s)
+    [[ "$os" == "Linux" ]] || return 0
+
+    local missing=()
+
+    if ! command -v pkg-config &> /dev/null; then
+        missing+=("pkg-config")
+    fi
+
+    if [[ ${#missing[@]} -eq 0 ]] && ! pkg-config --exists openssl 2>/dev/null; then
+        missing+=("openssl-dev")
+    fi
+
+    if [[ ${#missing[@]} -eq 0 ]]; then
+        local ssl_version
+        ssl_version=$(pkg-config --modversion openssl 2>/dev/null || echo "0")
+        local ssl_major="${ssl_version%%.*}"
+        if [[ "$ssl_major" -lt 3 ]] 2>/dev/null; then
+            echo ""
+            error_noexit "OpenSSL ${ssl_version} found, but version 3.0+ is required (license compatibility)."
+            echo ""
+            echo "  Please upgrade your system's OpenSSL to 3.0 or later."
+            echo "  On Ubuntu 22.04+, this is the default. On older systems, consider upgrading your distro."
+            echo ""
+            exit 1
+        fi
+        return 0
+    fi
+
+    echo ""
+    error_noexit "Missing build dependencies: ${missing[*]}"
+    echo ""
+    echo "  speq requires OpenSSL development headers and pkg-config to build."
+    echo ""
+    echo "  Install them for your distro:"
+    echo "    Debian/Ubuntu:  sudo apt-get install pkg-config libssl-dev"
+    echo "    Fedora/RHEL:    sudo dnf install pkg-config openssl-devel"
+    echo "    Arch:           sudo pacman -S pkg-config openssl"
+    echo ""
+    exit 1
 }
 
 # Check for Rust toolchain
@@ -160,6 +206,7 @@ main() {
 
     # Check prerequisites (skip if using pre-built binary)
     if [[ -z "${SPEQ_PREBUILT:-}" ]]; then
+        check_linux_deps
         if ! check_rust; then
             install_rust
         fi
@@ -179,7 +226,17 @@ main() {
     check_path
 
     echo ""
+    echo "========================================"
     info "Installation complete!"
+    echo "========================================"
+    echo ""
+    echo "  Binary:      $INSTALL_DIR/speq"
+    echo "  Plugin:      $MARKETPLACE_DIR/"
+    if command -v claude &> /dev/null; then
+        echo "  Claude CLI:  plugin registered"
+    else
+        echo "  Claude CLI:  not found (register manually after installing)"
+    fi
     echo ""
     echo "Run 'speq --help' to get started."
     echo ""

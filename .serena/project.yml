@@ -1,3 +1,4 @@
+# the name by which the project can be referenced within Serena
 project_name: "speq-skill"
 
 # list of languages for which language servers are started; choose from:
@@ -24,8 +25,8 @@ project_name: "speq-skill"
 # The first language is the default language and the respective language server will be used as a fallback.
 # Note that when using the JetBrains backend, language servers are not used and this list is correspondingly ignored.
 languages:
-  - rust
-  - python
+- rust
+- python
 
 # the encoding used by text files in the project
 # For a list of possible encodings, see https://docs.python.org/3.11/library/codecs.html#standard-encodings
@@ -91,18 +92,18 @@ included_optional_tools: []
 # fixed set of tools to use as the base tool set (if non-empty), replacing Serena's default set of tools.
 # This cannot be combined with non-empty excluded_tools or included_optional_tools.
 fixed_tools:
-  - find_file
-  - find_referencing_symbols
-  - find_symbol
-  - get_symbols_overview
-  - initial_instructions
-  - insert_after_symbol
-  - insert_before_symbol
-  - list_dir
-  - rename_symbol
-  - replace_symbol_body
-  - search_for_pattern
-  - open_dashboard
+- find_file
+- find_referencing_symbols
+- find_symbol
+- get_symbols_overview
+- initial_instructions
+- insert_after_symbol
+- insert_before_symbol
+- list_dir
+- rename_symbol
+- replace_symbol_body
+- search_for_pattern
+- open_dashboard
 
 # list of mode names to that are always to be included in the set of active modes
 # The full set of modes to be activated is base_modes + default_modes.
@@ -126,3 +127,14 @@ initial_prompt: ""
 # override of the corresponding setting in serena_config.yml, see the documentation there.
 # If null or missing, the value from the global config is used.
 symbol_info_budget:
+
+# The language backend to use for this project.
+# If not set, the global setting from serena_config.yml is used.
+# Valid values: LSP, JetBrains
+# Note: the backend is fixed at startup. If a project with a different backend
+# is activated post-init, an error will be returned.
+language_backend:
+
+# list of regex patterns which, when matched, mark a memory entry as read‑only.
+# Extends the list from the global configuration, merging the two lists.
+read_only_memory_patterns: []
