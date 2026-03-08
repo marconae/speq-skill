@@ -36,5 +36,4 @@ For more background, see the Anthropic Cookbook entry on [semantic anchors](http
 | EARS Syntax | speq-plan | Requirements |
 | ADR (Nygard format) | speq-plan | Design decisions |
 | Docs-as-Code | speq-record | Documentation |
-| Three-Way Merge | speq-record | Integration |
 | London School TDD | speq-implement (template) | Testing |
