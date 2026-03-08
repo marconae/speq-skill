@@ -5,7 +5,7 @@ description: TDD and code quality guardrails triggered by speq-implement.
 
 # Code Guardrails
 
-TDD workflow and code quality guardrails.
+**Clean Code** (Martin) TDD workflow and quality guardrails.
 
 ## Golden Rule
 
@@ -15,7 +15,7 @@ TDD workflow and code quality guardrails.
 
 **No claim without evidence.** Run command, show output, then claim.
 
-## TDD Cycle
+## TDD Cycle (London School)
 
 ```
 RED    → Write failing test, run it, show failure
@@ -32,9 +32,9 @@ Run ONLY the test you created/changed — not the full suite.
 | **KISS** | Simplest solution that works |
 | **YAGNI** | Build for now, not hypotheticals |
 | **DRY** | Extract duplication, don't copy-paste |
-| **Single Responsibility** | One function = one purpose |
+| **Single Responsibility** (**SOLID**) | One function = one purpose |
 | **Boy Scout** | Leave code cleaner than you found it |
-| **Root Cause** | Fix the source, not the symptom |
+| **Root Cause** | **Five Whys** — fix the source, not the symptom |
 
 ## Design
 

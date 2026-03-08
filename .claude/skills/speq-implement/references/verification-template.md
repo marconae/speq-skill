@@ -2,6 +2,21 @@
 
 **Generated:** <YYYY-MM-DD>
 
+## Verdict
+
+| Result | Details |
+|--------|---------|
+| **PASS / FAIL** | <one-line summary of outcome> |
+
+| Check | Status |
+|-------|--------|
+| Build | ✓/✗ |
+| Tests | ✓/✗ |
+| Lint | ✓/✗ |
+| Format | ✓/✗ |
+| Scenario Coverage | ✓/✗ |
+| Manual Tests | ✓/✗ |
+
 ## Test Evidence
 
 ### Coverage

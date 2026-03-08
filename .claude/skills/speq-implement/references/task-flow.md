@@ -1,6 +1,6 @@
-# Task Flow
+# Task Flow (Work Breakdown Structure)
 
-Dual-track task management: `tasks.md` for persistence, TaskTools for runtime.
+Dual-track task management following **Work Breakdown Structure** decomposition: `tasks.md` for persistence, TaskTools for runtime.
 
 ## Dual-Track System
 

@@ -5,7 +5,7 @@ description: Merge implemented spec deltas into permanent specs library.
 
 # Spec Recorder
 
-Merge plan deltas into permanent specs and archive completed plans.
+Merge plan deltas into permanent specs and archive completed plans. Specs are maintained as **Docs-as-Code** — versioned, validated, and reviewed like source.
 
 Get plan name from user prompt or ask (via `AskUserTool` present a list) if none specified.
 

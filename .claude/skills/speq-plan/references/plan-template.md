@@ -14,16 +14,18 @@ One-paragraph description of what this plan achieves (max two sentences).
 
 Required for new features and significant changes. Skip for small fixes.
 
-### Goals / Non-Goals
+### Context
 
-- Goals
-    - <Primary objective this design achieves>
-    - <Secondary objectives>
-- Non-Goals
-    - <What this design explicitly does NOT address>
-    - <Scope boundaries to prevent creep>
+What forces are at play. What is the problem and why does it need a design decision.
 
-### Architecture
+- **Goals** — <what this design achieves>
+- **Non-Goals** — <what this design explicitly does NOT address>
+
+### Decision
+
+The chosen approach: architecture, patterns, and key interfaces.
+
+#### Architecture
 
 High-level system structure: components, layers, data flow
 
@@ -33,13 +35,13 @@ High-level system structure: components, layers, data flow
 └─────────────┘     └─────────────┘
 ```
 
-### Design Patterns
+#### Patterns
 
 | Pattern | Where | Why |
 |---------|-------|-----|
 | <pattern> | <component> | <rationale> |
 
-### Trade-offs
+### Consequences
 
 | Decision | Alternatives Considered | Rationale |
 |----------|------------------------|-----------|

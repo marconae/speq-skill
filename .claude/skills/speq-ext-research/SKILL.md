@@ -36,6 +36,8 @@ External documentation and research via Context7 and WebSearch.
 
 ## Priority Decision
 
+Apply an **evidence hierarchy** — primary documentation over secondary commentary:
+
 ```
 Need library API details?
 ├─ Yes → Context7

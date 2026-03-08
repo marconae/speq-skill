@@ -58,7 +58,7 @@ Extract: feature specs, implementation tasks, parallelization groups, verificati
 
 ### Phase 2: Create Tasks
 
-Generate `specs/_plans/<plan-name>/tasks.md` from plan.
+Decompose the plan into a **Work Breakdown Structure** in `specs/_plans/<plan-name>/tasks.md`.
 
 **Format:**
 
@@ -140,6 +140,7 @@ After implementation completes, review all changed files.
 
    - Plan: specs/_plans/{plan_name}/plan.md
    - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations
+   - Structure findings using the **Pyramid Principle**: group by theme, lead each group with the key finding, support with evidence.
    """
    )
    ```
@@ -178,7 +179,7 @@ Update tasks.md verification tasks as completed.
 
 ### Phase 6: Verification Report
 
-Generate using `references/verification-template.md`.
+Generate using `references/verification-template.md`. Structure the report **BLUF (Bottom Line Up Front)**: lead with pass/fail verdict and summary before evidence details.
 
 Save to: `specs/_plans/<plan-name>/verification-report.md`
 

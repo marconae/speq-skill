@@ -56,12 +56,15 @@ There are many other spec-driven development tools out there: OpenSpec, BMAD, Sp
 3. A **permanent** and growing spec-library
 4. A system that keeps the specs **small** to avoid context cluttering
 5. A system that keeps **asking me instead of making assumptions**
+6. **Semantic anchors** that ground AI behavior in established methodologies
 
 So I built `speq-skill`. 
 
 It combines skills with a simple CLI called `speq` that adds a semantical search layer to the permanent spec library. The search empowers the coding agent to find the right feature or scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window.
 
 New to spec-driven development? Read ["Spec-driven development: an introduction"](https://deliberate.codes/blog/2026/spec-driven-development-an-introduction/) and ["Writing specs for AI coding agents"](https://deliberate.codes/blog/2026/writing-specs-for-ai-coding-agents/) on my blog.
+
+Each skill is grounded in [semantic anchors](./docs/semantic-anchors.md) — named references to established methodologies (like London School TDD, BLUF, ADR) that steer AI behavior toward well-documented practices.
 
 ## Who should use it?
 
@@ -100,6 +103,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 | [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
+| [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
 
 ---
 

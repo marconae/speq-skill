@@ -16,7 +16,7 @@ Invoke before starting:
 
 ## Guiding Principles
 
-- Integration tests default; unit tests for isolated scenarios only
+**BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN steps; integration tests default, unit tests for isolated pure computation only
 
 ## Workflow
 
@@ -49,10 +49,11 @@ Invoke `/speq-ext-research` and conduct research for:
 
 ### 3. Clarifying Interview
 
-Use `AskUserQuestion` — never assume:
-- Clarify vague requirements
-- Choose between alternative solutions
-- Confirm design tradeoffs
+Apply the **Socratic Method** via `AskUserQuestion` — never assume. Decompose the problem space using **MECE partitioning** (mutually exclusive, collectively exhaustive):
+
+- **Probe** — surface hidden assumptions with open-ended questions
+- **Partition** — present alternative solutions as MECE options
+- **Challenge** — test design tradeoffs through guided counterexamples
 
 ### 4. Planning
 
@@ -78,6 +79,8 @@ specs/<domain>/<feature>/spec.md exists?
 Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
+Spec narratives follow **EARS syntax** (Easy Approach to Requirements Syntax) for unambiguous behavioral clauses.
+
 #### 4.3 Test Mapping and Verification
 
 Every scenario requires two forms of external proof. No claims — only evidence.
@@ -102,7 +105,7 @@ A feature is incomplete until every scenario has a mapped integration test and e
 
 #### 4.4 Design Section
 
-For new features/major changes, add `## Design` to plan.md:
+For new features/major changes, add `## Design` to plan.md structured as an **ADR (Nygard format)**:
 - Goals / Non-Goals
 - Architecture
 - Trade-offs

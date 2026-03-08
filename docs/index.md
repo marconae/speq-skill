@@ -13,3 +13,4 @@
 | [Spec Library](./spec-library.md) | Spec format, BDD, and RFC keywords                           |
 | [CLI Reference](./cli-reference.md) | All CLI commands                                             |
 | [MCP Servers](./mcp-servers.md)     | Pre-configured MCPs: Serena and Context7                     |
+| [Semantic Anchors](./semantic-anchors.md) | Named methodologies grounding each skill |

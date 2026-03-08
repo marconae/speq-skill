@@ -23,7 +23,7 @@ Semantic code navigation and editing via Serena MCP.
 
 ## Reflection Checkpoints
 
-Call these tools at key moments:
+Apply the **Feynman Technique** — explain your understanding before proceeding. Call these tools at key moments:
 
 | Tool | When |
 |------|------|

@@ -87,7 +87,7 @@ Use research to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
-Use `AskUserQuestion` for EVERY section. Never fill in content without asking.
+Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope.
 
 #### 4.1 Identity & Purpose
 
@@ -120,6 +120,8 @@ Questions:
 For brownfield: "Based on the code, it seems targeted at [X]. Is this correct?"
 
 #### 4.3 Core Capabilities
+
+Apply **User Story Mapping** (Patton) — identify activities, then decompose into capabilities:
 
 ```
 Questions:
@@ -248,7 +250,7 @@ Iterate until user approves.
 
 ### Question Batching
 
-Group related questions (max 3-4 per `AskUserQuestion` call) to avoid overwhelming:
+Group questions into **MECE partitions** (max 3-4 per `AskUserQuestion` call) — each group covers one dimension without overlap:
 
 | Phase | Questions to Group |
 |-------|-------------------|

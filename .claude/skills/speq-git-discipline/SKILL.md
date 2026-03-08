@@ -39,7 +39,7 @@ Never commit secrets (API keys, passwords, credentials, tokens).
 
 ## Commit Conventions
 
-When user asks for a commit message, use this format:
+Follow the **Conventional Commits** specification:
 
 ```
 <type>[scope]: <description>

@@ -11,10 +11,7 @@ Spec-driven development via the speq CLI. The spec CLI is installed locally and 
 
 **Never read full spec files without searching first.**
 
-Benefits:
-- Reduces context window usage
-- Finds relevant content faster
-- Avoids loading irrelevant scenarios
+Apply **information foraging** — search narrows the scent trail before committing context window budget.
 
 ## Command Reference
 

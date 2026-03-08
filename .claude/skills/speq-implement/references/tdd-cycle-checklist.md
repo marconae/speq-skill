@@ -1,12 +1,13 @@
 # TDD Cycle Checklist
 
-Per-iteration checklist for implementing a single scenario or behavior.
+Per-iteration checklist following **London School TDD**: outside-in, mock collaborators, test behavior not state.
 
 ## Before Starting
 
 - [ ] Read the scenario from feature spec
 - [ ] Search codebase for existing implementation
 - [ ] Understand what needs to be tested
+- [ ] Identify collaborators to mock (London School: mock outward dependencies)
 
 ## RED Phase
 
@@ -24,6 +25,7 @@ Per-iteration checklist for implementing a single scenario or behavior.
 - [ ] Test failure message is meaningful
 - [ ] Ran test and showed output
 - [ ] Failure is because feature doesn't exist (not syntax error)
+- [ ] Test asserts on behavior/messages, not internal state
 
 ## GREEN Phase
 
@@ -39,6 +41,7 @@ Per-iteration checklist for implementing a single scenario or behavior.
 
 - [ ] Implementation is minimal (just enough to pass)
 - [ ] No "improvements" or "nice-to-haves" added
+- [ ] Collaborators are mocked, not real implementations
 - [ ] Test passes
 - [ ] Ran test and showed output
 
@@ -78,3 +81,4 @@ After completing RED-GREEN-REFACTOR for one behavior:
 | Code written before test | Delete code, write test first |
 | "Should pass" without running | Run command, show output |
 | Refactoring adds behavior | Undo, keep refactor pure |
+| Testing internal state | Assert on observable behavior and collaborator interactions |
