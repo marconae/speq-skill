@@ -15,6 +15,8 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 
 Then run `claude` and type `/speq:mission` to start.
 
+For Codex usage, see [Using with Codex](./codex.md).
+
 ---
 
 ## Prerequisites
@@ -53,6 +55,31 @@ git clone https://github.com/marconae/speq-skill && cd speq-skill
 
 > [!NOTE]
 > Requires Rust toolchain (install via [rustup](https://rustup.rs/)).
+
+---
+
+## Codex Installation
+
+Install the `speq` CLI and copy skills into Codex:
+
+```bash
+# Install speq CLI + Claude plugin assets
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
+
+# Install Codex skills
+curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/scripts/install-codex-skills.sh | bash
+```
+
+Restart Codex after installing skills.
+
+In Codex, invoke skills in your prompt by name, for example:
+
+```text
+Use speq-mission to create specs/mission.md for this repo.
+Use speq-plan to plan <feature>.
+Use speq-implement to implement plan <plan-name>.
+Use speq-record to merge plan <plan-name>.
+```
 
 ---
 
@@ -143,6 +170,15 @@ The plugin depends on Serena and Context7 MCP servers. If you see connection err
 2. Verify server configuration in `~/.claude/plugins/speq-skill/.mcp.json`
 
 3. Restart Claude Code to reconnect
+
+### Codex skills not detected
+
+1. Verify skills were copied:
+   ```bash
+   ls ~/.codex/skills/speq-*
+   ```
+
+2. Restart Codex to reload skills.
 
 ---
 
