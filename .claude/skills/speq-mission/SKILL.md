@@ -87,7 +87,7 @@ Use research to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
-Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope.
+Conduct a **Socratic interview** for EVERY section. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope.
 
 #### 4.1 Identity & Purpose
 
@@ -250,7 +250,7 @@ Iterate until user approves.
 
 ### Question Batching
 
-Group questions into **MECE partitions** (max 3-4 per `AskUserQuestion` call) — each group covers one dimension without overlap:
+Group questions into **MECE partitions** (max 3-4 questions per turn) — each group covers one dimension without overlap:
 
 | Phase | Questions to Group |
 |-------|-------------------|
