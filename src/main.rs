@@ -11,7 +11,31 @@ mod search;
 mod tree;
 mod validate;
 
+/// Build an OrtApi that delegates to ort-tract but patches stub functions
+/// that fastembed needs but ort-tract doesn't implement (e.g. SetIntraOpNumThreads).
+fn patched_ort_tract_api() -> ort_sys::OrtApi {
+    unsafe extern "system" fn set_intra_op_num_threads_noop(
+        _options: *mut ort_sys::OrtSessionOptions,
+        _intra_op_num_threads: std::ffi::c_int,
+    ) -> ort_sys::OrtStatusPtr {
+        ort_sys::OrtStatusPtr(std::ptr::null_mut())
+    }
+
+    unsafe extern "system" fn set_inter_op_num_threads_noop(
+        _options: *mut ort_sys::OrtSessionOptions,
+        _inter_op_num_threads: std::ffi::c_int,
+    ) -> ort_sys::OrtStatusPtr {
+        ort_sys::OrtStatusPtr(std::ptr::null_mut())
+    }
+
+    let mut api = ort_tract::api();
+    api.SetIntraOpNumThreads = set_intra_op_num_threads_noop;
+    api.SetInterOpNumThreads = set_inter_op_num_threads_noop;
+    api
+}
+
 fn main() -> ExitCode {
+    ort::set_api(patched_ort_tract_api());
     let cli = cli::Cli::parse();
 
     match cli.command {

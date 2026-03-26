@@ -67,7 +67,6 @@ fn configure_fastembed_cache() {
 pub fn index_specs(base: &Path) -> Result<usize, String> {
     use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 
-    // Configure fastembed cache before model initialization
     configure_fastembed_cache();
 
     // Initialize the embedding model
@@ -157,7 +156,6 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
 pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, String> {
     use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
 
-    // Configure fastembed cache before model initialization
     configure_fastembed_cache();
 
     // Load the index, auto-building if missing
