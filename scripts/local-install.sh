@@ -16,6 +16,14 @@ echo "=== Installing speq-skill ==="
 # 1. Build release binary if not present
 if [ ! -f "target/release/speq" ]; then
     echo "Building release binary..."
+    # Intel Mac: ort-download-binaries has no prebuilt binaries for x86_64-apple-darwin.
+    # Require system ONNX Runtime (ort-load-dynamic links against it at runtime).
+    if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
+        if ! brew list onnxruntime &>/dev/null 2>&1; then
+            echo "Installing ONNX Runtime (required on Intel Mac)..."
+            brew install onnxruntime
+        fi
+    fi
     cargo build --release
 fi
 
