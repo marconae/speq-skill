@@ -19,14 +19,26 @@ clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
 thiserror = "2.0"
 serde = { version = "1.0", features = ["derive"] }
+dirs = "6.0"
+chrono = "0.4"
+postcard = { version = "1.1", features = ["alloc"] }
+
+# ort does not provide prebuilt binaries for x86_64-apple-darwin (Intel Mac).
+# Use ort-load-dynamic there and link against a system-installed ONNX Runtime
+# (e.g. `brew install onnxruntime`). All other platforms download binaries automatically.
+[target.'cfg(all(target_os = "macos", target_arch = "x86_64"))'.dependencies]
+fastembed = { version = "5.8", default-features = false, features = [
+    "hf-hub-rustls-tls",
+    "ort-load-dynamic",
+    "image-models",
+] }
+
+[target.'cfg(not(all(target_os = "macos", target_arch = "x86_64")))'.dependencies]
 fastembed = { version = "5.8", default-features = false, features = [
     "hf-hub-rustls-tls",
     "ort-download-binaries",
     "image-models",
 ] }
-dirs = "6.0"
-chrono = "0.4"
-postcard = { version = "1.1", features = ["alloc"] }
 
 [dev-dependencies]
 assert_cmd = "2"
