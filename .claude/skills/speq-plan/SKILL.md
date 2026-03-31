@@ -158,8 +158,8 @@ speq plan validate <plan-name>
 * Inform the user that the plan is created and ready for review
 * List all created files in the plan.
 * Inform the user to call `/speq-implement <plan-name>` to continue.
-* Inform the user to call `/clear` to start implementing with a fresh context window.
-* If in Claude Code is in "plan mode" then call `ExitPlanMode` and ask to proceed with cleared context.
+* Recommend continuing with a fresh context window before implementation.
+* If the current agent supports a dedicated plan mode, exit it before implementation.
 
 ## Spec Hierarchy
 
