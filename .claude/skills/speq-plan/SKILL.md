@@ -49,7 +49,7 @@ Invoke `/speq-ext-research` and conduct research for:
 
 ### 3. Clarifying Interview
 
-Apply the **Socratic Method** by asking focused user questions — never assume. Decompose the problem space using **MECE partitioning** (mutually exclusive, collectively exhaustive):
+Apply the **Socratic Method** via `AskUserQuestion` — never assume. Decompose the problem space using **MECE partitioning** (mutually exclusive, collectively exhaustive):
 
 - **Probe** — surface hidden assumptions with open-ended questions
 - **Partition** — present alternative solutions as MECE options
@@ -173,3 +173,4 @@ specs/
 ## RFC 2119 Keywords
 
 THEN steps use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
+

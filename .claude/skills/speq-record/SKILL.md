@@ -7,7 +7,7 @@ description: Merge implemented spec deltas into permanent specs library.
 
 Merge plan deltas into permanent specs and archive completed plans. Specs are maintained as **Docs-as-Code** — versioned, validated, and reviewed like source.
 
-Get plan name from user prompt or ask the user directly (present a short list) if none specified.
+Get plan name from user prompt or ask (via `AskUserTool` present a list) if none specified.
 
 ## Required Skills
 
@@ -65,7 +65,7 @@ Check thresholds after merging:
 | Scenarios per spec | >10 | Ask user about split |
 | Domain features | >8 | Ask about sub-domains |
 
-**Never assume** — ask the user directly for organization decisions.
+**Never assume** — use `AskUserQuestion` for organization decisions.
 
 ### Phase 5: Finalize
 
