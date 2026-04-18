@@ -130,10 +130,8 @@ fn handle_text(ctx: &mut ParseContext, text: &str) {
         ParseState::InFeatureHeading | ParseState::InH2Heading | ParseState::InScenarioHeading => {
             ctx.heading_text.push_str(text);
         }
-        ParseState::AfterFeatureHeading => {
-            if !ctx.in_list_item {
-                ctx.description_buffer.push_str(text);
-            }
+        ParseState::AfterFeatureHeading if !ctx.in_list_item => {
+            ctx.description_buffer.push_str(text);
         }
         ParseState::InEmphasis => {
             handle_emphasis_text(ctx, text);
