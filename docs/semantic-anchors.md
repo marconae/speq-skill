@@ -10,7 +10,7 @@ Semantic anchors are named references to established methodologies, frameworks, 
 
 This works because LLMs have deep training data on these named practices. A single anchor like "Socratic Method" activates richer behavior than paragraphs of custom instruction.
 
-For more background, see the Anthropic Cookbook entry on [semantic anchors](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/semantic_anchors) and explore the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog of semantic anchors on GitHub.
+For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog of semantic anchors on GitHub.
 
 ## Anchor Reference
 
