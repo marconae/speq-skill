@@ -157,6 +157,6 @@ The system SHALL do something.
             .find(|(fp, _)| fp.feature == "broken")
             .unwrap();
 
-        assert!(broken.1.as_ref().unwrap().errors.len() > 0);
+        assert!(!broken.1.as_ref().unwrap().errors.is_empty());
     }
 }
