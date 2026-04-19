@@ -157,8 +157,15 @@ pub fn parse_deltas(content: &str) -> Result<Vec<DeltaBlock>, RecordError> {
             in_delta = true;
             current_kind = Some(kind);
             current_content.clear();
-        } else if parse_delta_close(trimmed).is_some() {
+        } else if let Some(close_kind) = parse_delta_close(trimmed) {
             if !in_delta {
+                return Err(RecordError::MalformedDelta {
+                    line: line_num + 1,
+                    content: line.to_string(),
+                });
+            }
+
+            if current_kind.as_ref() != Some(&close_kind) {
                 return Err(RecordError::MalformedDelta {
                     line: line_num + 1,
                     content: line.to_string(),
@@ -182,6 +189,13 @@ pub fn parse_deltas(content: &str) -> Result<Vec<DeltaBlock>, RecordError> {
             }
             current_content.push_str(line);
         }
+    }
+
+    if in_delta {
+        return Err(RecordError::MalformedDelta {
+            line: content.lines().count(),
+            content: current_content,
+        });
     }
 
     Ok(deltas)
@@ -480,6 +494,27 @@ nested
     fn error_on_close_without_open() {
         let content = r#"### Scenario: Test
 <!-- /DELTA:NEW -->
+"#;
+
+        let result = parse_deltas(content);
+        assert!(matches!(result, Err(RecordError::MalformedDelta { .. })));
+    }
+
+    #[test]
+    fn error_on_mismatched_close_marker() {
+        let content = r#"<!-- DELTA:NEW -->
+### Scenario: Test
+<!-- /DELTA:CHANGED -->
+"#;
+
+        let result = parse_deltas(content);
+        assert!(matches!(result, Err(RecordError::MalformedDelta { .. })));
+    }
+
+    #[test]
+    fn error_on_unclosed_delta_at_end_of_file() {
+        let content = r#"<!-- DELTA:REMOVED -->
+### Scenario: Test
 "#;
 
         let result = parse_deltas(content);

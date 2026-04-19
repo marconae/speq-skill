@@ -32,9 +32,40 @@ pub struct SearchResult {
 
 /// Get the cache directory path for speq
 pub fn get_cache_path() -> PathBuf {
-    dirs::cache_dir()
-        .unwrap_or_else(|| PathBuf::from(".cache"))
-        .join("speq")
+    let local_cache = PathBuf::from(".cache").join("speq");
+
+    if let Ok(path) = std::env::var("SPEQ_CACHE_DIR") {
+        return PathBuf::from(path);
+    }
+
+    if let Some(system_cache) = dirs::cache_dir() {
+        let system_cache = system_cache.join("speq");
+        if cache_path_is_writable(&system_cache) {
+            return system_cache;
+        }
+    }
+
+    local_cache
+}
+
+fn cache_path_is_writable(path: &Path) -> bool {
+    if std::fs::create_dir_all(path).is_err() {
+        return false;
+    }
+
+    let probe = path.join(".write-test");
+    match std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(&probe)
+    {
+        Ok(_) => {
+            let _ = std::fs::remove_file(probe);
+            true
+        }
+        Err(_) => false,
+    }
 }
 
 /// Get the project slug from the current working directory

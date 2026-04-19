@@ -2,14 +2,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
-
-mod cli;
-mod feature;
-mod plan;
-mod record;
-mod search;
-mod tree;
-mod validate;
+use speq_skill::{cli, feature, plan, record, search, tree, validate};
 
 fn main() -> ExitCode {
     let cli = cli::Cli::parse();
