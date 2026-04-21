@@ -4,14 +4,14 @@
 
 # speq-skill
 
-**A light-weight and straightforward system for spec-driven development with Claude Code**
+**A light-weight and straightforward system for spec-driven development with Claude Code, Codex, and compatible coding agents**
 
 [![spec|driven](https://img.shields.io/badge/spec-driven-blue)](specs/)
 [![Rust](https://img.shields.io/badge/rust-stable-brightgreen.svg)](https://www.rust-lang.org/)
 [![CI](https://github.com/marconae/speq-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/marconae/speq-skill/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Getting Started](#getting-started) • [Why](#why-i-built-it) • [How It Works](#how-does-it-work) • [Documentation](./docs/) • [Installation](./docs/installation.md)
+[Getting Started](#getting-started) • [Why](#why-i-built-it) • [How It Works](#how-does-it-work) • [Documentation](./docs/) • [Installation](./docs/installation.md) • [Using with Codex](./docs/codex.md)
 </div>
 
 ---
@@ -26,6 +26,8 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 > The installer builds `speq` from source using the Rust toolchain (installed automatically if missing). There is no binary distribution. See [Installation](./docs/installation.md) for details.
 
 Then run `claude` and type `/speq:mission` to start.
+
+For Codex usage, see [Using with Codex](./docs/codex.md).
 
 <details>
 <summary>What does the installer do?</summary>
@@ -109,7 +111,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ## Important
 
-`speq-skill` is a plugin for Claude Code and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent (such as Claude Code) generates all code, specs, or other artifacts**.
+`speq-skill` is a plugin for Claude Code and supports other compatible AI coding agents (including Codex via skill files). This tool provides workflow structure and spec management only—**the AI / coding agent generates all code, specs, or other artifacts**.
 
 ## Dependencies
 

@@ -6,6 +6,9 @@
 
 The speq-skill workflow starts with a one-time **Mission** bootstrap, then follows a repeating **Plan → Implement → Record** cycle.
 
+> [!NOTE]
+> In Claude Code, use slash commands (for example `/speq:plan`). In Codex, invoke the corresponding skill by name in your prompt (for example `Use speq-plan ...`).
+
 ```
 /speq:mission → specs/mission.md  (once per project)
                        │

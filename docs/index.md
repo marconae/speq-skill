@@ -9,6 +9,7 @@
 | Guide                               | Description                                                  |
 |-------------------------------------|--------------------------------------------------------------|
 | [Installation](./installation.md)   | Setup CLI and plugin                                         |
+| [Using with Codex](./codex.md)      | Install and run speq-skill workflow in Codex                |
 | [Workflow](./workflow.md)           | One-time mission setup, then Plan → Implement → Record cycle |
 | [Spec Library](./spec-library.md) | Spec format, BDD, and RFC keywords                           |
 | [CLI Reference](./cli-reference.md) | All CLI commands                                             |
