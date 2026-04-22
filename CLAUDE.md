@@ -12,15 +12,22 @@ You are **building speq-skill while using it**.
 
 ```
 .claude/skills/
-├── speq-plan/                   # Workflow skill
-├── speq-implement/              # Workflow skill
-├── speq-record/                 # Workflow skill
+├── speq-plan/                   # Workflow skill (orchestrator)
+├── speq-implement/              # Workflow skill (orchestrator)
+├── speq-record/                 # Workflow skill (orchestrator)
 ├── speq-mission/                # Workflow skill
 ├── speq-code-guardrails/        # Utility skill
 ├── speq-code-tools/             # Utility skill
 ├── speq-ext-research/           # Utility skill
 ├── speq-git-discipline/         # Utility skill
 └── speq-cli/                    # Utility skill
+
+.claude/agents/
+├── planner-agent.md             # heavy planning
+├── implementer-agent.md         # standard implementation
+├── implementer-expert-agent.md  # hard, reasoning-heavy tasks
+├── code-reviewer.md             # adversarial review
+└── recorder-agent.md            # deterministic spec merge
 ```
 
 ### Build Script
@@ -38,6 +45,39 @@ The build script (`scripts/plugin/build.sh`):
 |---------|-----------------|----------------|
 | Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
 | Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
+
+## Model Routing Strategy
+
+Each sub-agent declares its model and effort in frontmatter (e.g. `model: opus`, `effort: xhigh`). Skills do not — they inherit the parent session's context and run alongside whatever invoked them.
+
+### Principle
+
+> Orchestration is cheap. Reasoning is expensive. Put the expensive tier only where defects compound.
+
+Workflow skills (`speq-plan`, `speq-implement`, `speq-record`) are thin orchestrators. They read tasks.md, dispatch sub-agents, and confirm results — all tool-call heavy, reasoning light. The sub-agents they spawn do the actual work.
+
+### Sub-agent routing table
+
+| Sub-agent | Tier | Spawned by | Rationale |
+|-----------|------|------------|-----------|
+| `planner-agent` | heavy reasoning | `speq-plan` | Architectural tradeoffs, ADR authoring, MECE decomposition. Defects here compound through every downstream task. |
+| `implementer-agent` | standard | `speq-implement` | Default for coding tasks. |
+| `implementer-expert-agent` | heavy reasoning | `speq-implement` | Only for tasks tagged `[expert]` in tasks.md. Concurrency, cross-file refactors, non-obvious correctness. |
+| `code-reviewer` | heavy reasoning | `speq-implement` | Adversarial review requires holding two large artifacts in mind and surfacing non-obvious defects. |
+| `recorder-agent` | mechanical | `speq-record` | Apply delta markers, validate, archive. No reasoning premium. |
+
+Actual model and effort values live in each agent's frontmatter so they can evolve with the model lineup without touching the framework.
+
+### Expert-task tagging
+
+`planner-agent` tags tasks that require deep reasoning with `[expert]` at the end of the task line in `tasks.md`:
+
+```markdown
+- [ ] 2.1 Add CLI flag parsing
+- [ ] 2.2 Implement lock-free queue for concurrent spec writes [expert]
+```
+
+`speq-implement` partitions tasks by tag before spawning: untagged → `implementer-agent`, tagged → `implementer-expert-agent`. If the plan is under-tagged, the orchestrator may add `[expert]` when materializing tasks.md — but sparingly. Over-tagging wastes tokens; under-tagging risks defects.
 
 ## speq CLI Invocation
 

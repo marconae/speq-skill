@@ -9,6 +9,12 @@
   "license": "MIT",
   "keywords": ["spec-driven", "tdd", "specifications", "planning", "workflow"],
   "skills": "./skills/",
-  "agents": ["./agents/code-reviewer.md", "./agents/implementer-agent.md"],
+  "agents": [
+    "./agents/code-reviewer.md",
+    "./agents/implementer-agent.md",
+    "./agents/implementer-expert-agent.md",
+    "./agents/planner-agent.md",
+    "./agents/recorder-agent.md"
+  ],
   "mcpServers": "./.mcp.json"
 }

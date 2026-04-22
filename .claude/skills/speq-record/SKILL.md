@@ -3,21 +3,24 @@ name: speq-record
 description: Merge implemented spec deltas into permanent specs library.
 ---
 
-# Spec Recorder
+# Spec Recorder (Orchestrator)
 
-Merge plan deltas into permanent specs and archive completed plans. Specs are maintained as **Docs-as-Code** — versioned, validated, and reviewed like source.
+This skill is a **thin orchestrator**. It verifies preconditions and delegates the deterministic merge work to the `recorder-agent` sub-agent. Recording is mechanical file surgery and does not need deep reasoning.
 
-Get plan name from user prompt or ask (via `AskUserTool` present a list) if none specified.
-
-## Required Skills
+## Required Skills (for the orchestrator)
 
 Invoke before starting:
-- `/speq-code-tools` — File operations
 - `/speq-cli` — Spec validation
+
+The `recorder-agent` sub-agent invokes `/speq-code-tools`, `/speq-cli`, and `/speq-git-discipline` itself.
 
 ## Workflow
 
-### Phase 1: Verify Implementation
+### Phase 1: Resolve Plan Name (orchestrator)
+
+Get plan name from user prompt. If none specified, use `AskUserQuestion` to present a list of plans under `specs/_plans/`.
+
+### Phase 2: Verify Preconditions (orchestrator)
 
 ```
 Check: specs/_plans/<plan-name>/verification-report.md exists?
@@ -25,65 +28,68 @@ Check: specs/_plans/<plan-name>/verification-report.md exists?
 └─ No  → STOP: "Run /speq-implement <plan-name> first."
 ```
 
-### Phase 2: Load Plan
+### Phase 3: Delegate to recorder-agent
 
-```bash
-speq feature list                 # Current spec library
+Spawn the recorder sub-agent with the plan name:
+
+```python
+Task(
+  subagent_type="recorder-agent",
+  description="Record <plan-name> into permanent specs",
+  prompt="""
+## Plan Name
+<plan-name>
+
+## Context
+- Verification report confirmed at: specs/_plans/<plan-name>/verification-report.md
+- Plan file: specs/_plans/<plan-name>/plan.md
+- Delta specs: specs/_plans/<plan-name>/**/spec.md
+
+## Your Task
+Merge all delta specs into permanent specs per the `recorder-agent` workflow.
+Validate between merges. Archive the plan on success. If any library threshold
+is exceeded (scenarios > 10, domain features > 8), STOP before archiving and
+return a question for the user.
+
+Return a summary of merged features and the archive path.
+"""
+)
 ```
 
-```
-Read: specs/_plans/<plan-name>/plan.md
-List: specs/_plans/<plan-name>/**/spec.md
-```
+### Phase 4: Handle Threshold Escalations (orchestrator)
 
-### Phase 3: Apply Deltas
+If the sub-agent returns threshold signals:
 
-For each delta spec in `specs/_plans/<plan-name>/<domain>/<feature>/spec.md`:
+1. Use `AskUserQuestion` to gather user's organizational decision
+2. Respawn `recorder-agent` with the decision, OR apply a small edit directly if the action is trivial (e.g., rename a file)
+3. Only archive once all decisions are resolved
 
-```
-specs/<domain>/<feature>/spec.md exists?
-├─ No  → Copy delta (strip markers)
-└─ Yes → Merge using markers below
-```
+### Phase 5: Confirm Completion (orchestrator)
 
-| Marker | Action |
-|--------|--------|
-| `DELTA:NEW` | Append scenario |
-| `DELTA:CHANGED` | Replace scenario with same name |
-| `DELTA:REMOVED` | Delete scenario with same name |
-
-After each merge:
-1. Strip all `<!-- DELTA:* -->` markers
-2. Validate: `speq feature validate <domain>/<feature>`
-
-### Phase 4: Optimize Library
-
-Check thresholds after merging:
-
-| Metric | Threshold | Action |
-|--------|-----------|--------|
-| Scenarios per spec | >10 | Ask user about split |
-| Domain features | >8 | Ask about sub-domains |
-
-**Never assume** — use `AskUserQuestion` for organization decisions.
-
-### Phase 5: Finalize
-
-1. Validate: `speq feature validate`
-2. Archive: `mv specs/_plans/<plan-name> specs/_recorded/YYYY-MM-DD-<plan-name>`
+Report to user:
 
 ```
 ✓ Verification report confirmed
 ✓ All deltas merged
 ✓ Spec library validated
-✓ Plan archived
+✓ Plan archived: specs/_recorded/YYYY-MM-DD-<plan-name>
 ```
+
+## Work Split (reference)
+
+| Step | Performed by | Why |
+|------|--------------|-----|
+| Precondition checks, user questions | This skill (inherits parent session) | Lightweight orchestration |
+| Delta merge, validation, archive | `recorder-agent` sub-agent | Mechanical file surgery |
+
+Keeping orchestrator and sub-agent separate preserves the rotation discipline: if the spec library is very large, the sub-agent can be re-spawned with a fresh context without losing orchestration state.
 
 ## Anti-Patterns
 
 | Pattern | Why Wrong |
 |---------|-----------|
 | Record without verification report | Implementation not proven |
+| Orchestrator merges directly | Breaks rotation / context discipline |
 | Assume split/domain decisions | User must confirm |
 | Skip validation | Broken specs may result |
 | Leave DELTA markers | Pollutes permanent specs |

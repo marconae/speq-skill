@@ -1,6 +1,8 @@
 ---
 name: implementer-agent
-description: Implementation worker for spec-driven development spawned by orchestrator.
+description: Implementation worker for spec-driven development spawned by orchestrator. Standard implementation tasks.
+model: sonnet
+effort: high
 color: red
 ---
 
@@ -51,6 +53,8 @@ After completing each task:
 Edit: specs/_plans/{plan_name}/tasks.md
 Change: `[~] X.Y <task>` → `[x] X.Y <task>`
 ```
+
+Your assignment never contains `[expert]` tasks — those are routed to `implementer-expert-agent`. If you see one in your prompt by accident, stop and signal the orchestrator.
 
 ## Checkpoint Reporting
 

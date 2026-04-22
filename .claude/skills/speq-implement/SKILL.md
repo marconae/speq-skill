@@ -3,9 +3,17 @@ name: speq-implement
 description: "Orchestrate implementation of reviewed plans according to the spec deltas. Arg: <plan-name>."
 ---
 
-# Spec Implementer
+# Spec Implementer (Orchestrator)
 
 Orchestrate implementation of plans in `specs/_plans/<plan-name>`.
+
+Orchestration (reading tasks.md, dispatching sub-agents, verifying results) is tool-call heavy but not reasoning-heavy. The sub-agents do the heavy lifting — each pins its own model and effort in its frontmatter:
+
+| Sub-agent | When used |
+|-----------|-----------|
+| `implementer-agent` | Standard tasks (default) |
+| `implementer-expert-agent` | Tasks tagged `[expert]` in tasks.md |
+| `code-reviewer` | Final review of all changed files |
 
 Get plan name from user prompt or ask if none specified.
 
@@ -17,7 +25,7 @@ Invoke before starting:
 - `/speq-code-guardrails` — TDD cycle and quality standards
 - `/speq-cli` — spec discovery
 
-Subagents must also invoke these skills plus `/speq-git-discipline`.
+Subagents (`implementer-agent`, `implementer-expert-agent`, `code-reviewer`) must also invoke their required skills.
 
 ## Orchestrator Role
 
@@ -67,7 +75,7 @@ Decompose the plan into a **Work Breakdown Structure** in `specs/_plans/<plan-na
 
 ## Phase 2: Implementation (Group A)
 - [ ] 2.1 <task from plan>
-- [ ] 2.2 <task from plan>
+- [ ] 2.2 <task from plan> [expert]
 
 ## Phase 2: Implementation (Group B)
 - [ ] 2.3 <task from plan>
@@ -82,6 +90,12 @@ Decompose the plan into a **Work Breakdown Structure** in `specs/_plans/<plan-na
 - `[~]` started
 - `[x]` completed
 
+**Difficulty tags:**
+- `[expert]` — tagged by `planner-agent` during planning. Routes the task to `implementer-expert-agent`. Preserve the tag through every status transition.
+- untagged — routed to `implementer-agent`. Most tasks are untagged.
+
+If the plan did not tag any tasks but you encounter a task that clearly warrants expert reasoning (e.g. concurrency, cross-file refactor, novel algorithm), you MAY add `[expert]` when materializing tasks.md. Do this sparingly — over-tagging wastes tokens.
+
 Also create runtime tasks:
 ```
 For each task in tasks.md:
@@ -92,31 +106,57 @@ For each task in tasks.md:
 
 For each parallel group in plan's `## Parallelization`:
 
-1. **Mark started** — Update tasks.md: `[ ]` → `[~]`
-2. **Spawn subagent** — Use `implementer-agent` agent
-3. **Await completion** — Sub-agent returns with results or rotation signal
-4. **Handle rotation** — If sub-agent signals rotation, spawn fresh agent
-5. **Mark completed** — Update tasks.md: `[~]` → `[x]` for completed tasks
-6. **Update TaskTools** — `TaskUpdate(taskId, status: "completed")`
-7. **Next group** — Proceed to next parallel group
+1. **Partition tasks by tag** — Split the group into `expert_tasks` (tagged `[expert]`) and `standard_tasks` (untagged)
+2. **Mark started** — Update tasks.md: `[ ]` → `[~]`
+3. **Spawn subagent(s)** — Route by tag:
+   - Standard tasks → `implementer-agent`
+   - Expert tasks → `implementer-expert-agent`
+   - Spawn in parallel when both exist and they touch disjoint files; otherwise sequence expert first (they often set up invariants the standard tasks rely on)
+4. **Await completion** — Each sub-agent returns with results or rotation signal
+5. **Handle rotation** — If a sub-agent signals rotation, spawn fresh agent of the SAME type with remaining tasks of that tag
+6. **Mark completed** — Update tasks.md: `[~]` → `[x]` (preserve `[expert]` tag)
+7. **Update TaskTools** — `TaskUpdate(taskId, status: "completed")`
+8. **Next group** — Proceed to next parallel group
 
-**Subagent invocation:**
+**Standard subagent invocation:**
 
 ```python
 Task(
   subagent_type="implementer-agent",
-  description="Implement <group-name> tasks",
+  description="Implement <group-name> standard tasks",
   prompt="""
-## Your Tasks
+## Your Tasks (standard)
 
-{task_list}
+{standard_task_list}
 
 ## Context
 
 - Plan: specs/_plans/{plan_name}/plan.md
 - Tasks file: specs/_plans/{plan_name}/tasks.md
-- Update tasks.md after each task completion
+- Update tasks.md after each task completion (preserve task numbering)
 - Report checkpoint after every 2-3 tasks
+"""
+)
+```
+
+**Expert subagent invocation:**
+
+```python
+Task(
+  subagent_type="implementer-expert-agent",
+  description="Implement <group-name> expert tasks",
+  prompt="""
+## Your Tasks (expert — reasoning-heavy)
+
+{expert_task_list}
+
+## Context
+
+- Plan: specs/_plans/{plan_name}/plan.md
+- Tasks file: specs/_plans/{plan_name}/tasks.md
+- Preserve the [expert] tag when updating status markers
+- Checkpoint after every 1-2 tasks (expert tasks are heavier)
+- Report key reasoning / invariants applied
 """
 )
 ```
@@ -145,8 +185,8 @@ After implementation completes, review all changed files.
    )
    ```
 3. **Process findings** — If findings exist:
-   - Create fix tasks in `tasks.md`
-   - Spawn `implementer-agent` with fix tasks
+   - Create fix tasks in `tasks.md` (tag `[expert]` when the finding involves subtle correctness, concurrency, or cross-file reasoning)
+   - Route fix tasks by tag: `implementer-agent` for untagged, `implementer-expert-agent` for `[expert]`
 4. **Proceed to verification** — Phase 5 verifies all tests pass
 
 ### Phase 5: Verification
