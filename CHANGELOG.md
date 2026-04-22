@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Split `speq-plan` and `speq-record` into thin orchestrators; heavy work now runs in dedicated sub-agents (`planner-agent`, `recorder-agent`)
+- Add `implementer-expert-agent` sub-agent for reasoning-heavy tasks tagged `[expert]` in `tasks.md`; `speq-implement` partitions tasks by tag and routes accordingly
+- Pin `model` and `effort` per sub-agent in frontmatter (opus/xhigh for planning, expert implementation, and review; sonnet/high for standard implementation; sonnet/medium for recording)
+- Document model routing strategy in CLAUDE.md
+
 ## 0.2.9
 
 - Reject mismatched and unclosed delta markers during record parsing
