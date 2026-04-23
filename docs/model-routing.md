@@ -49,7 +49,7 @@ Two layers do the actual work:
 
 > Orchestration is cheap. Reasoning is expensive.
 
-Spec authoring, implementation, and adversarial code review are the steps where a wrong choices accumulate in bad results downstream. This is why these staps pin the reasoning-heavy tier. More mechanical steps, e.g. applying delta markers, or recording, do not and thus are pinned with ligher and faster models.
+Spec authoring, implementation, and adversarial code review are the steps where a wrong choices accumulate in bad results downstream. This is why these steps pin the reasoning-heavy tier. More mechanical steps, e.g. applying delta markers, or recording, do not and thus are pinned with ligher and faster models.
 
 This matches Anthropic's published orchestrator/worker pattern: a lean coordinator delegating to specialist workers. See [Building effective agents](https://www.anthropic.com/research/building-effective-agents) and [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system).
 
