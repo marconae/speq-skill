@@ -1,63 +1,47 @@
 ---
 name: speq-plan
 description: Plan and create spec deltas for new features or changes to existing features.
+model: sonnet
 ---
 
-# Spec Planner
+# Spec Planner (Orchestrator)
 
-Create and manage feature specification deltas. Deltas are recorded to permanent specs via `/speq-record`.
+This skill is a **thin orchestrator**. It conducts the clarifying interview, collects context, and then delegates the heavy planning work (spec delta authoring, test mapping, task decomposition) to the `planner-agent` sub-agent.
 
-## Required Skills
+**Why this split:** Orchestration (asking questions, reading a few files, shepherding the workflow) does not need expensive reasoning. The actual planning — architectural tradeoffs, MECE decomposition, ADR authoring — does. Splitting the work concentrates reasoning on the step that benefits from it.
+
+## Required Skills (for the orchestrator)
 
 Invoke before starting:
-- `/speq-code-tools` — Codebase exploration
-- `/speq-ext-research` — API docs and design research
 - `/speq-cli` — Spec discovery and search
 
-## Guiding Principles
-
-**BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN steps; integration tests default, unit tests for isolated pure computation only
+The `planner-agent` sub-agent invokes `/speq-code-tools`, `/speq-ext-research`, and `/speq-cli` itself.
 
 ## Workflow
 
-### 1. Discovery
+### 1. Discovery (orchestrator)
 
-Use speq CLI to explore existing specs:
+Use speq CLI to understand what exists:
 
 ```bash
-# Browse structure
-speq domain list                    # List domains
-speq feature list                   # Tree view of all features
-speq feature list <domain>          # Features in domain
-
-# Semantic search (find related specs)
-speq search query "error handling"  # Find scenarios about errors
-speq search query "validation"      # Find validation-related specs
-
-# Get specific content
-speq feature get cli/validate                        # Full feature spec
-speq feature get "cli/validate/Validation fails"    # Single scenario
+speq domain list
+speq feature list
+speq search query "<relevant terms>"
 ```
 
-**Search first** when modifying behavior — find related scenarios to understand scope.
+This is lightweight — enough context to ask good clarifying questions, not a full exploration.
 
-### 2. Research
+### 2. Clarifying Interview (orchestrator)
 
-Invoke `/speq-ext-research` and conduct research for:
-- External libraries and APIs
-- Design patterns and architecture
-
-### 3. Clarifying Interview
-
-Apply the **Socratic Method** via `AskUserQuestion` — never assume. Decompose the problem space using **MECE partitioning** (mutually exclusive, collectively exhaustive):
+Apply the **Socratic Method** via `AskUserQuestion` — never assume. Decompose the problem space using **MECE partitioning**:
 
 - **Probe** — surface hidden assumptions with open-ended questions
 - **Partition** — present alternative solutions as MECE options
 - **Challenge** — test design tradeoffs through guided counterexamples
 
-### 4. Planning
+Record answers in a concise interview summary to pass to the sub-agent.
 
-#### 4.1 Plan Name
+### 3. Plan Name (orchestrator)
 
 Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 
@@ -69,99 +53,57 @@ Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 | `refactor` | Restructure, same behavior |
 | `fix` | Bug or spec mismatch |
 
-#### 4.2 Spec Deltas
+### 4. Delegate to planner-agent
 
-```
-specs/<domain>/<feature>/spec.md exists?
-├─ Yes → DELTA markers (references/delta-template.md)
-└─ No  → Full spec (references/feature-template.md)
+Spawn the planner sub-agent with everything it needs:
 
-Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
-```
+```python
+Task(
+  subagent_type="planner-agent",
+  description="Plan <plan-name>",
+  prompt="""
+## Plan Name
+<plan-name>
 
-Spec narratives follow **EARS syntax** (Easy Approach to Requirements Syntax) for unambiguous behavioral clauses.
+## User Intent
+<1-3 sentence summary of what the user wants>
 
-#### 4.3 Test Mapping and Verification
+## Clarifying Interview Results
+<verbatim Q&A from the AskUserQuestion exchanges>
 
-Every scenario requires two forms of external proof. No claims — only evidence.
+## Existing Context
+<output of relevant `speq search` / `speq feature get` calls>
 
-**Integration tests** (mandatory per scenario):
-- Map each scenario → integration test (file path + test name)
-- Integration tests run outside the SUT and form a regression harness for future changes
-- One test per scenario by default; combine only when scenarios share setup and assertions
-- Unit tests: only for pure computation with no I/O
+## External Research
+<any research already conducted, or "none — agent to research as needed">
 
-**Manual invocation** (mandatory per feature):
-- Plan concrete commands that invoke the built software
-- Define expected observable output for each command
-- Manual steps confirm end-to-end behavior beyond automated tests
+## Your Task
+Produce spec deltas and plan.md per the `planner-agent` workflow. Tag tasks
+requiring deep reasoning with [expert] so the implementer orchestrator can
+route them to implementer-expert-agent.
 
-**Output:** Populate `## Verification` in plan.md per `references/plan-template.md`:
-1. **Scenario Coverage** — every scenario → test location + test name (no gaps)
-2. **Manual Testing** — every feature → invocation command with expected output
-3. **Checklist** — build/test/lint/format commands from `specs/mission.md`
-
-A feature is incomplete until every scenario has a mapped integration test and every feature has manual test steps.
-
-#### 4.4 Design Section
-
-For new features/major changes, add `## Design` to plan.md structured as an **ADR (Nygard format)**:
-- Goals / Non-Goals
-- Architecture
-- Trade-offs
-- Key Interfaces
-
-Skip for minor fixes.
-
-#### 4.5 Generate plan.md
-
-1. Read `specs/mission.md` for commands and tech stack
-2. Use `references/plan-template.md` as structure guide
-3. Generate concrete content (no template placeholders)
-
-**Critical:** plan.md SHALL only **reference** spec delta files, never embed their content.
-
-```markdown
-## Features
-
-| Feature | Status | Spec |
-|---------|--------|------|
-| Plan validation | NEW | `cli/plan-validate/spec.md` |
-| Keyword casing | CHANGED | `validation/keyword-casing/spec.md` |
+Return the list of files created and the validation result.
+"""
+)
 ```
 
-The actual spec content lives in `specs/_plans/<plan-name>/<domain>/<feature>/spec.md` files.
+### 5. Review planner-agent output (orchestrator)
 
-### 5. Validate Plan
+When the sub-agent returns:
 
-Run CLI validation before exiting:
+1. Confirm `speq plan validate <plan-name>` passed (re-run if uncertain)
+2. List all created files
+3. If the sub-agent escalated a question back to you, resolve it with the user and respawn with the clarification
 
-```bash
-speq plan validate <plan-name>
-```
+### 6. Explain next steps (orchestrator)
 
-**Validation checks:**
-- Plan directory exists (`specs/_plans/<plan-name>/`)
-- `plan.md` is present
-- Delta markers are properly formatted (CHANGED, NEW, REMOVED blocks closed)
-- Spec syntax is valid (RFC 2119 keywords, step formatting)
+- Inform the user that the plan is created and ready for review
+- List all created files
+- Inform the user to call `/speq-implement <plan-name>` to continue
+- Inform the user to call `/clear` to start implementing with a fresh context window
+- If Claude Code is in "plan mode", call `ExitPlanMode` and ask to proceed with cleared context
 
-**On failure:** Fix issues before proceeding. Common fixes:
-- Close unclosed delta markers with `<!-- /CHANGED -->`, `<!-- /NEW -->`, `<!-- /REMOVED -->`
-- Uppercase RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
-- Fix step formatting (bold keywords with `*GIVEN*`, `*WHEN*`, `*THEN*`, `*AND*`)
-
-**On warnings:** Review and fix if appropriate. Warnings don't block but indicate style issues.
-
-### 6. Explain next steps
-
-* Inform the user that the plan is created and ready for review
-* List all created files in the plan.
-* Inform the user to call `/speq-implement <plan-name>` to continue.
-* Inform the user to call `/clear` to start implementing with a fresh context window.
-* If in Claude Code is in "plan mode" then call `ExitPlanMode` and ask to proceed with cleared context.
-
-## Spec Hierarchy
+## Spec Hierarchy (reference)
 
 ```
 specs/
@@ -170,7 +112,11 @@ specs/
 └── _recorded/<plan-name>/         # Archived
 ```
 
-## RFC 2119 Keywords
+## Work Split (reference)
 
-THEN steps use: `MUST`, `MUST NOT`, `SHALL`, `SHALL NOT`, `SHOULD`, `SHOULD NOT`, `MAY`
+| Step | Performed by | Why |
+|------|--------------|-----|
+| Discovery, interview, coordination | This skill (pins Sonnet) | Conversational, tool-call heavy |
+| Spec delta authoring, ADR, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; defect here compounds through implementation |
 
+The sub-agent pins its own model and effort in its frontmatter, so planning quality is independent of the parent session's configuration.

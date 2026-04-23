@@ -182,7 +182,7 @@ main() {
     log_info "To test: claude --plugin-dir $PLUGIN_DIR"
     log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission"
     log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:cli"
-    log_info "Agents: implementer-agent, code-reviewer"
+    log_info "Agents: implementer-agent, implementer-expert-agent, code-reviewer, planner-agent, recorder-agent"
     log_info "Marketplace structure built at: $MARKETPLACE_DIR"
 }
 
