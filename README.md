@@ -104,6 +104,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
 | [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
+| [Model Routing](./docs/model-routing.md) | How workflow skills and sub-agents are routed across models |
 
 ---
 
