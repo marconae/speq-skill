@@ -48,7 +48,7 @@ The build script (`scripts/plugin/build.sh`):
 
 ## Model Routing Strategy
 
-Each sub-agent declares its model and effort in frontmatter (e.g. `model: opus`, `effort: xhigh`). Skills do not — they inherit the parent session's context and run alongside whatever invoked them.
+Each sub-agent declares its model and effort in frontmatter (e.g. `model: opus`, `effort: xhigh`). Orchestrator workflow skills (`speq-plan`, `speq-implement`, `speq-record`) pin `model: sonnet` so orchestration stays cheap regardless of the session's `/model` selection. Utility skills and `speq-mission` leave the field unset and inherit the model of whatever context invoked them.
 
 ### Principle
 

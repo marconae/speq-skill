@@ -1,6 +1,7 @@
 ---
 name: speq-implement
 description: "Orchestrate implementation of reviewed plans according to the spec deltas. Arg: <plan-name>."
+model: sonnet
 ---
 
 # Spec Implementer (Orchestrator)

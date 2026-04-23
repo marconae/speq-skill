@@ -4,9 +4,7 @@
 
 # Model Routing
 
-speq-skill routes work between a main session, workflow skills, and specialist sub-agents. The routing is designed so that expensive reasoning is applied only where defects compound, while mechanical and conversational work stays in cheaper tiers.
-
-This guide explains the architecture and the conventions the plugin uses. It is grounded in the current [Claude Code sub-agents documentation](https://docs.claude.com/en/docs/claude-code/sub-agents).
+speq-skill routes work between a main session, workflow skills, and dedicated specialist sub-agents. The routing is designed so that expensive reasoning is applied only where it is required. This guide explains the architecture and the conventions the plugin uses. It is grounded in the current [Claude Code sub-agents documentation](https://docs.claude.com/en/docs/claude-code/sub-agents).
 
 ---
 
@@ -18,16 +16,16 @@ User prompt
    ▼
 ┌──────────────────────────────┐
 │  Main session                │  runs in the configured model
-│  (invokes a workflow skill)  │  recommended: Sonnet
+│  (invokes a workflow skill)  │
 └──────────────┬───────────────┘
                │
                ▼
-┌──────────────────────────────┐
-│  Workflow skill (orchestrator)│  inherits the session's model
-│  /speq:plan                  │
-│  /speq:implement             │
-│  /speq:record                │
-└──────────────┬───────────────┘
+┌───────────────────────────────┐
+│  Workflow skill (orchestrator)│  pins Sonnet in frontmatter,
+│  /speq:plan                   │  overriding the session model
+│  /speq:implement              │  while the skill is active
+│  /speq:record                 │
+└──────────────┬────────────────┘
                │ spawns
                ▼
 ┌──────────────────────────────┐
@@ -49,25 +47,23 @@ Two layers do the actual work:
 
 ## Guiding Principle
 
-> Orchestration is cheap. Reasoning is expensive. Put the expensive tier only where defects compound.
+> Orchestration is cheap. Reasoning is expensive.
 
-Spec authoring, expert implementation, and adversarial code review are the steps where a flawed choice reverberates through every downstream task. These pin the reasoning-heavy tier. Mechanical steps — applying delta markers, archiving — do not.
+Spec authoring, implementation, and adversarial code review are the steps where a wrong choices accumulate in bad results downstream. This is why these staps pin the reasoning-heavy tier. More mechanical steps, e.g. applying delta markers, or recording, do not and thus are pinned with ligher and faster models.
 
 This matches Anthropic's published orchestrator/worker pattern: a lean coordinator delegating to specialist workers. See [Building effective agents](https://www.anthropic.com/research/building-effective-agents) and [How we built our multi-agent research system](https://www.anthropic.com/engineering/multi-agent-research-system).
 
 ---
 
-## Skills and the Configured Model
+## Skills and Model Pinning
 
-Workflow skills run inside the main session and use whatever model the session is configured with. In the default plugin they do not pin their own model in frontmatter, so the skill behavior follows the session's `/model` selection.
+Claude Code lets a skill's frontmatter pin `model:` and `effort:`; the pin overrides the session's setting for the duration of the skill and then reverts. speq-skill uses this so orchestration is cheap and predictable regardless of which model the user has selected for their session.
 
-**Recommendation:** run the main Claude Code session on **Sonnet** when using `/speq:plan`, `/speq:implement`, or `/speq:record`.
+- **Orchestrator skills** (`/speq:plan`, `/speq:implement`, `/speq:record`) pin `model: sonnet` in frontmatter. Orchestration is tool-call heavy and reasoning-light — reading tasks.md, partitioning task groups, and spawning sub-agents does not benefit from a premium tier.
+- **Utility skills** (`/speq:code-tools`, `/speq:cli`, `/speq:git-discipline`, `/speq:ext-research`, `/speq:code-guardrails`) do not pin a model. They are reference material injected into the calling context and inherit the model of whatever skill or agent invoked them.
+- **Sub-agents** pin their own model and effort in frontmatter, so planning, expert implementation, and review run on the reasoning-heavy tier regardless of the orchestrator's model. The session choice does not affect output quality of those steps.
 
-- Orchestration is tool-call heavy and reasoning-light — reading tasks.md, partitioning groups, and spawning sub-agents does not benefit from a premium tier.
-- Sub-agents pin their own model in frontmatter, so planning, expert implementation, and review still run on the reasoning-heavy tier regardless of the session's model. The session choice only affects orchestrator cost, not output quality.
-- Utility skills (`/speq:code-tools`, `/speq:cli`, `/speq:git-discipline`, `/speq:ext-research`, `/speq:code-guardrails`) are reference material injected into the calling context. They inherit the model of whatever skill or agent invoked them.
-
-> Claude Code does support `model:` and `effort:` fields in skill frontmatter (they override the session setting while the skill is active). speq-skill intentionally does not pin them, so users stay in control of the orchestrator tier via `/model`.
+The user's `/model` selection therefore controls only the thin layer outside of speq-skill — the main session prompt before a workflow skill takes over, and any follow-up after. Cost and quality inside the speq workflow are determined by the pins in the skill and sub-agent frontmatter.
 
 ---
 
@@ -149,8 +145,8 @@ See the Claude Code [sub-agent docs](https://docs.claude.com/en/docs/claude-code
 
 ## Summary
 
-- The main session runs in the **configured model**; Sonnet is recommended for orchestration.
-- Workflow skills are orchestrators — they do not author specs or write code directly.
+- Orchestrator workflow skills (`/speq:plan`, `/speq:implement`, `/speq:record`) pin `model: sonnet` so orchestration is cheap regardless of the session's `/model` selection.
+- Workflow skills do not author specs or write code directly — they delegate to specialist sub-agents.
 - Sub-agents pin their own `model` and `effort` in frontmatter and run in isolated context windows.
 - `[expert]` tags in `tasks.md` route individual tasks to `implementer-expert-agent` instead of `implementer-agent`.
-- Actual model and effort values live next to the sub-agent definitions in `.claude/agents/*.md` so the framework is insulated from model-version churn.
+- Actual model and effort values live next to the skill and sub-agent definitions in `.claude/` so the framework is insulated from model-version churn.

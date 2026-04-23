@@ -1,6 +1,7 @@
 ---
 name: speq-record
 description: Merge implemented spec deltas into permanent specs library.
+model: sonnet
 ---
 
 # Spec Recorder (Orchestrator)
@@ -79,7 +80,7 @@ Report to user:
 
 | Step | Performed by | Why |
 |------|--------------|-----|
-| Precondition checks, user questions | This skill (inherits parent session) | Lightweight orchestration |
+| Precondition checks, user questions | This skill (pins Sonnet) | Lightweight orchestration |
 | Delta merge, validation, archive | `recorder-agent` sub-agent | Mechanical file surgery |
 
 Keeping orchestrator and sub-agent separate preserves the rotation discipline: if the spec library is very large, the sub-agent can be re-spawned with a fresh context without losing orchestration state.

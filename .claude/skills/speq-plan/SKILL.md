@@ -1,6 +1,7 @@
 ---
 name: speq-plan
 description: Plan and create spec deltas for new features or changes to existing features.
+model: sonnet
 ---
 
 # Spec Planner (Orchestrator)
@@ -115,7 +116,7 @@ specs/
 
 | Step | Performed by | Why |
 |------|--------------|-----|
-| Discovery, interview, coordination | This skill (inherits parent session) | Conversational, tool-call heavy |
+| Discovery, interview, coordination | This skill (pins Sonnet) | Conversational, tool-call heavy |
 | Spec delta authoring, ADR, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; defect here compounds through implementation |
 
 The sub-agent pins its own model and effort in its frontmatter, so planning quality is independent of the parent session's configuration.
