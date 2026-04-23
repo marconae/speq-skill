@@ -133,11 +133,12 @@ After `/speq:plan` to implement a plan:
 ### What It Does
 
 1. Loads the plan and creates a task breakdown
-2. Spawns sub-agents to work through tasks (with context rotation)
-3. Loads targeted guardrails for clean code, unit testing and integration testing
-4. Runs code review on changed files
-5. Executes build, test, and lint verification
-6. Generates a verification report
+2. Partitions tasks by tag — `[expert]`-tagged tasks route to `implementer-expert-agent`, all others to `implementer-agent` (see [Model Routing](./model-routing.md))
+3. Spawns sub-agents to work through tasks (with context rotation)
+4. Loads targeted guardrails for clean code, unit testing and integration testing
+5. Runs code review on changed files via `code-reviewer`
+6. Executes build, test, and lint verification
+7. Generates a verification report
 
 ---
 
