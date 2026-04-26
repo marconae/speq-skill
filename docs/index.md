@@ -11,6 +11,7 @@
 | [Installation](./installation.md)   | Setup CLI and plugin                                         |
 | [Workflow](./workflow.md)           | One-time mission setup, then Plan → Implement → Record cycle |
 | [Spec Library](./spec-library.md) | Spec format, BDD, and RFC keywords                           |
+| [Decision Log](./decision-log.md)   | Design decisions, ADR format, and validation                 |
 | [Model Routing](./model-routing.md) | Orchestrator skills, specialist sub-agents, and effort tiers |
 | [CLI Reference](./cli-reference.md) | All CLI commands                                             |
 | [MCP Servers](./mcp-servers.md)     | Pre-configured MCPs: Serena and Context7                     |
