@@ -71,7 +71,32 @@ After merges, check for organization signals:
 
 **Never assume** — library reorganization is a user decision. Signal back to the orchestrator with a concrete question.
 
-### 4. Finalize
+### 4. Promote ADRs to Permanent Decision Log
+
+Read `specs/_plans/<plan-name>/decision-log.md` (if it exists).
+
+For each entry where `Promotes to ADR: yes`:
+
+1. Convert to ADR format using `references/decision-log-permanent-template.md`:
+   - **Title** — from the decision entry heading
+   - **Date** — from the plan's decision-log Date field
+   - **Plan** — `<plan-name>`
+   - **Status** — `Accepted`
+   - **Context** — synthesized from the entry's Rationale + Alternatives
+   - **Decision** — from the entry's Decision bullet
+   - **Options Considered** — from the entry's Alternatives bullet
+   - **Consequences** — brief inference from Rationale
+
+2. Append to `specs/decision-log.md` as the next sequential `## ADR-NNN:` entry:
+   - If the file doesn't exist, create it with the header from `decision-log-permanent-template.md`
+   - Never renumber existing ADRs; always append
+   - Determine next ADR number by counting existing `## ADR-` headings
+
+3. Validate: `speq decision-log validate` (once CLI feature exists; skip if command not available)
+
+If `decision-log.md` is absent or has no "Promotes to ADR: yes" entries, skip silently.
+
+### 5. Finalize
 
 1. Final validation: `speq feature validate`
 2. Archive: `mv specs/_plans/<plan-name> specs/_recorded/YYYY-MM-DD-<plan-name>`
@@ -85,6 +110,11 @@ Recording complete: <plan-name>
 
 Merged features:
 - <domain>/<feature> (NEW / CHANGED / REMOVED scenarios: X / Y / Z)
+
+Decision log:
+- ADRs promoted: N (ADR-NNN through ADR-MMM)
+  OR
+- No ADRs promoted
 
 Validation: pass
 Archive: specs/_recorded/YYYY-MM-DD-<plan-name>
