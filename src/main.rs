@@ -13,6 +13,7 @@ fn main() -> ExitCode {
         cli::Commands::Plan { command } => handle_plan_command(command),
         cli::Commands::Record { plan_name } => handle_record_command(&plan_name),
         cli::Commands::Search { command } => handle_search_command(command),
+        cli::Commands::DecisionLog { command } => handle_decision_log_command(command),
     }
 }
 
@@ -105,6 +106,9 @@ fn handle_plan_command(command: cli::PlanCommands) -> ExitCode {
                     }
 
                     print_spec_warnings(&result.spec_validation_warnings);
+                    for warn in &result.decision_log_warnings {
+                        println!("  WARN (decision-log.md): {}", warn);
+                    }
                     ExitCode::SUCCESS
                 } else {
                     println!("Plan '{}' validation failed:", plan_name);
@@ -322,6 +326,37 @@ fn print_validation_results(
         ExitCode::from(1)
     } else {
         ExitCode::SUCCESS
+    }
+}
+
+fn handle_decision_log_command(command: cli::DecisionLogCommands) -> ExitCode {
+    let log_path = PathBuf::from("specs/decision-log.md");
+    match command {
+        cli::DecisionLogCommands::Validate => match std::fs::read_to_string(&log_path) {
+            Err(_) => {
+                println!("Error: decision-log.md not found at {}", log_path.display());
+                ExitCode::from(1)
+            }
+            Ok(content) => {
+                let result = validate::decision_log::validate_permanent_log(&content);
+                if result.is_success() {
+                    println!("Permanent decision log validation passed.");
+                    for warn in &result.warnings {
+                        println!("  WARN: {}", warn);
+                    }
+                    ExitCode::SUCCESS
+                } else {
+                    println!("Permanent decision log validation failed:");
+                    for error in &result.errors {
+                        println!("  ERROR: {}", error);
+                    }
+                    for warn in &result.warnings {
+                        println!("  WARN: {}", warn);
+                    }
+                    ExitCode::from(1)
+                }
+            }
+        },
     }
 }
 

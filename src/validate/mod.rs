@@ -1,3 +1,4 @@
+pub mod decision_log;
 pub mod parser;
 pub mod report;
 pub mod rules;

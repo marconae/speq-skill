@@ -48,6 +48,7 @@ pub struct PlanValidationResult {
     pub spec_paths: Vec<String>,
     pub spec_validation_errors: Vec<SpecValidationResult>,
     pub spec_validation_warnings: Vec<SpecValidationResult>,
+    pub decision_log_warnings: Vec<String>,
 }
 
 impl PlanValidationResult {
@@ -154,6 +155,23 @@ pub fn validate_plan(
         if let Ok(validation_result) = validate::run(spec_path) {
             result.distribute_spec_validation_result(relative_path, validation_result);
         }
+    }
+
+    // Check for optional decision log
+    let decision_log_path = plan_dir.join("decision-log.md");
+    if decision_log_path.exists() {
+        let content = std::fs::read_to_string(&decision_log_path).map_err(|_| {
+            PlanValidationError::FileReadError {
+                path: decision_log_path.display().to_string(),
+            }
+        })?;
+        let log_result = validate::decision_log::validate_plan_log(&content, plan_name);
+        for error in log_result.errors {
+            result.add_error(format!("decision-log.md: {}", error));
+        }
+        result
+            .decision_log_warnings
+            .extend(log_result.warnings.into_iter().map(|w| w.to_string()));
     }
 
     Ok(result)
