@@ -40,6 +40,18 @@ pub enum Commands {
         #[command(subcommand)]
         command: SearchCommands,
     },
+
+    /// Validate the permanent decision log
+    DecisionLog {
+        #[command(subcommand)]
+        command: DecisionLogCommands,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum DecisionLogCommands {
+    /// Validate the permanent decision log at specs/decision-log.md
+    Validate,
 }
 
 #[derive(Subcommand)]

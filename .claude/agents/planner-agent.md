@@ -87,7 +87,23 @@ Populate plan.md per `references/plan-template.md`:
 5. **Parallelization** — groups of tasks that can run concurrently
 6. **Verification** — Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
 
-### 5. Expert-Task Tagging (CRITICAL)
+### 5. Generate decision-log.md
+
+Create `specs/_plans/<plan-name>/decision-log.md` from `references/decision-log-plan-template.md`.
+
+**What to capture:**
+- **Interview section** — verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
+- **Design Decisions section** — one entry per significant choice made while authoring spec deltas or plan.md (architecture patterns, rejected alternatives, scope boundaries)
+- **Review Findings section** — leave empty; populated by `speq-implement` after code review
+
+**For each decision entry**, set `Promotes to ADR: yes` when the decision is:
+- An architectural or workflow pattern adopted project-wide
+- A deliberate rejection of a commonly expected approach
+- A constraint that future planners need to know to avoid re-litigating
+
+Set `Promotes to ADR: no` for local design choices, scope trims, and implementation details.
+
+### 6. Expert-Task Tagging (CRITICAL)
 
 As you decompose the plan into tasks, identify tasks that require deep reasoning. Tag them with `[expert]` at the end of the task line:
 
@@ -133,6 +149,7 @@ Plan created: <plan-name>
 
 Files:
 - specs/_plans/<plan-name>/plan.md
+- specs/_plans/<plan-name>/decision-log.md
 - specs/_plans/<plan-name>/<domain>/<feature>/spec.md (one per feature)
 
 Task summary:

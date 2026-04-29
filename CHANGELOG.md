@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.1
+
+- New `speq decision-log validate` command — validates `specs/decision-log.md` against ADR/Nygard format (sequential numbering, required fields, Status values)
+- `speq plan validate` now validates optional `decision-log.md` in plan directories; absence is not an error
+- New `src/validate/decision_log.rs` module with `validate_plan_log` and `validate_permanent_log`
+- `planner-agent` generates `decision-log.md` capturing design decisions; `recorder-agent` promotes curated entries to permanent ADR log
+
 ## 0.3.0
 
 - Split `speq-plan` and `speq-record` into thin orchestrators; heavy work now runs in dedicated sub-agents (`planner-agent`, `recorder-agent`)

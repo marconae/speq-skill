@@ -19,6 +19,7 @@ speq <command> [subcommand] [options]
 | `domain` | List and explore spec domains |
 | `feature` | List, get, and validate feature specs |
 | `plan` | List and validate implementation plans |
+| `decision-log` | Validate the permanent decision log |
 | `record` | Merge plan deltas into permanent specs |
 | `search` | Semantic search across scenarios |
 
@@ -141,6 +142,30 @@ Validates:
 - `plan.md` is present
 - Delta markers properly formatted
 - Spec syntax is valid
+- `decision-log.md` structure, if the file is present (absence is not an error)
+
+---
+
+## Decision Log Commands
+
+### `speq decision-log validate`
+
+Validate the permanent decision log at `specs/decision-log.md`.
+
+```bash
+speq decision-log validate
+```
+
+Validates:
+- File exists (exits non-zero with an error message if absent)
+- H1 is `# Architecture Decision Records`
+- ADR headings follow `## ADR-NNN: <Title>` — sequential, no gaps, starting at `ADR-001`
+- Each ADR contains all required fields: `**Date:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`
+- `**Status:**` is one of: `Accepted`, `Superseded by ADR-NNN`, `Deprecated`
+
+`### Options Considered` and `### Consequences` are optional and do not trigger errors when absent.
+
+See [Decision Log](./decision-log.md) for the full format reference.
 
 ---
 

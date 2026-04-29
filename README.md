@@ -101,6 +101,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 |-------|-------------|
 | [Installation](./docs/installation.md) | Setup CLI and plugin |
 | [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
+| [Decision Log](./docs/decision-log.md) | Design decisions, ADR format, and validation |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
 | [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
