@@ -1,0 +1,20 @@
+{
+  "name": "speq-skill-local",
+  "interface": {
+    "displayName": "speq-skill"
+  },
+  "plugins": [
+    {
+      "name": "speq-skill",
+      "source": {
+        "source": "local",
+        "path": "./plugins/speq-skill"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Development"
+    }
+  ]
+}

@@ -1,6 +1,8 @@
 # Project
 Read @CLAUDE.md
 
+@CLAUDE.md contains the shared local development rules for both Claude Code and Codex contributors.
+
 # Commit Conventions
 
 The commit message SHALL be structured like this:

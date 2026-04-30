@@ -6,7 +6,7 @@ You are **building speq-skill while using it**.
 
 `.claude/skills/` contains skills that serve two roles:
 1. **Development usage** — Used directly when working on this repo
-2. **Plugin source** — Transformed by `scripts/plugin/build.sh` into distributable `dist/plugin/`
+2. **Shared plugin source** — Transformed by `scripts/plugin/build.sh` into Claude and Codex plugin artifacts
 
 ### Directory Structure
 
@@ -33,22 +33,37 @@ You are **building speq-skill while using it**.
 ### Build Script
 
 The build script (`scripts/plugin/build.sh`):
-- Copies all skills from `.claude/skills/speq-*` to `dist/plugin/skills/*` (drops `speq-` prefix)
+- Copies all skills from `.claude/skills/speq-*` into Claude and Codex plugin payloads (drops `speq-` prefix for folders)
 - Transforms frontmatter names: `name: speq-*` → `name: speq:*`
 - Transforms references: `/speq-*` → `/speq:*`
+- Translates Claude-only workflow syntax out of Codex generated files
 - Stamps version and author from `Cargo.toml` into `plugin.json`
-- Builds marketplace structure in `dist/marketplace/`
+- Builds Claude marketplace structure and Codex plugin/marketplace structure in `dist/marketplace/`
 
 ### Invocation Patterns
 
 | Context | Workflow Skills | Utility Skills |
 |---------|-----------------|----------------|
 | Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
-| Plugin | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
+| Installed plugin (Claude/Codex) | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
 
 ## Model Routing Strategy
 
-Each sub-agent declares its model and effort in frontmatter (e.g. `model: opus`, `effort: xhigh`). Orchestrator workflow skills (`speq-plan`, `speq-implement`, `speq-record`) pin `model: sonnet` so orchestration stays cheap regardless of the session's `/model` selection. Utility skills and `speq-mission` leave the field unset and inherit the model of whatever context invoked them.
+Model routing is hardcoded in generated artifacts for `0.4.0`. Dynamic model-routing configuration is deferred to a later release.
+
+Claude defaults:
+- `speq-plan`, `speq-implement`, `speq-record`: `model: sonnet`
+- `speq-mission` and utility skills: inherit caller model
+- heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: opus`, `effort: xhigh`
+- `implementer-agent`: `model: sonnet`, `effort: high`
+- `recorder-agent`: `model: sonnet`, `effort: medium`
+
+Codex defaults:
+- `speq:plan`, `speq:implement`, `speq:record`: `model: gpt-5.4`, `effort: medium`
+- `speq:mission` and utility skills: inherit caller model
+- heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: gpt-5.5`, `effort: xhigh`
+- `implementer-agent`: `model: gpt-5.4`, `effort: high`
+- `recorder-agent`: `model: gpt-5.4`, `effort: medium`
 
 ### Principle
 
@@ -66,7 +81,7 @@ Workflow skills (`speq-plan`, `speq-implement`, `speq-record`) are thin orchestr
 | `code-reviewer` | heavy reasoning | `speq-implement` | Adversarial review requires holding two large artifacts in mind and surfacing non-obvious defects. |
 | `recorder-agent` | mechanical | `speq-record` | Apply delta markers, validate, archive. No reasoning premium. |
 
-Actual model and effort values live in each agent's frontmatter so they can evolve with the model lineup without touching the framework.
+Actual model and effort values are stamped into generated platform artifacts by `scripts/plugin/build.sh`.
 
 ### Expert-task tagging
 
@@ -101,7 +116,7 @@ scripts/
 │   ├── build.sh    # Build release artifact for current platform
 │   └── test.sh     # Test release artifact locally
 └── plugin/
-    └── build.sh    # Build Claude plugin from .claude/skills/
+    └── build.sh    # Build Claude and Codex plugin artifacts from .claude/skills/
 ```
 
 ### Release Scripts

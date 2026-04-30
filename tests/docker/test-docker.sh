@@ -20,15 +20,18 @@ cd "$PROJECT_ROOT"
 # Detect if we're cross-platform (macOS host testing Linux Docker)
 HOST_OS="$(uname -s)"
 CROSS_PLATFORM=false
-if [[ "$HOST_OS" == "Darwin" ]]; then
+FORCE_MOCK_BINARY="${SPEQ_DOCKER_MOCK_BINARY:-0}"
+if [[ "$HOST_OS" == "Darwin" ]] || [[ "$FORCE_MOCK_BINARY" == "1" ]]; then
     CROSS_PLATFORM=true
-    echo "=== Cross-platform detected: macOS host -> Linux Docker ==="
-    echo "Note: Using mock binary for script testing. Full binary testing requires Linux host."
+    echo "=== Mock binary mode enabled ==="
+    echo "Note: Using mock binary for installer/plugin testing. Full binary testing requires Linux host with Cargo dependencies available."
     echo ""
 fi
 
-echo "=== Building release binary ==="
-cargo build --release
+if [[ "$CROSS_PLATFORM" != "true" ]]; then
+    echo "=== Building release binary ==="
+    cargo build --release
+fi
 
 echo ""
 echo "=== Building plugin ==="
@@ -42,13 +45,13 @@ rm -rf "$TARBALL_DIR"
 mkdir -p "$TARBALL_DIR/speq-skill-main"
 
 # Copy source files (excluding .git, target except release binary, dist)
-rsync -a \
-    --exclude='.git' \
-    --exclude='target' \
-    --exclude='dist' \
-    --exclude='.DS_Store' \
-    --exclude='._*' \
-    "$PROJECT_ROOT/" "$TARBALL_DIR/speq-skill-main/"
+tar \
+    --exclude='./.git' \
+    --exclude='./target' \
+    --exclude='./dist' \
+    --exclude='./.DS_Store' \
+    --exclude='./._*' \
+    -cf - . | tar -xf - -C "$TARBALL_DIR/speq-skill-main/"
 
 # Include binary - use mock for cross-platform, real binary for same-platform
 mkdir -p "$TARBALL_DIR/speq-skill-main/target/release"
@@ -57,7 +60,7 @@ if [[ "$CROSS_PLATFORM" == "true" ]]; then
     cat > "$TARBALL_DIR/speq-skill-main/target/release/speq" << 'MOCK_EOF'
 #!/bin/sh
 # Mock speq binary for cross-platform Docker testing
-VERSION="0.1.0-mock"
+VERSION="0.4.0"
 case "$1" in
     --version|-V)
         echo "speq $VERSION"
@@ -105,6 +108,16 @@ docker run --rm \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
     speq-install-test -c "/home/testuser/test-install.sh"
+
+echo ""
+echo "=== Running Codex plugin loading integration test ==="
+docker run --rm \
+    -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
+    -v "$PROJECT_ROOT/tests/docker/test-codex-plugin.sh:/home/testuser/test-codex-plugin.sh:ro" \
+    -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
+    -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
+    -e "SPEQ_PREBUILT=1" \
+    speq-install-test -c "/home/testuser/test-codex-plugin.sh"
 
 echo ""
 echo "=== Running update integration test ==="

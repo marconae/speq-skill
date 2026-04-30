@@ -15,7 +15,7 @@ speq-skill integrates with popular MCP (Model Context Protocol) servers for enha
 | [Serena](https://github.com/oraios/serena) | Semantic code navigation and editing |
 | [Context7](https://github.com/upstash/context7) | Library documentation lookup |
 
-Both servers are installed automatically by the speq-skill installer as a convenience. They are standard open-source MCP servers installed from their respective repositories — speq-skill does not bundle or modify them. Their behavior, limitations, and licensing are governed by their own documentation.
+Both servers are declared in the generated plugin MCP configuration as a convenience. They are standard open-source MCP servers launched from their respective upstream packages — speq-skill does not bundle or modify them. Their behavior, limitations, and licensing are governed by their own documentation.
 
 ---
 
@@ -64,13 +64,16 @@ During implementation, the skills work together:
 
 ## Configuration
 
-MCP servers are configured in the plugin's `.mcp.json` file:
+MCP servers are configured in each generated plugin's `.mcp.json` file:
 
 ```
-~/.claude/plugins/speq-skill/.mcp.json
+~/.speq-skill/plugins/speq-skill/.mcp.json
+~/.speq-skill/codex/plugins/speq-skill/.mcp.json
 ```
 
-The installer sets up both Serena and Context7 automatically. See the respective project documentation for advanced configuration:
+The Claude plugin starts Serena with the Claude Code context. The Codex plugin starts Serena with the Codex context and `--project-from-cwd`, matching Serena's [Codex client guidance](https://oraios.github.io/serena/02-usage/030_clients.html#codex-cli-and-app).
+
+The installer registers the local Codex marketplace with `codex plugin marketplace add` when the Codex CLI is available, and keeps the MCP declarations in the generated plugin payload. See the respective project documentation for advanced configuration:
 
 - [Serena documentation](https://github.com/oraios/serena)
 - [Context7 documentation](https://github.com/upstash/context7)

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0
+
+- Add Codex plugin generation alongside the existing Claude Code marketplace payload
+- Register the Codex marketplace through `codex plugin marketplace add ~/.speq-skill/codex` while keeping `~/.speq-skill` as the single install root
+- Install generated Codex skills into `$CODEX_HOME/skills` so Codex can discover `/speq:*`
+- Keep installed skills invocable as `/speq:*` on both Claude Code and Codex
+- Add Codex plugin MCP declarations for Serena and Context7
+- Hardcode Codex model routing for the initial platform support release; dynamic routing config is deferred
+
 ## 0.3.1
 
 - New `speq decision-log validate` command — validates `specs/decision-log.md` against ADR/Nygard format (sequential numbering, required fields, Status values)

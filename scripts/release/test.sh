@@ -74,7 +74,7 @@ for file in .claude-plugin/marketplace.json bin/speq bin/LICENSE bin/THIRD_PARTY
     fi
 done
 
-for dir in plugins/speq-skill plugins/speq-skill/.claude-plugin plugins/speq-skill/skills; do
+for dir in plugins/speq-skill plugins/speq-skill/.claude-plugin plugins/speq-skill/skills codex/.agents/plugins codex/plugins/speq-skill codex/plugins/speq-skill/.codex-plugin codex/plugins/speq-skill/skills; do
     if [ -d "$EXTRACT_DIR/$dir" ]; then
         echo "OK $dir/"
     else
@@ -105,6 +105,7 @@ fi
 echo ""
 echo "=== Checking plugin structure ==="
 PLUGIN_DIR="$EXTRACT_DIR/plugins/speq-skill"
+CODEX_PLUGIN_DIR="$EXTRACT_DIR/codex/plugins/speq-skill"
 
 for file in .claude-plugin/plugin.json skills/plan/SKILL.md skills/implement/SKILL.md skills/record/SKILL.md skills/mission/SKILL.md; do
     if [ -f "$PLUGIN_DIR/$file" ]; then
@@ -114,6 +115,35 @@ for file in .claude-plugin/plugin.json skills/plan/SKILL.md skills/implement/SKI
         exit 1
     fi
 done
+
+for file in .codex-plugin/plugin.json .mcp.json skills/plan/SKILL.md skills/implement/SKILL.md skills/record/SKILL.md skills/mission/SKILL.md; do
+    if [ -f "$CODEX_PLUGIN_DIR/$file" ]; then
+        echo "OK codex/$file"
+    else
+        echo "MISSING codex/$file"
+        exit 1
+    fi
+done
+
+if grep -q '"path": "./plugins/speq-skill"' "$EXTRACT_DIR/codex/.agents/plugins/marketplace.json"; then
+    echo "OK Codex marketplace manifest"
+else
+    echo "ERROR: Codex marketplace manifest missing plugin path"
+    exit 1
+fi
+
+if grep -q '^name: speq:plan$' "$CODEX_PLUGIN_DIR/skills/plan/SKILL.md"; then
+    echo "OK Codex /speq:plan skill name"
+else
+    echo "ERROR: Codex skill name is not speq:plan"
+    exit 1
+fi
+
+if grep -R -E "AskUserQuestion|AskUserTool|Task\\(|subagent_type=|ExitPlanMode|Claude Code|CodexSubagent|Codex user-input prompt|Codex task" "$CODEX_PLUGIN_DIR" >/dev/null; then
+    echo "ERROR: Codex plugin contains Claude-only workflow syntax"
+    grep -R -E "AskUserQuestion|AskUserTool|Task\\(|subagent_type=|ExitPlanMode|Claude Code|CodexSubagent|Codex user-input prompt|Codex task" "$CODEX_PLUGIN_DIR"
+    exit 1
+fi
 
 # 9. Verify THIRD_PARTY_LICENSES content
 echo ""
@@ -139,3 +169,4 @@ echo "  2. Move: mv /tmp/speq-marketplace-${VERSION}-${SHORT_PLATFORM} ~/.speq-s
 echo "  3. Symlink CLI: ln -sf ~/.speq-skill/bin/speq ~/.local/bin/speq"
 echo "  4. Add marketplace: claude plugin marketplace add ~/.speq-skill"
 echo "  5. Install plugin: claude plugin install speq@speq-skill"
+echo "  6. Register Codex: codex plugin marketplace add ~/.speq-skill/codex"

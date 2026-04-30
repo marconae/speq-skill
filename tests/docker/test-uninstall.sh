@@ -27,5 +27,23 @@ if [ -d ~/.speq-skill ]; then
 fi
 echo "PASS: ~/.speq-skill removed"
 
+if [ -f ~/.codex/config.toml ] && grep -q '^\[marketplaces\.speq-skill-local\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex marketplace registration still exists"
+    exit 1
+fi
+echo "PASS: Codex marketplace registration removed"
+
+if [ -f ~/.agents/plugins/marketplace.json ] && grep -q '"name": "speq-skill"' ~/.agents/plugins/marketplace.json; then
+    echo "FAIL: legacy Codex marketplace entry still exists"
+    exit 1
+fi
+echo "PASS: legacy Codex marketplace entry removed"
+
+if [ -e ~/.codex/skills/speq-plan ] || [ -L ~/.codex/skills/speq-plan ]; then
+    echo "FAIL: Codex speq-plan skill still exists"
+    exit 1
+fi
+echo "PASS: Codex skills removed"
+
 echo ""
 echo "=== All uninstallation tests passed! ==="
