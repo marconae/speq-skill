@@ -35,6 +35,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 | Codex plugin payload | `~/.speq-skill/codex/plugins/speq-skill/` |
 | Codex marketplace manifest | `~/.speq-skill/codex/.agents/plugins/marketplace.json` |
 | Codex marketplace registration | `~/.codex/config.toml` (`speq-skill-local`) |
+| Codex MCP server registrations | `~/.codex/config.toml` (`serena`, `context7`) |
 | Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
 
 The installer automatically:
@@ -42,6 +43,7 @@ The installer automatically:
 - Builds and copies the `speq` CLI to your PATH
 - Installs the speq-skill plugin for Claude Code and Codex
 - Registers the local Codex marketplace with `codex plugin marketplace add` when Codex is installed
+- Registers Serena and Context7 with `codex mcp add` when Codex is installed
 - Installs Codex skills into `$CODEX_HOME/skills` so Codex can load `/speq:*`
 - Installs plugin MCP configuration for Serena and Context7
 
@@ -76,6 +78,9 @@ ls ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json
 
 # Check Codex marketplace registration
 grep -n "speq-skill-local" ~/.codex/config.toml
+
+# Check Codex MCP server registrations
+codex mcp list
 
 # Check Codex skills
 ls ~/.codex/skills/speq-mission
@@ -167,12 +172,23 @@ rustup update
    codex plugin marketplace add ~/.speq-skill/codex
    ```
 
-4. Verify the Codex skill copies exist:
+4. Verify the Codex MCP servers are registered:
+   ```bash
+   codex mcp list
+   ```
+
+5. If missing, register them manually:
+   ```bash
+   codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
+   codex mcp add context7 -- npx -y @upstash/context7-mcp
+   ```
+
+6. Verify the Codex skill copies exist:
    ```bash
    ls ~/.codex/skills/speq-mission/SKILL.md
    ```
 
-5. Restart Codex and invoke:
+7. Restart Codex and invoke:
    ```
    /speq:mission
    ```
@@ -189,9 +205,11 @@ The plugin depends on Serena and Context7 MCP servers. If you see connection err
 
 2. Verify server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex
 
-3. Ensure the Codex marketplace is registered if you use Codex:
+3. Ensure the Codex marketplace and MCP servers are registered if you use Codex:
    ```bash
    codex plugin marketplace add ~/.speq-skill/codex
+   codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
+   codex mcp add context7 -- npx -y @upstash/context7-mcp
    ```
 
 4. Restart Claude Code or Codex to reconnect

@@ -75,6 +75,18 @@ if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" "${HOME}/.codex/config.to
 fi
 echo "PASS: Codex marketplace registered"
 
+if ! grep -q '^\[mcp_servers\.serena\]' "${HOME}/.codex/config.toml"; then
+    echo "FAIL: Codex Serena MCP registration missing"
+    cat "${HOME}/.codex/config.toml"
+    exit 1
+fi
+if ! grep -q '^\[mcp_servers\.context7\]' "${HOME}/.codex/config.toml"; then
+    echo "FAIL: Codex Context7 MCP registration missing"
+    cat "${HOME}/.codex/config.toml"
+    exit 1
+fi
+echo "PASS: Codex MCP servers registered"
+
 for skill in cli code-guardrails code-tools ext-research git-discipline implement mission plan record; do
     if [[ ! -f "${HOME}/.codex/skills/speq-${skill}/SKILL.md" ]]; then
         echo "FAIL: Codex skill missing: speq-${skill}"

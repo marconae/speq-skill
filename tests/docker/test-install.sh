@@ -95,6 +95,18 @@ if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" ~/.codex/config.toml; the
 fi
 echo "PASS: Codex marketplace registered"
 
+if ! grep -q '^\[mcp_servers\.serena\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex Serena MCP registration missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+if ! grep -q '^\[mcp_servers\.context7\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex Context7 MCP registration missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+echo "PASS: Codex MCP servers registered"
+
 # Test 4: Verify Claude plugin registration
 echo ""
 echo "--- Test 4: Verify Claude plugin registration ---"

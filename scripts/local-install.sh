@@ -38,6 +38,34 @@ register_codex_plugin() {
     fi
 }
 
+register_codex_mcp_servers() {
+    if command -v codex &> /dev/null; then
+        echo "Registering Codex MCP servers..."
+
+        if codex mcp get serena >/dev/null 2>&1; then
+            echo "Codex MCP server already registered: serena"
+        elif codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex >/dev/null 2>&1; then
+            echo "Codex MCP server: serena"
+        else
+            echo "Codex MCP server registration failed: serena"
+            echo "  Run manually: codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex"
+        fi
+
+        if codex mcp get context7 >/dev/null 2>&1; then
+            echo "Codex MCP server already registered: context7"
+        elif codex mcp add context7 -- npx -y @upstash/context7-mcp >/dev/null 2>&1; then
+            echo "Codex MCP server: context7"
+        else
+            echo "Codex MCP server registration failed: context7"
+            echo "  Run manually: codex mcp add context7 -- npx -y @upstash/context7-mcp"
+        fi
+    else
+        echo "Codex CLI not found. Register MCP servers after installing Codex:"
+        echo "  codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex"
+        echo "  codex mcp add context7 -- npx -y @upstash/context7-mcp"
+    fi
+}
+
 install_codex_skills() {
     local source_dir="${INSTALL_DIR}/codex/plugins/speq-skill/skills"
 
@@ -112,6 +140,7 @@ rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 cp -r "dist/marketplace/." "$INSTALL_DIR/"
 register_codex_plugin
+register_codex_mcp_servers
 install_codex_skills
 
 # 6. Verify installation
