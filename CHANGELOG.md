@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+
+- Fix Serena MCP server startup: replace `"--project", "${PWD}"` with `"--project-from-cwd"` in `scripts/plugin/mcp.json` (bash variable was never expanded inside a JSON file)
+- Add regression tests in `tests/mcp_config.rs` asserting both `mcp.json` and `mcp-codex.json` use `--project-from-cwd` and contain no static `${PWD}` path
+
 ## 0.4.0
 
 - Add Codex plugin generation alongside the existing Claude Code marketplace payload

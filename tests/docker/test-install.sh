@@ -24,8 +24,8 @@ if [[ -z "$VERSION_OUTPUT" ]]; then
     echo "FAIL: speq --version returned empty"
     exit 1
 fi
-if [[ "$VERSION_OUTPUT" != "speq 0.4.0" ]]; then
-    echo "FAIL: expected speq 0.4.0, got: $VERSION_OUTPUT"
+if [[ "$VERSION_OUTPUT" != "speq 0.4.1" ]]; then
+    echo "FAIL: expected speq 0.4.1, got: $VERSION_OUTPUT"
     exit 1
 fi
 echo "PASS: speq --version returns: $VERSION_OUTPUT"
