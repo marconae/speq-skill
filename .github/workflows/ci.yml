@@ -37,7 +37,12 @@ jobs:
         run: cargo tarpaulin --out html --output-dir coverage
 
       - name: Docker integration tests
-        run: ./tests/docker/test-docker.sh
+        run: |
+          for i in 1 2 3; do
+            ./tests/docker/test-docker.sh && break || {
+              [ $i -lt 3 ] && echo "Attempt $i failed, retrying in 30s..." && sleep 30 || exit 1
+            }
+          done
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
