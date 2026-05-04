@@ -15,10 +15,13 @@ WORKDIR /home/testuser
 # Install Claude Code CLI as testuser (installs to ~/.claude)
 RUN curl -fsSL https://claude.ai/install.sh | bash || true
 
-# Ensure .local/bin exists for user
+# Install Codex CLI for plugin loading checks
 RUN mkdir -p /home/testuser/.local/bin
+RUN npm config set prefix /home/testuser/.local \
+    && npm install -g @openai/codex \
+    && /home/testuser/.local/bin/codex --version
 
-# Add Claude CLI to PATH
+# Add Claude and Codex CLIs to PATH
 ENV PATH="/home/testuser/.claude/local/bin:/home/testuser/.local/bin:${PATH}"
 
 # Entry point for testing

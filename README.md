@@ -4,7 +4,7 @@
 
 # speq-skill
 
-**A light-weight and straightforward system for spec-driven development with Claude Code**
+**A light-weight and straightforward system for spec-driven development with Claude Code and Codex**
 
 [![spec|driven](https://img.shields.io/badge/spec-driven-blue)](specs/)
 [![Rust](https://img.shields.io/badge/rust-stable-brightgreen.svg)](https://www.rust-lang.org/)
@@ -25,7 +25,7 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 > [!NOTE]
 > The installer builds `speq` from source using the Rust toolchain (installed automatically if missing). There is no binary distribution. See [Installation](./docs/installation.md) for details.
 
-Then run `claude` and type `/speq:mission` to start.
+Then open Claude Code or Codex and type `/speq:mission` to start.
 
 <details>
 <summary>What does the installer do?</summary>
@@ -35,7 +35,8 @@ Then run `claude` and type `/speq:mission` to start.
 - Builds the `speq` CLI from source
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
-- Registers the plugin with Claude Code
+- Registers `/speq:*` skills for Claude Code and Codex when available
+- Registers the local Codex marketplace when the Codex CLI is available
 
 To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall).
 
@@ -45,7 +46,7 @@ To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall)
 
 ## Why I Built It
 
-I want to leverage Claude Code as an effective tool to write software.
+I want to leverage AI coding agents such as Claude Code and Codex as effective tools to write software.
 
 There are many other spec-driven development tools out there: OpenSpec, BMAD, SpecKit... 
 
@@ -111,11 +112,11 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 ## Important
 
-`speq-skill` is a plugin for Claude Code and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent (such as Claude Code) generates all code, specs, or other artifacts**.
+`speq-skill` is a plugin for Claude Code, Codex, and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent generates all code, specs, or other artifacts**.
 
 ## Dependencies
 
-This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers. The installer sets them up as a convenience — they are standard open-source servers installed from their respective repositories. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier — see [Context7](https://context7.com).
+This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers. The generated plugin payload declares them as a convenience — they are standard open-source servers installed from their respective repositories at runtime. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier — see [Context7](https://context7.com).
 
 The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search.
 

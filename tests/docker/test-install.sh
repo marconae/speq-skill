@@ -24,6 +24,10 @@ if [[ -z "$VERSION_OUTPUT" ]]; then
     echo "FAIL: speq --version returned empty"
     exit 1
 fi
+if [[ "$VERSION_OUTPUT" != "speq 0.4.0" ]]; then
+    echo "FAIL: expected speq 0.4.0, got: $VERSION_OUTPUT"
+    exit 1
+fi
 echo "PASS: speq --version returns: $VERSION_OUTPUT"
 
 # Test 3: Verify marketplace structure
@@ -40,6 +44,68 @@ if [[ ! -f ~/.speq-skill/bin/speq ]]; then
     exit 1
 fi
 echo "PASS: marketplace bin/speq exists"
+
+if [[ ! -f ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json ]]; then
+    echo "FAIL: Codex plugin manifest missing"
+    exit 1
+fi
+echo "PASS: Codex plugin manifest exists"
+
+if [[ ! -f ~/.speq-skill/codex/.agents/plugins/marketplace.json ]]; then
+    echo "FAIL: Codex marketplace manifest missing"
+    exit 1
+fi
+if ! grep -q '"path": "./plugins/speq-skill"' ~/.speq-skill/codex/.agents/plugins/marketplace.json; then
+    echo "FAIL: Codex marketplace manifest path missing"
+    exit 1
+fi
+echo "PASS: Codex marketplace manifest exists"
+
+if [[ ! -f ~/.speq-skill/codex/plugins/speq-skill/.mcp.json ]]; then
+    echo "FAIL: Codex MCP config missing"
+    exit 1
+fi
+echo "PASS: Codex MCP config exists"
+
+if ! grep -q '^name: speq:plan$' ~/.speq-skill/codex/plugins/speq-skill/skills/plan/SKILL.md; then
+    echo "FAIL: Codex /speq:plan skill name missing"
+    exit 1
+fi
+echo "PASS: Codex /speq:plan skill registered"
+
+if [[ ! -f ~/.codex/skills/speq-plan/SKILL.md ]]; then
+    echo "FAIL: Codex speq-plan skill missing"
+    exit 1
+fi
+echo "PASS: Codex speq-plan skill exists"
+
+if [[ ! -f ~/.codex/config.toml ]]; then
+    echo "FAIL: Codex config missing"
+    exit 1
+fi
+if ! grep -q '^\[marketplaces\.speq-skill-local\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex marketplace registration missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" ~/.codex/config.toml; then
+    echo "FAIL: Codex marketplace source missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+echo "PASS: Codex marketplace registered"
+
+if ! grep -q '^\[mcp_servers\.serena\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex Serena MCP registration missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+if ! grep -q '^\[mcp_servers\.context7\]' ~/.codex/config.toml; then
+    echo "FAIL: Codex Context7 MCP registration missing"
+    cat ~/.codex/config.toml
+    exit 1
+fi
+echo "PASS: Codex MCP servers registered"
 
 # Test 4: Verify Claude plugin registration
 echo ""

@@ -1,0 +1,29 @@
+{
+  "name": "speq-skill",
+  "version": "VERSION_PLACEHOLDER",
+  "description": "Spec-driven development workflow for Codex.",
+  "author": {
+    "name": "AUTHOR_PLACEHOLDER"
+  },
+  "homepage": "https://github.com/marconae/speq-skill",
+  "repository": "https://github.com/marconae/speq-skill",
+  "license": "MIT",
+  "keywords": ["spec-driven", "tdd", "specifications", "planning", "workflow"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "speq-skill",
+    "shortDescription": "Spec-driven development workflow for Codex.",
+    "longDescription": "speq-skill provides /speq:* skills, spec search, planning, implementation orchestration, and recording workflows for Codex.",
+    "developerName": "AUTHOR_PLACEHOLDER",
+    "category": "Development",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/marconae/speq-skill",
+    "defaultPrompt": [
+      "Run /speq:mission to bootstrap specs.",
+      "Plan a change with /speq:plan.",
+      "Implement reviewed deltas with /speq:implement."
+    ],
+    "brandColor": "#2B6CB0"
+  }
+}

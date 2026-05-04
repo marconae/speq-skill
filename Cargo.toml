@@ -1,13 +1,13 @@
 [package]
 name = "speq-skill"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2024"
 authors = ["marconae"]
 license = "MIT"
-description = "Spec-driven development CLI for Claude Code"
+description = "Spec-driven development CLI for AI coding agents"
 repository = "https://github.com/marconae/speq-skill"
 readme = "README.md"
-keywords = ["spec", "tdd", "claude", "ai", "cli"]
+keywords = ["spec", "tdd", "codex", "claude", "cli"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]

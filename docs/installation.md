@@ -13,14 +13,14 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 > [!NOTE]
 > The installer builds `speq` from source using the Rust toolchain. There is no binary distribution. If you don't have Rust installed, the installer will offer to install it for you via [rustup](https://rustup.rs/).
 
-Then run `claude` and type `/speq:mission` to start.
+Then open Claude Code or Codex and type `/speq:mission` to start.
 
 ---
 
 ## Prerequisites
 
 - **macOS or Linux** (Windows via Windows Subsystem for Linux (WSL))
-- **Claude Code CLI** installed and configured
+- **Claude Code CLI** or **Codex CLI/App** installed and configured
 - **Rust toolchain** (installed if missing or via [rustup](https://rustup.rs/))
 
 ---
@@ -31,13 +31,21 @@ Then run `claude` and type `/speq:mission` to start.
 |-----------|----------|
 | `speq` CLI | `~/.local/bin/speq` |
 | Plugin files | `~/.speq-skill/` |
-| Claude plugins | `~/.claude/plugins/` |
+| Claude marketplace payload | `~/.speq-skill/` |
+| Codex plugin payload | `~/.speq-skill/codex/plugins/speq-skill/` |
+| Codex marketplace manifest | `~/.speq-skill/codex/.agents/plugins/marketplace.json` |
+| Codex marketplace registration | `~/.codex/config.toml` (`speq-skill-local`) |
+| Codex MCP server registrations | `~/.codex/config.toml` (`serena`, `context7`) |
+| Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
 
 The installer automatically:
 - Downloads the sources of the latest release from GitHub
-- Build and copies the `speq` CLI to your PATH
-- Installs the speq-skill plugin for Claude Code
-- Installs required Model Context Protocol (MCP) servers (Serena, Context7)
+- Builds and copies the `speq` CLI to your PATH
+- Installs the speq-skill plugin for Claude Code and Codex
+- Registers the local Codex marketplace with `codex plugin marketplace add` when Codex is installed
+- Registers Serena and Context7 with `codex mcp add` when Codex is installed
+- Installs Codex skills into `$CODEX_HOME/skills` so Codex can load `/speq:*`
+- Installs plugin MCP configuration for Serena and Context7
 
 ---
 
@@ -62,12 +70,28 @@ git clone https://github.com/marconae/speq-skill && cd speq-skill
 # Check CLI is available
 speq --version
 
-# Check plugin is installed
-ls ~/.claude/plugins/speq-skill
+# Check Claude marketplace payload
+ls ~/.speq-skill/plugins/speq-skill/.claude-plugin/plugin.json
+
+# Check Codex plugin payload
+ls ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json
+
+# Check Codex marketplace registration
+grep -n "speq-skill-local" ~/.codex/config.toml
+
+# Check Codex MCP server registrations
+codex mcp list
+
+# Check Codex skills
+ls ~/.codex/skills/speq-mission
 
 # Test in Claude Code
 claude
 /plugin # should show speq:* skills
+
+# Test in Codex
+codex
+/speq:mission
 ```
 
 ---
@@ -118,7 +142,7 @@ rustup update
 
 1. Verify plugin is installed:
    ```bash
-   ls ~/.claude/plugins/speq-skill
+   ls ~/.speq-skill/plugins/speq-skill/.claude-plugin/plugin.json
    ```
 
 2. Restart Claude Code:
@@ -131,18 +155,64 @@ rustup update
    /speq:mission
    ```
 
+### Plugin not found in Codex
+
+1. Verify the Codex plugin payload exists:
+   ```bash
+   ls ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json
+   ```
+
+2. Verify the Codex marketplace is registered:
+   ```bash
+   grep -n "speq-skill-local" ~/.codex/config.toml
+   ```
+
+3. If missing, register it manually:
+   ```bash
+   codex plugin marketplace add ~/.speq-skill/codex
+   ```
+
+4. Verify the Codex MCP servers are registered:
+   ```bash
+   codex mcp list
+   ```
+
+5. If missing, register them manually:
+   ```bash
+   codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
+   codex mcp add context7 -- npx -y @upstash/context7-mcp
+   ```
+
+6. Verify the Codex skill copies exist:
+   ```bash
+   ls ~/.codex/skills/speq-mission/SKILL.md
+   ```
+
+7. Restart Codex and invoke:
+   ```
+   /speq:mission
+   ```
+
 ### MCP server connection errors
 
 The plugin depends on Serena and Context7 MCP servers. If you see connection errors:
 
 1. Check servers are installed:
    ```bash
-   ls ~/.claude/plugins/speq-skill/mcp/
+   ls ~/.speq-skill/plugins/speq-skill/.mcp.json
+   ls ~/.speq-skill/codex/plugins/speq-skill/.mcp.json
    ```
 
-2. Verify server configuration in `~/.claude/plugins/speq-skill/.mcp.json`
+2. Verify server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex
 
-3. Restart Claude Code to reconnect
+3. Ensure the Codex marketplace and MCP servers are registered if you use Codex:
+   ```bash
+   codex plugin marketplace add ~/.speq-skill/codex
+   codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
+   codex mcp add context7 -- npx -y @upstash/context7-mcp
+   ```
+
+4. Restart Claude Code or Codex to reconnect
 
 ---
 

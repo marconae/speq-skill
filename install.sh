@@ -7,6 +7,9 @@ set -e
 REPO="marconae/speq-skill"
 INSTALL_DIR="$HOME/.local/bin"
 MARKETPLACE_DIR="$HOME/.speq-skill"
+CODEX_MARKETPLACE_NAME="speq-skill-local"
+CODEX_MARKETPLACE_ROOT="$MARKETPLACE_DIR/codex"
+CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 
 # Colors
 RED='\033[0;31m'
@@ -25,7 +28,7 @@ step() { echo -e "${BLUE}[${1}/${2}]${NC} $3"; }
 get_latest_version() {
     local response
     response=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null) || {
-        warn "No releases found, using main branch"
+        warn "No releases found, using main branch" >&2
         echo "main"
         return
     }
@@ -84,6 +87,89 @@ check_rust() {
         return 0
     fi
     return 1
+}
+
+register_codex_plugin() {
+    if [[ ! -f "$CODEX_MARKETPLACE_ROOT/.agents/plugins/marketplace.json" ]]; then
+        warn "Codex plugin payload missing; skipping Codex registration"
+        return
+    fi
+
+    if command -v codex &> /dev/null; then
+        info "Registering Codex marketplace..."
+        codex plugin marketplace remove "$CODEX_MARKETPLACE_NAME" >/dev/null 2>&1 || true
+        if codex plugin marketplace add "$CODEX_MARKETPLACE_ROOT" >/dev/null 2>&1; then
+            info "Registered Codex marketplace: $CODEX_MARKETPLACE_NAME"
+        else
+            warn "Codex marketplace registration failed."
+            echo "  Run manually: codex plugin marketplace add $CODEX_MARKETPLACE_ROOT"
+        fi
+    else
+        warn "Codex CLI not found. Register the marketplace after installing Codex:"
+        echo "  codex plugin marketplace add $CODEX_MARKETPLACE_ROOT"
+    fi
+}
+
+register_codex_mcp_servers() {
+    if command -v codex &> /dev/null; then
+        info "Registering Codex MCP servers..."
+
+        if codex mcp get serena >/dev/null 2>&1; then
+            info "Codex MCP server already registered: serena"
+        elif codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex >/dev/null 2>&1; then
+            info "Registered Codex MCP server: serena"
+        else
+            warn "Codex MCP server registration failed: serena"
+            echo "  Run manually: codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex"
+        fi
+
+        if codex mcp get context7 >/dev/null 2>&1; then
+            info "Codex MCP server already registered: context7"
+        elif codex mcp add context7 -- npx -y @upstash/context7-mcp >/dev/null 2>&1; then
+            info "Registered Codex MCP server: context7"
+        else
+            warn "Codex MCP server registration failed: context7"
+            echo "  Run manually: codex mcp add context7 -- npx -y @upstash/context7-mcp"
+        fi
+    else
+        warn "Codex CLI not found. Register MCP servers after installing Codex:"
+        echo "  codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex"
+        echo "  codex mcp add context7 -- npx -y @upstash/context7-mcp"
+    fi
+}
+
+install_codex_skills() {
+    local source_dir="$MARKETPLACE_DIR/codex/plugins/speq-skill/skills"
+
+    if [[ ! -d "$source_dir" ]]; then
+        warn "Codex skills payload missing; skipping Codex skill installation"
+        return
+    fi
+
+    mkdir -p "$CODEX_SKILLS_DIR"
+
+    for skill_dir in "$source_dir"/*; do
+        [[ -d "$skill_dir" ]] || continue
+
+        local skill_name
+        local target
+        skill_name=$(basename "$skill_dir")
+        target="$CODEX_SKILLS_DIR/speq-$skill_name"
+
+        if [[ -L "$target" ]]; then
+            rm -f "$target"
+        elif [[ -d "$target" && -f "$target/.speq-skill-managed" ]]; then
+            rm -rf "$target"
+        elif [[ -e "$target" ]]; then
+            warn "Codex skill already exists and is not managed by speq-skill, skipping: $target"
+            continue
+        fi
+
+        cp -R "$skill_dir" "$target"
+        touch "$target/.speq-skill-managed"
+    done
+
+    info "Installed Codex /speq:* skills into $CODEX_SKILLS_DIR"
 }
 
 # Offer to install Rust
@@ -192,6 +278,11 @@ build_from_source() {
         echo "  claude plugin marketplace add $MARKETPLACE_DIR"
         echo "  claude plugin install speq-skill@speq-skill"
     fi
+
+    # Register with Codex marketplace
+    register_codex_plugin
+    register_codex_mcp_servers
+    install_codex_skills
 }
 
 # Check if ~/.local/bin is in PATH
@@ -240,10 +331,16 @@ main() {
     echo ""
     echo "  Binary:      $INSTALL_DIR/speq"
     echo "  Plugin:      $MARKETPLACE_DIR/"
+    echo "  Codex:       $CODEX_MARKETPLACE_ROOT"
     if command -v claude &> /dev/null; then
         echo "  Claude CLI:  plugin registered"
     else
         echo "  Claude CLI:  not found (register manually after installing)"
+    fi
+    if command -v codex &> /dev/null; then
+        echo "  Codex CLI:   marketplace registered"
+    else
+        echo "  Codex CLI:   not found (marketplace entry created)"
     fi
     echo ""
     echo "Run 'speq --help' to get started."
