@@ -13,7 +13,7 @@ USER testuser
 WORKDIR /home/testuser
 
 # Install Claude Code CLI as testuser (installs to ~/.claude)
-RUN curl -fsSL https://claude.ai/install.sh | bash || true
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Install Codex CLI for plugin loading checks
 RUN mkdir -p /home/testuser/.local/bin

@@ -96,41 +96,46 @@ tar -czf "$TARBALL" -C "$TARBALL_DIR" "speq-skill-main"
 echo "Created: $TARBALL"
 
 echo ""
-echo "=== Building Docker test image ==="
-docker build -t speq-install-test -f tests/docker/Dockerfile .
+if docker image inspect speq-install-test &>/dev/null; then
+    echo "=== Docker test image already present, skipping build ==="
+else
+    echo "=== Building Docker test image ==="
+    docker build -t speq-install-test -f tests/docker/Dockerfile .
+fi
 
 echo ""
-echo "=== Running install integration test ==="
+echo "=== Running integration tests in parallel ==="
+
+declare -a PIDS=()
+declare -a NAMES=()
+
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-install.sh:/home/testuser/test-install.sh:ro" \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
-    speq-install-test -c "/home/testuser/test-install.sh"
+    speq-install-test -c "/home/testuser/test-install.sh" &
+PIDS+=($!); NAMES+=("install")
 
-echo ""
-echo "=== Running Codex plugin loading integration test ==="
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-codex-plugin.sh:/home/testuser/test-codex-plugin.sh:ro" \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
-    speq-install-test -c "/home/testuser/test-codex-plugin.sh"
+    speq-install-test -c "/home/testuser/test-codex-plugin.sh" &
+PIDS+=($!); NAMES+=("codex-plugin")
 
-echo ""
-echo "=== Running update integration test ==="
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/tests/docker/test-update.sh:/home/testuser/test-update.sh:ro" \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
-    speq-install-test -c "/home/testuser/test-update.sh"
+    speq-install-test -c "/home/testuser/test-update.sh" &
+PIDS+=($!); NAMES+=("update")
 
-echo ""
-echo "=== Running uninstall integration test ==="
 docker run --rm \
     -v "$PROJECT_ROOT/install.sh:/home/testuser/install.sh:ro" \
     -v "$PROJECT_ROOT/uninstall.sh:/home/testuser/uninstall.sh:ro" \
@@ -139,7 +144,22 @@ docker run --rm \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
-    speq-install-test -c "/home/testuser/test-install.sh && /home/testuser/test-uninstall.sh"
+    speq-install-test -c "/home/testuser/test-install.sh && /home/testuser/test-uninstall.sh" &
+PIDS+=($!); NAMES+=("uninstall")
+
+echo "Started ${#PIDS[@]} test containers in parallel..."
+
+FAILED=0
+for i in "${!PIDS[@]}"; do
+    if wait "${PIDS[$i]}"; then
+        echo "  ✓ ${NAMES[$i]}"
+    else
+        echo "  ✗ ${NAMES[$i]} FAILED"
+        FAILED=1
+    fi
+done
+
+[ "$FAILED" -eq 0 ] || exit 1
 
 echo ""
 echo "=== Docker integration tests passed! ==="
