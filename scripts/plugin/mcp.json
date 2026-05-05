@@ -8,7 +8,7 @@
         "serena",
         "start-mcp-server",
         "--context", "claude-code",
-        "--project", "${PWD}"
+        "--project-from-cwd"
       ]
     },
     "context7": {
