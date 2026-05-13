@@ -37,8 +37,14 @@ mod claude_code_config {
             v.get("mcpServers").is_none(),
             "mcp.json must not have a top-level mcpServers wrapper — use flat format"
         );
-        assert!(v.get("serena").is_some(), "mcp.json must declare serena server");
-        assert!(v.get("context7").is_some(), "mcp.json must declare context7 server");
+        assert!(
+            v.get("serena").is_some(),
+            "mcp.json must declare serena server"
+        );
+        assert!(
+            v.get("context7").is_some(),
+            "mcp.json must declare context7 server"
+        );
     }
 
     #[test]
@@ -108,7 +114,13 @@ mod codex_config {
             v.get("mcpServers").is_none(),
             "mcp-codex.json must not have a top-level mcpServers wrapper — use flat format"
         );
-        assert!(v.get("serena").is_some(), "mcp-codex.json must declare serena server");
-        assert!(v.get("context7").is_some(), "mcp-codex.json must declare context7 server");
+        assert!(
+            v.get("serena").is_some(),
+            "mcp-codex.json must declare serena server"
+        );
+        assert!(
+            v.get("context7").is_some(),
+            "mcp-codex.json must declare context7 server"
+        );
     }
 }
