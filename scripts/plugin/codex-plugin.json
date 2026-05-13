@@ -10,7 +10,6 @@
   "license": "MIT",
   "keywords": ["spec-driven", "tdd", "specifications", "planning", "workflow"],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "speq-skill",
     "shortDescription": "Spec-driven development workflow for Codex.",
