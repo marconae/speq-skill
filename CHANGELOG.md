@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2
+
+- Fix double MCP server registration: remove `mcpServers` wrapper from `mcp.json`, `mcp-codex.json`, `plugin.json`, and `codex-plugin.json` — platforms expect a flat server map, not a nested object
+- Add regression tests (`mcp_json_uses_flat_format`, `mcp_codex_json_uses_flat_format`) asserting the flat structure for both Claude and Codex configs
+
 ## 0.4.1
 
 - Fix Serena MCP server startup: replace `"--project", "${PWD}"` with `"--project-from-cwd"` in `scripts/plugin/mcp.json` (bash variable was never expanded inside a JSON file)
