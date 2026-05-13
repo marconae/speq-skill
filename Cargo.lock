@@ -2631,7 +2631,7 @@ dependencies = [
 
 [[package]]
 name = "speq-skill"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "assert_cmd",
  "chrono",
@@ -2642,6 +2642,7 @@ dependencies = [
  "predicates",
  "pulldown-cmark",
  "serde",
+ "serde_json",
  "serial_test",
  "tempfile",
  "thiserror",

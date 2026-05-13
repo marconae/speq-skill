@@ -15,6 +15,5 @@
     "./agents/implementer-expert-agent.md",
     "./agents/planner-agent.md",
     "./agents/recorder-agent.md"
-  ],
-  "mcpServers": "./.mcp.json"
+  ]
 }

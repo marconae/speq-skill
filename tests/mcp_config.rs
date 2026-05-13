@@ -29,6 +29,19 @@ mod claude_code_config {
     }
 
     #[test]
+    fn mcp_json_uses_flat_format() {
+        let content = read_mcp_template("mcp.json");
+        let v: serde_json::Value =
+            serde_json::from_str(&content).expect("mcp.json must be valid JSON");
+        assert!(
+            v.get("mcpServers").is_none(),
+            "mcp.json must not have a top-level mcpServers wrapper — use flat format"
+        );
+        assert!(v.get("serena").is_some(), "mcp.json must declare serena server");
+        assert!(v.get("context7").is_some(), "mcp.json must declare context7 server");
+    }
+
+    #[test]
     fn built_mcp_json_uses_project_from_cwd() {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
         let build_sh = Path::new(manifest_dir).join("scripts/plugin/build.sh");
@@ -58,6 +71,13 @@ mod claude_code_config {
             content.contains("claude-code"),
             "built .mcp.json should contain claude-code"
         );
+
+        let v: serde_json::Value =
+            serde_json::from_str(&content).expect("built .mcp.json must be valid JSON");
+        assert!(
+            v.get("mcpServers").is_none(),
+            "built .mcp.json must not have a top-level mcpServers wrapper"
+        );
     }
 }
 
@@ -77,5 +97,18 @@ mod codex_config {
     #[test]
     fn mcp_codex_json_has_codex_context() {
         assert!(read_mcp_template("mcp-codex.json").contains("codex"));
+    }
+
+    #[test]
+    fn mcp_codex_json_uses_flat_format() {
+        let content = read_mcp_template("mcp-codex.json");
+        let v: serde_json::Value =
+            serde_json::from_str(&content).expect("mcp-codex.json must be valid JSON");
+        assert!(
+            v.get("mcpServers").is_none(),
+            "mcp-codex.json must not have a top-level mcpServers wrapper — use flat format"
+        );
+        assert!(v.get("serena").is_some(), "mcp-codex.json must declare serena server");
+        assert!(v.get("context7").is_some(), "mcp-codex.json must declare context7 server");
     }
 }
