@@ -60,7 +60,7 @@ if [[ "$CROSS_PLATFORM" == "true" ]]; then
     cat > "$TARBALL_DIR/speq-skill-main/target/release/speq" << 'MOCK_EOF'
 #!/bin/sh
 # Mock speq binary for cross-platform Docker testing
-VERSION="0.4.2"
+VERSION="0.4.3"
 case "$1" in
     --version|-V)
         echo "speq $VERSION"

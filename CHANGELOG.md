@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.3
+
+Security patch — no functional changes:
+- `openssl` 0.10.76 → 0.10.79: fixes 7 advisories (buffer overflows in `digest_final`, AES key-wrap, and PEM callback; undefined behavior in `X509Ref::ocsp_responders`; PSK/cookie trampoline memory leak)
+- `quinn-proto` 0.11.13 → 0.11.14: fixes unauthenticated remote DoS via panic in QUIC transport parameter parsing
+- `rand` 0.9.2 → 0.9.4: fixes unsound aliased mutable reference when using a custom logger with `rand::rng()`
+
+All are transitive dependencies pulled in by `fastembed` → `hf-hub` / `tokenizers` / `rav1e`. Direct dependencies and public API are unchanged.
+
 ## 0.4.2
 
 - Fix double MCP server registration: remove `mcpServers` wrapper from `mcp.json`, `mcp-codex.json`, `plugin.json`, and `codex-plugin.json` — platforms expect a flat server map, not a nested object

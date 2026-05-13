@@ -17,8 +17,8 @@ if [[ -z "$VERSION_OUTPUT" ]]; then
     echo "FAIL: speq --version returned empty after first install"
     exit 1
 fi
-if [[ "$VERSION_OUTPUT" != "speq 0.4.2" ]]; then
-    echo "FAIL: expected speq 0.4.2 after first install, got: $VERSION_OUTPUT"
+if [[ "$VERSION_OUTPUT" != "speq 0.4.3" ]]; then
+    echo "FAIL: expected speq 0.4.3 after first install, got: $VERSION_OUTPUT"
     exit 1
 fi
 echo "PASS: first install version: $VERSION_OUTPUT"
@@ -53,8 +53,8 @@ if [[ -z "$VERSION_OUTPUT" ]]; then
     echo "FAIL: speq --version returned empty after update"
     exit 1
 fi
-if [[ "$VERSION_OUTPUT" != "speq 0.4.2" ]]; then
-    echo "FAIL: expected speq 0.4.2 after update, got: $VERSION_OUTPUT"
+if [[ "$VERSION_OUTPUT" != "speq 0.4.3" ]]; then
+    echo "FAIL: expected speq 0.4.3 after update, got: $VERSION_OUTPUT"
     exit 1
 fi
 echo "PASS: update version: $VERSION_OUTPUT"
