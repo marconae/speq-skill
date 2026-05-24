@@ -83,29 +83,24 @@ pub fn get_index_path() -> PathBuf {
     cache.join("indexes").join(format!("{}.idx", slug))
 }
 
-/// Configure fastembed to use our cache directory
-fn configure_fastembed_cache() {
-    if std::env::var("FASTEMBED_CACHE_DIR").is_err() {
-        let cache_dir = get_cache_path().join("fastembed");
-        // Only sets if not already set, avoiding race conditions in typical single-threaded CLI usage
-        unsafe {
-            std::env::set_var("FASTEMBED_CACHE_DIR", cache_dir);
-        }
-    }
+/// Get the model directory path for speq's embedding model files
+pub fn get_model_dir() -> PathBuf {
+    get_cache_path().join("models")
+}
+
+/// Get the three expected model file paths as (model.safetensors, tokenizer.json, config.json)
+pub fn get_model_file_paths() -> (PathBuf, PathBuf, PathBuf) {
+    let model_dir = get_model_dir();
+    (
+        model_dir.join("model.safetensors"),
+        model_dir.join("tokenizer.json"),
+        model_dir.join("config.json"),
+    )
 }
 
 /// Build the search index from all specs
 pub fn index_specs(base: &Path) -> Result<usize, String> {
-    use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-
-    // Configure fastembed cache before model initialization
-    configure_fastembed_cache();
-
-    // Initialize the embedding model
-    let mut model = TextEmbedding::try_new(
-        InitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXS).with_show_download_progress(true),
-    )
-    .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
+    let embedder = crate::embedding::Embedder::load_model()?;
 
     // Discover all features
     let features = discover_features(base);
@@ -148,9 +143,7 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
 
     // Generate embeddings for all scenarios
     let texts: Vec<&str> = indexed_scenarios.iter().map(|s| s.3.as_str()).collect();
-    let embeddings = model
-        .embed(texts, None)
-        .map_err(|e| format!("Failed to generate embeddings: {}", e))?;
+    let embeddings = embedder.embed(&texts)?;
 
     // Build the index
     let scenarios: Vec<IndexedScenario> = indexed_scenarios
@@ -186,11 +179,6 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
 
 /// Search for scenarios matching a query
 pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, String> {
-    use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-
-    // Configure fastembed cache before model initialization
-    configure_fastembed_cache();
-
     // Load the index, auto-building if missing
     let index_path = get_index_path();
     if !index_path.exists() {
@@ -206,16 +194,13 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
         return Ok(Vec::new());
     }
 
-    // Initialize the embedding model
-    let mut model =
-        TextEmbedding::try_new(InitOptions::new(EmbeddingModel::SnowflakeArcticEmbedXS))
-            .map_err(|e| format!("Failed to initialize embedding model: {}", e))?;
+    let embedder = crate::embedding::Embedder::load_model()?;
 
     // Generate query embedding
-    let query_embeddings = model
-        .embed(vec![query], None)
-        .map_err(|e| format!("Failed to generate query embedding: {}", e))?;
-    let query_embedding = &query_embeddings[0];
+    let query_embeddings = embedder.embed(&[query])?;
+    let query_embedding = query_embeddings
+        .first()
+        .ok_or_else(|| "Embedding produced no vector".to_string())?;
 
     // Calculate cosine similarity and rank results
     let mut scored: Vec<(f32, &IndexedScenario)> = index
@@ -264,6 +249,22 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_get_model_dir_is_under_cache() {
+        let cache = get_cache_path();
+        let model_dir = get_model_dir();
+        assert_eq!(model_dir, cache.join("models"));
+    }
+
+    #[test]
+    fn test_get_model_file_paths_are_under_model_dir() {
+        let model_dir = get_model_dir();
+        let (safetensors, tokenizer, config) = get_model_file_paths();
+        assert_eq!(safetensors, model_dir.join("model.safetensors"));
+        assert_eq!(tokenizer, model_dir.join("tokenizer.json"));
+        assert_eq!(config, model_dir.join("config.json"));
+    }
 
     #[test]
     fn test_get_cache_path() {

@@ -2,6 +2,7 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use serial_test::serial;
 use std::fs;
+use std::sync::OnceLock;
 use tempfile::TempDir;
 
 fn setup_test_specs() -> TempDir {
@@ -60,6 +61,59 @@ The system SHALL validate documents.
 
 fn cmd() -> Command {
     Command::new(assert_cmd::cargo::cargo_bin!("speq"))
+}
+
+static MODEL_CACHED: OnceLock<()> = OnceLock::new();
+
+/// Provision the embedding-model files into the system model cache once per
+/// test process.
+///
+/// On the first call it downloads the three model files from HuggingFace into
+/// `speq_skill::search::get_model_dir()` (the same path the binary reads),
+/// mirroring what `install.sh`'s `provision_embedding_model` does during
+/// installation. Subsequent calls and runs are a no-op because the files
+/// persist on disk. The download is intentionally written to the system cache,
+/// not a TempDir, so candle-backed search tests find a model without per-test
+/// downloads.
+fn ensure_model_cached() {
+    MODEL_CACHED.get_or_init(|| {
+        let model_dir = speq_skill::search::get_model_dir();
+        std::fs::create_dir_all(&model_dir).expect("create model dir");
+        let files = [
+            (
+                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/model.safetensors",
+                "model.safetensors",
+            ),
+            (
+                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/tokenizer.json",
+                "tokenizer.json",
+            ),
+            (
+                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/config.json",
+                "config.json",
+            ),
+        ];
+        for (url, filename) in files {
+            let dest = model_dir.join(filename);
+            if dest.exists() {
+                continue;
+            }
+            let tmp = format!("{}.tmp", dest.display());
+            let status = std::process::Command::new("curl")
+                .args(["-fsSL", url, "-o", &tmp])
+                .status()
+                .expect("invoke curl");
+            assert!(status.success(), "Failed to download {filename}");
+            std::fs::rename(&tmp, &dest).expect("rename model file into place");
+        }
+    });
+}
+
+/// Resolve the system cache path as a `String` for passing via `SPEQ_CACHE_DIR`.
+fn system_cache_dir() -> String {
+    speq_skill::search::get_cache_path()
+        .to_string_lossy()
+        .into_owned()
 }
 
 mod feature_list {
@@ -307,12 +361,15 @@ mod search {
     #[test]
     #[serial]
     fn auto_indexes_on_first_search() {
+        ensure_model_cached();
         let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
 
         // Search WITHOUT running 'speq search index' first
         // Should auto-build index and return results
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "query", "validation"])
             .assert()
             .success()
@@ -322,10 +379,13 @@ mod search {
     #[test]
     #[serial]
     fn index_builds_successfully() {
+        ensure_model_cached();
         let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
 
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "index"])
             .assert()
             .success()
@@ -336,11 +396,14 @@ mod search {
     #[test]
     #[serial]
     fn search_finds_similar_scenarios() {
+        ensure_model_cached();
         let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
 
         // First build the index
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "index"])
             .assert()
             .success();
@@ -348,6 +411,7 @@ mod search {
         // Then search for validation-related content
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "query", "document validation"])
             .assert()
             .success()
@@ -357,11 +421,14 @@ mod search {
     #[test]
     #[serial]
     fn search_with_limit() {
+        ensure_model_cached();
         let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
 
         // First build the index
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "index"])
             .assert()
             .success();
@@ -369,6 +436,7 @@ mod search {
         // Search with limit
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "query", "test", "--limit", "1"])
             .assert()
             .success();
@@ -377,11 +445,14 @@ mod search {
     #[test]
     #[serial]
     fn search_no_matches() {
+        ensure_model_cached();
         let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
 
         // First build the index
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "index"])
             .assert()
             .success();
@@ -390,7 +461,113 @@ mod search {
         // Note: Semantic search may still find some results, so we just verify it runs
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "query", "xyzzy12345nonexistent"])
+            .assert()
+            .success();
+    }
+
+    #[test]
+    #[serial]
+    fn search_index_builds_with_candle_backend() {
+        ensure_model_cached();
+        let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
+
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "index"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("Indexed"));
+    }
+
+    #[test]
+    #[serial]
+    fn search_loads_model_from_cache_offline() {
+        ensure_model_cached();
+        let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
+
+        // Build index first
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        // Run query — model already in cache, no network access
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "query", "validation"])
+            .assert()
+            .success();
+    }
+
+    #[test]
+    #[serial]
+    fn search_reports_actionable_error_when_model_missing() {
+        // Point SPEQ_CACHE_DIR at an empty TempDir — no model files present.
+        // This test must NOT call ensure_model_cached().
+        let empty_cache = TempDir::new().unwrap();
+        let tmp = setup_test_specs();
+
+        cmd()
+            .current_dir(tmp.path())
+            .env(
+                "SPEQ_CACHE_DIR",
+                empty_cache.path().to_string_lossy().as_ref(),
+            )
+            .args(["search", "query", "validation"])
+            .assert()
+            .failure()
+            .stdout(predicate::str::contains("model").and(predicate::str::contains("models")));
+    }
+
+    #[test]
+    #[serial]
+    fn search_model_and_index_cache_layout() {
+        ensure_model_cached();
+        let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
+        let model_dir = speq_skill::search::get_model_dir();
+
+        // Model files must exist in the model cache
+        assert!(model_dir.join("model.safetensors").exists());
+        assert!(model_dir.join("tokenizer.json").exists());
+        assert!(model_dir.join("config.json").exists());
+
+        // Build index and verify it lands in the indexes/ subdir
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        assert!(
+            speq_skill::search::get_cache_path()
+                .join("indexes")
+                .exists()
+        );
+    }
+
+    #[test]
+    #[serial]
+    fn search_runs_without_onnx_runtime() {
+        ensure_model_cached();
+        let tmp = setup_test_specs();
+        let cache_dir = system_cache_dir();
+
+        // candle is the only inference backend; this asserts that index
+        // building succeeds with no ONNX library present.
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "index"])
             .assert()
             .success();
     }
@@ -492,6 +669,8 @@ A test feature.
     #[test]
     #[serial]
     fn record_rebuilds_search_index() {
+        ensure_model_cached();
+        let cache_dir = system_cache_dir();
         let tmp = TempDir::new().unwrap();
         let specs = tmp.path().join("specs");
 
@@ -522,6 +701,7 @@ An existing feature.
         // Build initial index
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "index"])
             .assert()
             .success();
@@ -558,6 +738,7 @@ A new feature added via plan.
         // Record the plan - should rebuild index and show indexed count
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["record", "test-plan"])
             .assert()
             .success()
@@ -566,6 +747,7 @@ A new feature added via plan.
         // Verify the new scenario is now searchable
         cmd()
             .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
             .args(["search", "query", "unique searchable"])
             .assert()
             .success()
