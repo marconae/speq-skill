@@ -235,14 +235,6 @@ build_from_source() {
         step 3 5 "Using pre-built binary..."
     else
         step 3 5 "Building from source (this may take a moment)..."
-        # Intel Mac: ort-download-binaries has no prebuilt binaries for x86_64-apple-darwin.
-        # Require system ONNX Runtime (ort-load-dynamic links against it at runtime).
-        if [[ "$(uname -s)" == "Darwin" ]] && [[ "$(uname -m)" == "x86_64" ]]; then
-            if ! brew list onnxruntime &>/dev/null 2>&1; then
-                info "Installing ONNX Runtime (required on Intel Mac)..."
-                brew install onnxruntime
-            fi
-        fi
         cargo build --release
     fi
 
@@ -285,6 +277,46 @@ build_from_source() {
     install_codex_skills
 }
 
+# Download the embedding model files from HuggingFace into the model cache directory
+provision_embedding_model() {
+    local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main"
+
+    if [[ -n "${SPEQ_CACHE_DIR:-}" ]]; then
+        local MODEL_DIR="${SPEQ_CACHE_DIR}/models"
+    else
+        local xdg_cache="${XDG_CACHE_HOME:-$HOME/.cache}"
+        local MODEL_DIR="${xdg_cache}/speq/models"
+    fi
+
+    local files=("model.safetensors" "tokenizer.json" "config.json")
+
+    # Drop any previously provisioned model files so upgrades always get a fresh copy
+    if [[ -d "$MODEL_DIR" ]]; then
+        for filename in "${files[@]}"; do
+            rm -f "$MODEL_DIR/$filename"
+        done
+    fi
+
+    info "Provisioning embedding model into $MODEL_DIR..."
+    mkdir -p "$MODEL_DIR"
+
+    for filename in "${files[@]}"; do
+        local dest="$MODEL_DIR/$filename"
+        local url="$HUGGINGFACE_BASE/$filename"
+        if ! curl -fsSL "$url" -o "${dest}.tmp"; then
+            rm -f "${dest}.tmp"
+            echo ""
+            echo -e "${RED}Error:${NC} Failed to download $filename from HuggingFace."
+            echo "  To provision manually: curl -fsSL \"$url\" -o \"$MODEL_DIR/$filename\""
+            echo ""
+            exit 1
+        fi
+        mv "${dest}.tmp" "$dest"
+    done
+
+    info "Embedding model provisioned in $MODEL_DIR"
+}
+
 # Check if ~/.local/bin is in PATH
 check_path() {
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -321,6 +353,9 @@ main() {
     # Build and install
     build_from_source "$version"
 
+    # Provision embedding model
+    provision_embedding_model
+
     # Post-install checks
     check_path
 
@@ -347,4 +382,6 @@ main() {
     echo ""
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

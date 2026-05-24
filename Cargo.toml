@@ -1,6 +1,6 @@
 [package]
 name = "speq-skill"
-version = "0.4.3"
+version = "0.5.0"
 edition = "2024"
 authors = ["marconae"]
 license = "MIT"
@@ -19,30 +19,24 @@ clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
 thiserror = "2.0"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
 dirs = "6.0"
 chrono = "0.4"
 postcard = { version = "1.1", features = ["alloc"] }
+candle-core = { version = "0.10", default-features = false }
+candle-nn = { version = "0.10", default-features = false }
+candle-transformers = { version = "0.10", default-features = false }
+tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
 
-# ort does not provide prebuilt binaries for x86_64-apple-darwin (Intel Mac).
-# Use ort-load-dynamic there and link against a system-installed ONNX Runtime
-# (e.g. `brew install onnxruntime`). All other platforms download binaries automatically.
-[target.'cfg(all(target_os = "macos", target_arch = "x86_64"))'.dependencies]
-fastembed = { version = "5.8", default-features = false, features = [
-    "hf-hub-rustls-tls",
-    "ort-load-dynamic",
-    "image-models",
-] }
-
-[target.'cfg(not(all(target_os = "macos", target_arch = "x86_64")))'.dependencies]
-fastembed = { version = "5.8", default-features = false, features = [
-    "hf-hub-rustls-tls",
-    "ort-download-binaries",
-    "image-models",
-] }
+[patch.crates-io]
+# gemm-common 0.19.0 panics when a CPU exposes L4 cache (level > 3 in sysfs);
+# `all_info` is a 3-element array but the code indexes `all_info[level - 1]`
+# without a bounds check. This vendored copy adds the missing `&& level <=
+# all_info.len()` guard.
+gemm-common = { path = "vendor/gemm-common" }
 
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
-serde_json = "1"
 serial_test = "3"
 tempfile = "3"

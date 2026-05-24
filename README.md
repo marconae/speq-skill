@@ -33,6 +33,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 - Downloads the latest release source from GitHub
 - Installs the Rust toolchain if missing (via [rustup](https://rustup.rs/))
 - Builds the `speq` CLI from source
+- Provisions the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
 - Registers `/speq:*` skills for Claude Code and Codex when available
@@ -118,7 +119,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<
 
 This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers. The generated plugin payload declares them as a convenience — they are standard open-source servers installed from their respective repositories at runtime. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier — see [Context7](https://context7.com).
 
-The `speq` CLI downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model (~23MB) on first run for semantic search.
+The `speq` CLI uses [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) for semantic search. The installer provisions the model files (~23MB) automatically into `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/` if set). Inference runs fully offline via pure-Rust BERT inference (candle) — no additional runtime or system library is required.
 
 ## License
 

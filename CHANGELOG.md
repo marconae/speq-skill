@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0
+
+- Replace `fastembed`/ONNX Runtime with a pure-Rust `candle` inference stack — eliminates the Intel Mac crash caused by missing ONNX Runtime prebuilt binaries
+- Add `src/embedding.rs`: `Embedder` struct backed by `candle-transformers` BERT (CPU-only); loads model files from installer-provisioned cache; fails fast with an actionable error when files are missing
+- Vendor `gemm-common` with an OOB bounds-check fix for CPUs that expose L4 cache (prevents panic in `gemm-common 0.19.0`)
+- Add embedding model provisioning to `install.sh`: downloads `model.safetensors`, `tokenizer.json`, and `config.json` from HuggingFace on every install (always refreshes on update)
+- Remove Intel Mac `brew install onnxruntime` workaround from `install.sh` and `scripts/release/build.sh`
+
 ## 0.4.3
 
 Security patch — no functional changes:
