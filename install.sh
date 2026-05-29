@@ -290,6 +290,15 @@ provision_embedding_model() {
 
     local files=("model.safetensors" "tokenizer.json" "config.json")
 
+    local all_cached=true
+    for filename in "${files[@]}"; do
+        [[ -f "$MODEL_DIR/$filename" ]] || { all_cached=false; break; }
+    done
+    if [[ "$all_cached" == true ]]; then
+        info "Embedding model already provisioned in $MODEL_DIR"
+        return 0
+    fi
+
     # Drop any previously provisioned model files so upgrades always get a fresh copy
     if [[ -d "$MODEL_DIR" ]]; then
         for filename in "${files[@]}"; do
