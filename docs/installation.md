@@ -37,6 +37,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 | Codex marketplace registration | `~/.codex/config.toml` (`speq-skill-local`) |
 | Codex MCP server registrations | `~/.codex/config.toml` (`serena`, `context7`) |
 | Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
+| Embeddings model | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
 
 The installer automatically:
 - Downloads the sources of the latest release from GitHub
@@ -46,6 +47,7 @@ The installer automatically:
 - Registers Serena and Context7 with `codex mcp add` when Codex is installed
 - Installs Codex skills into `$CODEX_HOME/skills` so Codex can load `/speq:*`
 - Installs plugin MCP configuration for Serena and Context7
+- Downloads the `snowflake-arctic-embed-xs` embedding model (~23 MB) into `~/.cache/speq/models/`
 
 ---
 
@@ -225,4 +227,4 @@ The plugin depends on Serena and Context7 MCP servers. If you see connection err
 | [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~23MB) | Apache 2.0 |
 
 > [!NOTE]
-> The embeddings model downloads automatically on first `speq search` command.
+> The embeddings model is downloaded during installation into `~/.cache/speq/models/`.
