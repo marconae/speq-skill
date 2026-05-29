@@ -11,7 +11,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
+          components: rustfmt, clippy, llvm-tools-preview
 
       - name: Cache
         uses: Swatinem/rust-cache@v2
@@ -30,11 +30,11 @@ jobs:
       - name: Build
         run: cargo build --release
 
-      - name: Install cargo-tarpaulin
-        run: cargo install cargo-tarpaulin
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
 
       - name: Test with coverage
-        run: cargo tarpaulin --out html --output-dir coverage
+        run: cargo llvm-cov --html --output-dir coverage
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
