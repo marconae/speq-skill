@@ -509,7 +509,6 @@ mod search {
                 .exists()
         );
     }
-
 }
 
 mod record {
