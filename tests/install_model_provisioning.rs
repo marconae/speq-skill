@@ -105,9 +105,8 @@ fn installer_provisions_model_on_clean_machine() {
     );
 
     let model_dir = cache.path().join("models");
-    assert!(model_dir.join("model.safetensors").exists());
+    assert!(model_dir.join("model.onnx").exists());
     assert!(model_dir.join("tokenizer.json").exists());
-    assert!(model_dir.join("config.json").exists());
 }
 
 #[test]
@@ -115,7 +114,7 @@ fn installer_skips_provisioning_when_model_cached() {
     let cache = TempDir::new().unwrap();
     let model_dir = cache.path().join("models");
     fs::create_dir_all(&model_dir).unwrap();
-    for filename in ["model.safetensors", "tokenizer.json", "config.json"] {
+    for filename in ["model.onnx", "tokenizer.json"] {
         fs::copy(model_stub_dir().join(filename), model_dir.join(filename)).unwrap();
     }
 
@@ -189,9 +188,8 @@ fn installer_provisions_model_into_custom_cache_dir() {
 
     // Files must land under the SPEQ_CACHE_DIR-derived models/ directory.
     let model_dir = custom_cache.path().join("models");
-    assert!(model_dir.join("model.safetensors").exists());
+    assert!(model_dir.join("model.onnx").exists());
     assert!(model_dir.join("tokenizer.json").exists());
-    assert!(model_dir.join("config.json").exists());
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(

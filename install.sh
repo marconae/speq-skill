@@ -288,7 +288,7 @@ provision_embedding_model() {
         local MODEL_DIR="${xdg_cache}/speq/models"
     fi
 
-    local files=("model.safetensors" "tokenizer.json" "config.json")
+    local files=("model.onnx" "tokenizer.json")
 
     local all_cached=true
     for filename in "${files[@]}"; do
@@ -311,7 +311,11 @@ provision_embedding_model() {
 
     for filename in "${files[@]}"; do
         local dest="$MODEL_DIR/$filename"
-        local url="$HUGGINGFACE_BASE/$filename"
+        local url
+        case "$filename" in
+            model.onnx) url="$HUGGINGFACE_BASE/onnx/model.onnx" ;;
+            *)          url="$HUGGINGFACE_BASE/$filename" ;;
+        esac
         if ! curl -fsSL "$url" -o "${dest}.tmp"; then
             rm -f "${dest}.tmp"
             echo ""

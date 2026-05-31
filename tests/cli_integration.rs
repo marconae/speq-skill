@@ -68,29 +68,25 @@ static MODEL_CACHED: OnceLock<()> = OnceLock::new();
 /// Provision the embedding-model files into the system model cache once per
 /// test process.
 ///
-/// On the first call it downloads the three model files from HuggingFace into
-/// `speq_skill::search::get_model_dir()` (the same path the binary reads),
-/// mirroring what `install.sh`'s `provision_embedding_model` does during
-/// installation. Subsequent calls and runs are a no-op because the files
-/// persist on disk. The download is intentionally written to the system cache,
-/// not a TempDir, so candle-backed search tests find a model without per-test
-/// downloads.
+/// On the first call it downloads `model.onnx` and `tokenizer.json` from
+/// HuggingFace into `speq_skill::search::get_model_dir()` (the same path the
+/// binary reads), mirroring what `install.sh`'s `provision_embedding_model`
+/// does during installation. Subsequent calls and runs are a no-op because the
+/// files persist on disk. The download is intentionally written to the system
+/// cache, not a TempDir, so tract-backed search tests find a model without
+/// per-test downloads.
 fn ensure_model_cached() {
     MODEL_CACHED.get_or_init(|| {
         let model_dir = speq_skill::search::get_model_dir();
         std::fs::create_dir_all(&model_dir).expect("create model dir");
         let files = [
             (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/model.safetensors",
-                "model.safetensors",
+                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/onnx/model.onnx",
+                "model.onnx",
             ),
             (
                 "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/tokenizer.json",
                 "tokenizer.json",
-            ),
-            (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/config.json",
-                "config.json",
             ),
         ];
         for (url, filename) in files {
@@ -469,46 +465,6 @@ mod search {
 
     #[test]
     #[serial]
-    fn search_index_builds_with_candle_backend() {
-        ensure_model_cached();
-        let tmp = setup_test_specs();
-        let cache_dir = system_cache_dir();
-
-        cmd()
-            .current_dir(tmp.path())
-            .env("SPEQ_CACHE_DIR", &cache_dir)
-            .args(["search", "index"])
-            .assert()
-            .success()
-            .stdout(predicate::str::contains("Indexed"));
-    }
-
-    #[test]
-    #[serial]
-    fn search_loads_model_from_cache_offline() {
-        ensure_model_cached();
-        let tmp = setup_test_specs();
-        let cache_dir = system_cache_dir();
-
-        // Build index first
-        cmd()
-            .current_dir(tmp.path())
-            .env("SPEQ_CACHE_DIR", &cache_dir)
-            .args(["search", "index"])
-            .assert()
-            .success();
-
-        // Run query — model already in cache, no network access
-        cmd()
-            .current_dir(tmp.path())
-            .env("SPEQ_CACHE_DIR", &cache_dir)
-            .args(["search", "query", "validation"])
-            .assert()
-            .success();
-    }
-
-    #[test]
-    #[serial]
     fn search_reports_actionable_error_when_model_missing() {
         // Point SPEQ_CACHE_DIR at an empty TempDir — no model files present.
         // This test must NOT call ensure_model_cached().
@@ -536,9 +492,8 @@ mod search {
         let model_dir = speq_skill::search::get_model_dir();
 
         // Model files must exist in the model cache
-        assert!(model_dir.join("model.safetensors").exists());
+        assert!(model_dir.join("model.onnx").exists());
         assert!(model_dir.join("tokenizer.json").exists());
-        assert!(model_dir.join("config.json").exists());
 
         // Build index and verify it lands in the indexes/ subdir
         cmd()
@@ -555,22 +510,6 @@ mod search {
         );
     }
 
-    #[test]
-    #[serial]
-    fn search_runs_without_onnx_runtime() {
-        ensure_model_cached();
-        let tmp = setup_test_specs();
-        let cache_dir = system_cache_dir();
-
-        // candle is the only inference backend; this asserts that index
-        // building succeeds with no ONNX library present.
-        cmd()
-            .current_dir(tmp.path())
-            .env("SPEQ_CACHE_DIR", &cache_dir)
-            .args(["search", "index"])
-            .assert()
-            .success();
-    }
 }
 
 mod record {

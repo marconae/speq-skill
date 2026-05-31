@@ -88,13 +88,12 @@ pub fn get_model_dir() -> PathBuf {
     get_cache_path().join("models")
 }
 
-/// Get the three expected model file paths as (model.safetensors, tokenizer.json, config.json)
-pub fn get_model_file_paths() -> (PathBuf, PathBuf, PathBuf) {
+/// Get the two expected model file paths as (model.onnx, tokenizer.json)
+pub fn get_model_file_paths() -> (PathBuf, PathBuf) {
     let model_dir = get_model_dir();
     (
-        model_dir.join("model.safetensors"),
+        model_dir.join("model.onnx"),
         model_dir.join("tokenizer.json"),
-        model_dir.join("config.json"),
     )
 }
 
@@ -260,10 +259,9 @@ mod tests {
     #[test]
     fn test_get_model_file_paths_are_under_model_dir() {
         let model_dir = get_model_dir();
-        let (safetensors, tokenizer, config) = get_model_file_paths();
-        assert_eq!(safetensors, model_dir.join("model.safetensors"));
+        let (onnx, tokenizer) = get_model_file_paths();
+        assert_eq!(onnx, model_dir.join("model.onnx"));
         assert_eq!(tokenizer, model_dir.join("tokenizer.json"));
-        assert_eq!(config, model_dir.join("config.json"));
     }
 
     #[test]
