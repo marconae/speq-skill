@@ -22,7 +22,7 @@ speq provides structural verification and exploration tools so AI agents can rel
 
 1. **Validate spec structure** — Check specs for required sections (Feature, Background, Scenarios), RFC2119 keyword usage, and scenario format
 2. **List features** — Display all specs in a tree view organized by domain, optionally filtered
-3. **Search specs** — Semantic search over scenarios using pure-Rust BERT inference (candle) with a locally cached embedding model; no external runtime required
+3. **Search specs** — Semantic search over scenarios using pure-Rust ONNX inference (tract-onnx) with a locally cached embedding model; no external runtime required
 4. **Record plan deltas** — Merge approved delta specs from `_plans/` into permanent specs and archive the plan
 
 ## Out of Scope
@@ -52,7 +52,7 @@ speq provides structural verification and exploration tools so AI agents can rel
 | Language | Rust (edition 2024) | Performance, reliability, single binary distribution |
 | CLI | clap 4.5 | Command-line argument parsing with derive macros |
 | Parsing | pulldown-cmark 0.13 | Markdown parsing for spec analysis |
-| Inference | candle-core, candle-nn, candle-transformers | Pure-Rust BERT inference for semantic search (no native runtime required) |
+| Inference | tract-onnx | Pure-Rust ONNX inference for semantic search (no native runtime required) |
 | Tokenization | tokenizers | Fast tokenization for embedding inputs |
 | Errors | thiserror 2 | Ergonomic error type definitions |
 | Testing | assert_cmd, predicates, tempfile | CLI integration testing |
@@ -70,7 +70,7 @@ cargo test
 cargo fmt && cargo clippy
 
 # Gather Code Coverage
-cargo tarpaulin
+cargo llvm-cov
 ```
 
 ## Project Structure
@@ -115,4 +115,4 @@ Data flows from CLI arguments → module handlers → formatted output.
 
 | Service | Purpose | Failure Impact |
 |---------|---------|----------------|
-| HuggingFace (model download) | The installer downloads `snowflake-arctic-embed-xs` model files (`model.safetensors`, `tokenizer.json`, `config.json`) once into the local cache (`~/.cache/speq/models/` or `$SPEQ_CACHE_DIR/models/`). Inference runs fully offline after that. | Search is unavailable until the model is provisioned. The binary reports a clear error naming the missing files and the cache directory. |
+| HuggingFace (model download) | The installer downloads `snowflake-arctic-embed-xs` model files (`model.onnx`, `tokenizer.json`) once into the local cache (`~/.cache/speq/models/` or `$SPEQ_CACHE_DIR/models/`). Inference runs fully offline after that. | Search is unavailable until the model is provisioned. The binary reports a clear error naming the missing files and the cache directory. |
