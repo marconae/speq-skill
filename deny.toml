@@ -10,6 +10,8 @@ ignore = [
     # Unmaintained crates (not security vulnerabilities)
     "RUSTSEC-2024-0436",  # paste - transitive dep, no security impact
     "RUSTSEC-2023-0089",  # atomic-polyfill - transitive via postcard/heapless, no security impact
+    # Build-time only dep; speq does not parse RFC 2822 user input; cannot upgrade (pinned by tract-linalg's liquid build dep)
+    "RUSTSEC-2026-0009",  # time - stack exhaustion via RFC 2822 parsing; build-only transitive via tract-linalg → liquid
 ]
 
 [licenses]

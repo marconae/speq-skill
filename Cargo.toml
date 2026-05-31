@@ -1,6 +1,6 @@
 [package]
 name = "speq-skill"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2024"
 authors = ["marconae"]
 license = "MIT"
@@ -23,17 +23,8 @@ serde_json = "1"
 dirs = "6.0"
 chrono = "0.4"
 postcard = { version = "1.1", features = ["alloc"] }
-candle-core = { version = "0.10", default-features = false }
-candle-nn = { version = "0.10", default-features = false }
-candle-transformers = { version = "0.10", default-features = false }
+tract-onnx = "0.21"
 tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
-
-[patch.crates-io]
-# gemm-common 0.19.0 panics when a CPU exposes L4 cache (level > 3 in sysfs);
-# `all_info` is a 3-element array but the code indexes `all_info[level - 1]`
-# without a bounds check. This vendored copy adds the missing `&& level <=
-# all_info.len()` guard.
-gemm-common = { path = "vendor/gemm-common" }
 
 [dev-dependencies]
 assert_cmd = "2"

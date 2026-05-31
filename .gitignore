@@ -17,6 +17,7 @@ target
 
 # macOS
 .DS_Store
+._*
 
 # GitHub
 .github/workflows/.secrets
