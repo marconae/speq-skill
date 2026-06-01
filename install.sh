@@ -199,6 +199,92 @@ install_rust() {
     fi
 }
 
+# Detect platform triple understood by the release archive naming convention
+detect_platform() {
+    local arch os
+    arch=$(uname -m)
+    os=$(uname -s)
+
+    case "$arch" in
+        x86_64)        arch="x86_64" ;;
+        aarch64|arm64) arch="aarch64" ;;
+        *)             echo ""; return ;;
+    esac
+
+    case "$os" in
+        Linux)  os="linux" ;;
+        Darwin) os="mac" ;;
+        *)      echo ""; return ;;
+    esac
+
+    echo "${arch}-${os}"
+}
+
+# Download a pre-built release archive and install it directly (no compilation).
+# Returns 0 on success, 1 if no pre-built binary is available for this platform
+# or if the download fails — caller should fall back to build_from_source.
+install_from_prebuilt() {
+    local version="$1"
+
+    # When a local source tarball is provided (Docker test mode), always compile
+    [[ -n "${SPEQ_LOCAL_TARBALL:-}" ]] && return 1
+
+    local platform
+    platform=$(detect_platform)
+    [[ -z "$platform" ]] && return 1
+
+    # Strip leading 'v' for crate version, but the tag name is used in the asset URL
+    local archive_name="speq-marketplace-${version}-${platform}.tar.gz"
+    local download_url="https://github.com/$REPO/releases/download/${version}/${archive_name}"
+
+    local tmp_dir
+    tmp_dir=$(mktemp -d)
+    trap "rm -rf $tmp_dir" RETURN
+
+    info "Downloading pre-built binary for ${platform}..."
+    if ! curl -fsSL "$download_url" -o "$tmp_dir/release.tar.gz" 2>/dev/null; then
+        warn "No pre-built binary available for ${platform} (${version}). Building from source..."
+        return 1
+    fi
+
+    step 1 3 "Extracting..."
+    tar -xzf "$tmp_dir/release.tar.gz" -C "$tmp_dir"
+
+    local extract_dir="$tmp_dir/speq-marketplace-${version}-${platform}"
+
+    step 2 3 "Installing..."
+
+    mkdir -p "$INSTALL_DIR"
+    cp "$extract_dir/bin/speq" "$INSTALL_DIR/speq"
+    chmod +x "$INSTALL_DIR/speq"
+    info "Installed speq to $INSTALL_DIR/speq"
+
+    rm -rf "$MARKETPLACE_DIR"
+    mkdir -p "$MARKETPLACE_DIR"
+    cp -r "$extract_dir/." "$MARKETPLACE_DIR/"
+    info "Installed marketplace to $MARKETPLACE_DIR"
+
+    step 3 3 "Registering plugins..."
+
+    if command -v claude &> /dev/null; then
+        info "Registering plugin with Claude CLI..."
+        claude plugin uninstall speq-skill@speq-skill 2>/dev/null || true
+        claude plugin marketplace remove speq-skill 2>/dev/null || true
+        claude plugin marketplace add "$MARKETPLACE_DIR" 2>/dev/null || true
+        claude plugin install speq-skill@speq-skill 2>/dev/null || true
+    else
+        warn "Claude CLI not found. Run these commands after installing Claude:"
+        echo "  claude plugin marketplace add $MARKETPLACE_DIR"
+        echo "  claude plugin install speq-skill@speq-skill"
+    fi
+
+    register_codex_plugin
+    register_codex_mcp_servers
+    install_codex_skills
+
+    return 0
+}
+
 # Download and build from source
 #
 # Environment variables for testing:
@@ -348,14 +434,6 @@ main() {
     echo "=========================="
     echo ""
 
-    # Check prerequisites (skip if using pre-built binary)
-    if [[ -z "${SPEQ_PREBUILT:-}" ]]; then
-        check_linux_deps
-        if ! check_rust; then
-            install_rust
-        fi
-    fi
-
     # Get version
     info "Checking for latest release..."
     local version
@@ -363,8 +441,16 @@ main() {
     info "Installing version: $version"
     echo ""
 
-    # Build and install
-    build_from_source "$version"
+    # Try pre-built binary first; fall back to compiling from source
+    if ! install_from_prebuilt "$version"; then
+        if [[ -z "${SPEQ_PREBUILT:-}" ]]; then
+            check_linux_deps
+            if ! check_rust; then
+                install_rust
+            fi
+        fi
+        build_from_source "$version"
+    fi
 
     # Provision embedding model
     provision_embedding_model

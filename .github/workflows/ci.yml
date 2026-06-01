@@ -58,23 +58,85 @@ jobs:
           name: coverage
           path: coverage/
 
-  release:
+  build:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: ci
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            cross: false
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+            cross: true
+          - target: aarch64-apple-darwin
+            runner: macos-14
+            cross: false
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            cross: false
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install cross (Linux ARM only)
+        if: matrix.cross
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cross
+
+      - name: Install cargo-about
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-about
+
+      - name: Build release archive
+        shell: bash
+        env:
+          TARGET: ${{ matrix.target }}
+        run: ./scripts/release/build.sh ${{ github.ref_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: speq-${{ matrix.target }}
+          path: dist/speq-marketplace-*.tar.gz
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ci, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-
       - name: Download coverage artifact
         uses: actions/download-artifact@v4
         with:
           name: coverage
           path: coverage/
 
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: speq-*
+          merge-multiple: true
+          path: dist/
+
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-          files: coverage/*
+          files: |
+            coverage/*
+            dist/*.tar.gz
