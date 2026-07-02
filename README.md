@@ -94,6 +94,8 @@ It introduces a lightweight workflow for spec-driven development. It adds a CLI 
 
 Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
 
+For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the same cycle headlessly against a `feat/<plan-name>` branch and PR — see [Workflow](./docs/workflow.md#headless-pr-pipeline).
+
 ---
 
 ## Documentation

@@ -183,6 +183,48 @@ After a successful `/speq:implement`:
 
 ---
 
+## Headless PR Pipeline
+
+`/speq:plan-pr` and `/speq:implement-pr` run the same Plan → Implement →
+Record cycle unattended. Autonomous pipelines can't run a live interview, so
+the Q&A has to be decoupled from planning itself: every decision that would
+normally be an `AskUserQuestion` prompt either gets a documented, conventional
+default, or turns into an open question posted on a PR for later reply.
+Human-in-the-loop is converted into an asynchronous process instead of a
+synchronous interview. Humans control the pipeline and still the intent via 
+prompting and answering questions, just not in a live chat session.
+
+```
+/speq:plan-pr <intent>  →  PR (ready, or draft + open questions)
+                                   │
+                    (reply on the PR, or /speq:plan <name> locally)
+                                   │
+                                   ▼
+                     /speq:implement-pr <name>  →  same PR, updated
+```
+
+- **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and
+  reused by `/speq:implement-pr` — both push to the same PR, there's no
+  separate plan-only branch namespace.
+- **Blocked state**: if planning hits a decision that genuinely needs a
+  human (irreversible, architecturally divergent, or security/compliance
+  relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md`
+  is flagged blocked, and the PR is opened as a draft with the questions
+  posted as a comment. `/speq:implement-pr` refuses to proceed while this
+  file exists.
+- **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>`
+  (it re-fetches new comments/reviews as answers), or check out the branch
+  and finish interactively with `/speq:plan <plan-name>`.
+- **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to
+  `/speq:record`'s library-split question rather than stalling on it.
+- **Git/PR mechanics**: both skills delegate every branch/commit/push/PR
+  operation to `git-pr-agent` — the one sub-agent in this system permitted to
+  write git history or touch a remote (via `ghbrk`), keeping both
+  orchestrators as thin as the interactive ones. See
+  [Model Routing](./model-routing.md).
+
+---
+
 ## Utility Skills
 
 Reusable guidance invoked by workflow skills:

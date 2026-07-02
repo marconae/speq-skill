@@ -24,12 +24,15 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `/speq:implement` | `sonnet` | inherited | Thin orchestration |
 | `/speq:record` | `sonnet` | inherited | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
+| `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration — headless |
+| `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration — headless |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `opus` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `implementer-agent` | `sonnet` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `opus` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
+| `git-pr-agent` | `sonnet` | `medium` | Branch/commit/push/PR mechanics — no reasoning premium |
 
 ---
 
@@ -41,12 +44,15 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `/speq:implement` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:record` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
+| `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
+| `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `implementer-agent` | `gpt-5.4` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `gpt-5.5` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
+| `git-pr-agent` | `gpt-5.4` | `medium` | Branch/commit/push/PR mechanics — no reasoning premium |
 
 ---
 

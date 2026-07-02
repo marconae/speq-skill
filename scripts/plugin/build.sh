@@ -84,7 +84,7 @@ set_codex_skill_model() {
     local skill_name="$2"
 
     case "$skill_name" in
-        speq-plan|speq-implement|speq-record)
+        speq-plan|speq-implement|speq-record|speq-plan-pr|speq-implement-pr)
             sed_in_place 's/^model: sonnet$/model: gpt-5.4/' "$file"
             if ! grep -q '^effort:' "$file"; then
                 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -153,7 +153,7 @@ set_codex_agent_model() {
         planner-agent.md|implementer-expert-agent.md|code-reviewer.md)
             sed_in_place 's/^model: .*/model: gpt-5.5/' "$file"
             ;;
-        implementer-agent.md|recorder-agent.md)
+        implementer-agent.md|recorder-agent.md|git-pr-agent.md)
             sed_in_place 's/^model: .*/model: gpt-5.4/' "$file"
             ;;
         *)
@@ -262,6 +262,7 @@ main() {
     log_info "Claude test: claude --plugin-dir $CLAUDE_PLUGIN_DIR"
     log_info "Codex plugin: $CODEX_PLUGIN_DIR"
     log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission"
+    log_info "Headless PR pipeline: /speq:plan-pr, /speq:implement-pr"
     log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:cli"
     log_info "Codex model routing: orchestration gpt-5.4/medium, heavy agents gpt-5.5/xhigh, standard implementation gpt-5.4/high, recording gpt-5.4/medium"
     log_info "Marketplace structure built at: $MARKETPLACE_DIR"

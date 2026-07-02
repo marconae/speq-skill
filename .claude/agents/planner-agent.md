@@ -160,9 +160,34 @@ Task summary:
 Validation: pass
 ```
 
+## Headless / Non-Interactive Mode
+
+If the orchestrator's prompt states `Interview Mode: headless` (used by
+`speq-plan-pr`, never by the interactive `speq-plan`), there is no human to
+ask a clarifying question mid-planning. Adjust the escalation bar instead of
+blocking by default:
+
+- **Assume and document.** For conventions, naming, implementation details,
+  and any choice with a clearly conventional default, make the call yourself
+  and record it as a `decision-log.md` entry (Rationale explains why this
+  default was chosen). This is the common case — most headless plans should
+  finish without escalating.
+- **Escalate only irreducible decisions** — ones that are irreversible, change
+  what the feature does for a user, diverge architecturally (two genuinely
+  incompatible designs), or touch security/compliance. Before escalating,
+  save every file you've completed so far (plan.md, delta specs,
+  decision-log.md) exactly as they stand — the orchestrator persists this
+  partial state for human review, so it must be usable as-is.
+- **Escalation format.** Return your response prefixed with the exact
+  sentinel `OPEN QUESTIONS:` followed by a markdown bullet list of concrete
+  questions (same bar as the interactive path's "signal back with a concrete
+  question" — headless mode changes when you escalate, not the quality bar
+  for what you escalate). Do not mix this sentinel into a normal completion
+  report.
+
 ## Scope Constraints
 
 - Produce spec deltas and plan.md — do NOT implement code
 - Do NOT embed spec content in plan.md — reference delta files only
 - Do NOT skip the clarifying interview findings the orchestrator passed you
-- If a requirement is ambiguous, signal back to the orchestrator with a concrete question — do not assume
+- If a requirement is ambiguous, signal back to the orchestrator with a concrete question — do not assume (in headless mode, see above — assume first, escalate only when the decision is irreducible)

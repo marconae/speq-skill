@@ -3,7 +3,7 @@ name: implementer-expert-agent
 description: Expert implementation worker for spec-driven development. Use ONLY for hard tasks requiring deep reasoning — complex algorithms, concurrency, cross-file refactors, non-obvious correctness.
 model: opus
 effort: xhigh
-color: magenta
+color: purple
 ---
 
 # Expert Implementation Sub-Agent

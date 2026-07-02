@@ -15,6 +15,8 @@ You are **building speq-skill while using it**.
 ├── speq-plan/                   # Workflow skill (orchestrator)
 ├── speq-implement/              # Workflow skill (orchestrator)
 ├── speq-record/                 # Workflow skill (orchestrator)
+├── speq-plan-pr/                # Workflow skill (orchestrator, headless)
+├── speq-implement-pr/           # Workflow skill (orchestrator, headless)
 ├── speq-mission/                # Workflow skill
 ├── speq-code-guardrails/        # Utility skill
 ├── speq-code-tools/             # Utility skill
@@ -27,7 +29,8 @@ You are **building speq-skill while using it**.
 ├── implementer-agent.md         # standard implementation
 ├── implementer-expert-agent.md  # hard, reasoning-heavy tasks
 ├── code-reviewer.md             # adversarial review
-└── recorder-agent.md            # deterministic spec merge
+├── recorder-agent.md            # deterministic spec merge
+└── git-pr-agent.md              # deterministic git/PR mechanics
 ```
 
 ### Build Script
@@ -42,28 +45,28 @@ The build script (`scripts/plugin/build.sh`):
 
 ### Invocation Patterns
 
-| Context | Workflow Skills | Utility Skills |
-|---------|-----------------|----------------|
-| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
-| Installed plugin (Claude/Codex) | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
+| Context | Workflow Skills | Headless PR Pipeline | Utility Skills |
+|---------|-----------------|-----------------------|----------------|
+| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-plan-pr`, `/speq-implement-pr` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
+| Installed plugin (Claude/Codex) | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:plan-pr`, `/speq:implement-pr` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
 
 ## Model Routing Strategy
 
-Model routing is hardcoded in generated artifacts for `0.4.0`. Dynamic model-routing configuration is deferred to a later release.
+Model routing is hardcoded in generated artifacts for `0.7.0`. Dynamic model-routing configuration is deferred to a later release.
 
 Claude defaults:
-- `speq-plan`, `speq-implement`, `speq-record`: `model: sonnet`
+- `speq-plan`, `speq-implement`, `speq-record`, `speq-plan-pr`, `speq-implement-pr`: `model: sonnet`
 - `speq-mission` and utility skills: inherit caller model
 - heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: opus`, `effort: xhigh`
 - `implementer-agent`: `model: sonnet`, `effort: high`
-- `recorder-agent`: `model: sonnet`, `effort: medium`
+- `recorder-agent`, `git-pr-agent`: `model: sonnet`, `effort: medium`
 
 Codex defaults:
-- `speq:plan`, `speq:implement`, `speq:record`: `model: gpt-5.4`, `effort: medium`
+- `speq:plan`, `speq:implement`, `speq:record`, `speq:plan-pr`, `speq:implement-pr`: `model: gpt-5.4`, `effort: medium`
 - `speq:mission` and utility skills: inherit caller model
 - heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: gpt-5.5`, `effort: xhigh`
 - `implementer-agent`: `model: gpt-5.4`, `effort: high`
-- `recorder-agent`: `model: gpt-5.4`, `effort: medium`
+- `recorder-agent`, `git-pr-agent`: `model: gpt-5.4`, `effort: medium`
 
 ### Principle
 
@@ -80,6 +83,7 @@ Workflow skills (`speq-plan`, `speq-implement`, `speq-record`) are thin orchestr
 | `implementer-expert-agent` | heavy reasoning | `speq-implement` | Only for tasks tagged `[expert]` in tasks.md. Concurrency, cross-file refactors, non-obvious correctness. |
 | `code-reviewer` | heavy reasoning | `speq-implement` | Adversarial review requires holding two large artifacts in mind and surfacing non-obvious defects. |
 | `recorder-agent` | mechanical | `speq-record` | Apply delta markers, validate, archive. No reasoning premium. |
+| `git-pr-agent` | mechanical | `speq-plan-pr`, `speq-implement-pr` | Branch/commit/push/PR create-or-update, and posting/collecting PR comments. No reasoning premium — pure git/gh mechanics. The only agent permitted to write git history or touch a remote. |
 
 Actual model and effort values are stamped into generated platform artifacts by `scripts/plugin/build.sh`.
 
