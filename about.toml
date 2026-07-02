@@ -5,9 +5,9 @@
 accepted = [
     "MIT",
     "Apache-2.0",
-    "Zlib",          # foldhash 0.1.5
-    "MPL-2.0",       # option-ext 0.2.0
-    "Unicode-3.0",   # unicode-ident — appears in AND expression, must be listed explicitly
+    "Zlib",
+    "MPL-2.0",
+    "Unicode-3.0",
 ]
 
 # Only include runtime dependencies (not build or dev dependencies)

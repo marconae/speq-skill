@@ -23,16 +23,15 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 ```
 
 > [!NOTE]
-> The installer builds `speq` from source using the Rust toolchain (installed automatically if missing). There is no binary distribution. See [Installation](./docs/installation.md) for details.
+> The installer downloads a pre-built `speq` binary for your platform when one is available, falling back to building from source with the Rust toolchain (installed automatically if missing). See [Installation](./docs/installation.md) for details.
 
 Then open Claude Code or Codex and type `/speq:mission` to start.
 
 <details>
 <summary>What does the installer do?</summary>
 
-- Downloads the latest release source from GitHub
-- Installs the Rust toolchain if missing (via [rustup](https://rustup.rs/))
-- Builds the `speq` CLI from source
+- Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon); other platforms fall back to a source build
+- If building from source: installs the Rust toolchain if missing (via [rustup](https://rustup.rs/)) and builds `speq`
 - Provisions the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`

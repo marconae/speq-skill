@@ -11,7 +11,7 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 ```
 
 > [!NOTE]
-> The installer builds `speq` from source using the Rust toolchain. There is no binary distribution. If you don't have Rust installed, the installer will offer to install it for you via [rustup](https://rustup.rs/).
+> The installer downloads a pre-built `speq` binary for your platform when one is available (Linux x86_64/ARM64, macOS Apple Silicon), falling back to building from source using the Rust toolchain. If you don't have Rust installed and a source build is needed, the installer will offer to install it for you via [rustup](https://rustup.rs/).
 
 Then open Claude Code or Codex and type `/speq:mission` to start.
 
@@ -21,7 +21,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 
 - **macOS or Linux** (Windows via Windows Subsystem for Linux (WSL))
 - **Claude Code CLI** or **Codex CLI/App** installed and configured
-- **Rust toolchain** (installed if missing or via [rustup](https://rustup.rs/))
+- **Rust toolchain** — only needed if no pre-built binary matches your platform (installed automatically if missing, or via [rustup](https://rustup.rs/))
 
 ---
 
@@ -40,8 +40,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 | Embeddings model | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
 
 The installer automatically:
-- Downloads the sources of the latest release from GitHub
-- Builds and copies the `speq` CLI to your PATH
+- Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon) and copies it to your PATH; other platforms (e.g. Intel Mac) fall back to downloading the release source and building `speq` with the Rust toolchain
 - Installs the speq-skill plugin for Claude Code and Codex
 - Registers the local Codex marketplace with `codex plugin marketplace add` when Codex is installed
 - Registers Serena and Context7 with `codex mcp add` when Codex is installed
@@ -52,6 +51,8 @@ The installer automatically:
 ---
 
 ## Installation from Source
+
+To build from source manually instead of using the pre-built binary (or if your platform has no pre-built binary):
 
 ```bash
 # Clone the repository
@@ -130,7 +131,7 @@ Add `~/.local/bin` to your PATH.
 
 ### Rust build errors
 
-Ensure Rust toolchain is installed and up to date:
+Only relevant if the installer fell back to a source build (no pre-built binary for your platform) or you ran `./scripts/local-install.sh` directly. Ensure Rust toolchain is installed and up to date:
 
 ```bash
 # Install Rust
