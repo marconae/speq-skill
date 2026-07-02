@@ -160,6 +160,20 @@ else
     exit 1
 fi
 
+if grep -q "Downloaded Assets" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
+    echo "OK Downloaded Assets section found"
+else
+    echo "ERROR: THIRD_PARTY_LICENSES missing 'Downloaded Assets' section"
+    exit 1
+fi
+
+if grep -q "snowflake-arctic-embed-xs" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
+    echo "OK snowflake-arctic-embed-xs attribution found"
+else
+    echo "ERROR: THIRD_PARTY_LICENSES missing snowflake-arctic-embed-xs attribution"
+    exit 1
+fi
+
 echo ""
 echo "=== All tests passed ==="
 echo ""
