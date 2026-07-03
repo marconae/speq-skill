@@ -52,7 +52,7 @@ The build script (`scripts/plugin/build.sh`):
 
 ## Model Routing Strategy
 
-Model routing is hardcoded in generated artifacts for `0.7.0`. Dynamic model-routing configuration is deferred to a later release.
+Model routing is hardcoded in generated artifacts for `0.8.0`. Dynamic model-routing configuration is deferred to a later release.
 
 Claude defaults:
 - `speq-plan`, `speq-implement`, `speq-record`, `speq-plan-pr`, `speq-implement-pr`: `model: sonnet`

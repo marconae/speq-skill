@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.8.0
+
+- Add a 6th `code-reviewer` category, "YAGNI / Over-Engineering": flags unneeded dependencies, speculative abstractions (single-implementation interfaces/generics/config values), dead flexibility (unused feature flags/extension points), reinvented standard-library logic, and shrinkable code — every finding is delegated to the implementer agents like any other finding, with `[expert]` tagging for removals that have cross-file or subtle-correctness implications
+- Give all 6 `code-reviewer` categories consistent per-finding `[TAG]` markers (previously 5 categories shared one blanket tag each)
+- Add a `Dependency Rule` and `YAGNI Checks` to `speq-code-guardrails` so unneeded dependencies and speculative abstractions are avoided at implementation time, not just caught by review afterward
+- Keep `code-reviewer`/`speq-code-guardrails` wording technology-agnostic — the reviewer runs against arbitrary target-project languages, not just this repo's own Rust codebase
+
+## 0.7.0
+
+- Add `speq-plan-pr` and `speq-implement-pr`: headless, non-interactive counterparts to `speq-plan`/`speq-implement` that plan/implement against a `feat/<plan-name>` branch and open or update a PR
+- Add `git-pr-agent`, the only sub-agent permitted to write git history or touch a remote (proxied through `ghbrk`)
+- `planner-agent` gains a headless escalation mode: assume-and-document conventional decisions, escalate only irreducible ones via an `OPEN QUESTIONS:` sentinel
+
+## 0.6.0
+
+- Add a multi-platform release pipeline: CI cross-compiles Linux x86_64/ARM64, macOS, and Windows; the installer tries a pre-built binary download first, falling back to a source build
+- Tighten `deny.toml`/`about.toml` license allow-lists to the 5 licenses actually present in the dependency tree, and explicitly ban the `openssl`/`native-tls`/`boring` crate family
+- Fix stale `THIRD_PARTY_LICENSES` notices left over from the `tract-onnx` migration and update README/installation docs to describe pre-built-binary-first installation
+
+## 0.5.1
+
+- Replace `candle-core`/`candle-nn`/`candle-transformers` with `tract-onnx` for embedding inference, loading the upstream `model.onnx` graph directly — removes the vendored `gemm-common` patch and resolves the L4-cache panic structurally rather than patching around it
+- Simplify provisioned model files to `model.onnx` + `tokenizer.json` (drops `config.json`)
+- Fix installer: `main` was silently skipped when piped via `curl | bash` (`BASH_SOURCE[0]` is empty in that mode)
+
 ## 0.5.0
 
 - Replace `fastembed`/ONNX Runtime with a pure-Rust `candle` inference stack — eliminates the Intel Mac crash caused by missing ONNX Runtime prebuilt binaries
