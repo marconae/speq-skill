@@ -180,13 +180,14 @@ After implementation completes, review all changed files.
    ## Context
 
    - Plan: specs/_plans/{plan_name}/plan.md
-   - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations
+   - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations, YAGNI/over-engineering
    - Structure findings using the **Pyramid Principle**: group by theme, lead each group with the key finding, support with evidence.
    """
    )
    ```
 3. **Process findings** — If findings exist:
-   - Create fix tasks in `tasks.md` (tag `[expert]` when the finding involves subtle correctness, concurrency, or cross-file reasoning)
+   - Create fix tasks in `tasks.md` for every finding
+   - Tag a fix task `[expert]` when the finding involves subtle correctness, concurrency, or cross-file reasoning
    - Route fix tasks by tag: `implementer-agent` for untagged, `implementer-expert-agent` for `[expert]`
 4. **Proceed to verification** — Phase 5 verifies all tests pass
 

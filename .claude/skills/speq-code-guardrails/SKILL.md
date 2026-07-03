@@ -15,6 +15,10 @@ description: TDD and code quality guardrails triggered by speq-implement.
 
 **No claim without evidence.** Run command, show output, then claim.
 
+## Dependency Rule
+
+**No new dependency without confirming the standard library or an already-installed dependency cannot do it first.**
+
 ## TDD Cycle (London School)
 
 ```
@@ -62,6 +66,11 @@ Run ONLY the test you created/changed — not the full suite.
 - Private methods: no comments
 - No inline comments — code should be self-explanatory
 - No work tracking (TODOs, FIXMEs, ticket refs)
+
+## YAGNI Checks
+
+- Abstraction (interface, generic type, configuration value) with one implementation/caller? Inline it.
+- Feature flag or extension point nobody uses? Remove it.
 
 ## Code Smells
 
