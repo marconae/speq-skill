@@ -122,6 +122,11 @@ This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https
 
 The `speq` CLI uses [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) for semantic search. The installer provisions the model files (~23MB) automatically into `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/` if set). Inference runs fully offline via pure-Rust BERT inference (candle) — no additional runtime or system library is required.
 
+## Acknowledgments
+
+- The `code-reviewer` agent's YAGNI / Over-Engineering review category was inspired by the tag taxonomy of [ponytail](https://github.com/DietrichGebert/ponytail).
+- The [semantic anchor](./docs/semantic-anchors.md) approach — naming established methodologies (Clean Code, London School TDD, MECE, ADR, and others) directly in skill instructions — draws on the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog.
+
 ## License
 
 [MIT](LICENSE)
