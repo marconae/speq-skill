@@ -129,7 +129,7 @@ The `speq` CLI uses [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake
 
 ## License
 
-[MIT](LICENSE)
+Free, open-source, and community-supported. [MIT](LICENSE).
 
 ---
 
