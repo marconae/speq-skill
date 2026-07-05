@@ -84,6 +84,37 @@ mod claude_code_config {
             v.get("mcpServers").is_none(),
             "built .mcp.json must not have a top-level mcpServers wrapper"
         );
+
+        let plugin_json_path = Path::new(manifest_dir)
+            .join("dist/marketplace/plugins/speq-skill/.claude-plugin/plugin.json");
+        let plugin_json: serde_json::Value = serde_json::from_str(
+            &fs::read_to_string(&plugin_json_path).expect("failed to read built plugin.json"),
+        )
+        .expect("built plugin.json must be valid JSON");
+
+        let mut expected_agents: Vec<String> =
+            fs::read_dir(Path::new(manifest_dir).join(".claude/agents"))
+                .expect("failed to read .claude/agents")
+                .filter_map(|e| e.ok())
+                .map(|e| e.file_name().to_string_lossy().into_owned())
+                .filter(|name| name.ends_with(".md"))
+                .collect();
+        expected_agents.sort();
+
+        let mut listed_agents: Vec<String> = plugin_json["agents"]
+            .as_array()
+            .expect("plugin.json agents must be an array")
+            .iter()
+            .map(|v| v.as_str().unwrap().rsplit('/').next().unwrap().to_string())
+            .collect();
+        listed_agents.sort();
+
+        assert_eq!(
+            listed_agents, expected_agents,
+            "plugin.json agents array must list exactly the files in .claude/agents/ \
+             (this is the git-pr-agent regression: it shipped in agents/ but wasn't \
+             registered in the manifest)"
+        );
     }
 }
 

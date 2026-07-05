@@ -197,6 +197,17 @@ copy_agents() {
     copy_agents_for_platform codex
 }
 
+generate_agents_json_array() {
+    local entries=()
+    for agent_file in "$SOURCE_DIR/agents"/*.md; do
+        if [[ -f "$agent_file" ]]; then
+            entries+=("\"./agents/$(basename "$agent_file")\"")
+        fi
+    done
+    local IFS=,
+    echo "[${entries[*]}]"
+}
+
 stamp_file() {
     local file="$1"
     local version="$2"
@@ -214,6 +225,8 @@ generate_manifests() {
 
     cp "$SCRIPT_DIR/plugin.json" "$CLAUDE_PLUGIN_DIR/.claude-plugin/plugin.json"
     stamp_file "$CLAUDE_PLUGIN_DIR/.claude-plugin/plugin.json" "$version" "$author"
+    sed_in_place "s|AGENTS_PLACEHOLDER|$(generate_agents_json_array)|" \
+        "$CLAUDE_PLUGIN_DIR/.claude-plugin/plugin.json"
 
     cp "$SCRIPT_DIR/marketplace.json" "$MARKETPLACE_DIR/.claude-plugin/marketplace.json"
     stamp_file "$MARKETPLACE_DIR/.claude-plugin/marketplace.json" "$version" "$author"
