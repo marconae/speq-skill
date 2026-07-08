@@ -10,6 +10,7 @@
 |-------------------------------------|--------------------------------------------------------------|
 | [Installation](./installation.md)   | Setup CLI and plugin                                         |
 | [Workflow](./workflow.md)           | One-time mission setup, then Plan → Implement → Record cycle |
+| [Headless PR Pipeline](./workflow.md#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
 | [Spec Library](./spec-library.md) | Spec format, BDD, and RFC keywords                           |
 | [Decision Log](./decision-log.md)   | Design decisions, ADR format, and validation                 |
 | [Model Routing](./model-routing.md) | Orchestrator skills, specialist sub-agents, and effort tiers |

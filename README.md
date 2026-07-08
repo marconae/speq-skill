@@ -22,9 +22,6 @@
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
-> [!NOTE]
-> The installer downloads a pre-built `speq` binary for your platform when one is available, falling back to building from source with the Rust toolchain (installed automatically if missing). See [Installation](./docs/installation.md) for details.
-
 Then open Claude Code or Codex and type `/speq:mission` to start.
 
 <details>
@@ -104,6 +101,7 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 |-------|-------------|
 | [Installation](./docs/installation.md) | Setup CLI and plugin |
 | [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
+| [Headless PR Pipeline](./docs/workflow.md#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
 | [Decision Log](./docs/decision-log.md) | Design decisions, ADR format, and validation |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |

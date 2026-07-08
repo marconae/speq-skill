@@ -12,7 +12,7 @@ You are a thin orchestrator layered on top of `speq-implement`. Your goal is:
 - Leave the PR ready for human review as the pipeline's endpoint.
 
 You must follow this workflow:
-- Delegate implementation to `/speq-implement`, spec merge to `/speq-record`, and every git/`gh` action to `git-pr-agent`; your own work is resolving the branch, gating, bumping the version, and sequencing those calls.
+- Delegate implementation to `/speq-implement`, spec merge to `/speq-record`, and every git/`gh` action to `git-agent`; your own work is resolving the branch, gating, bumping the version, and sequencing those calls.
 - Run the steps in order: resolve target → blocker check → implement → bump version → test+record gate → PR.
 - Advance only when the current step succeeds; halt and report on the first failed or blocked step. Reuse the one `feat/<plan-name>` branch/PR that `speq-plan-pr` created.
 
@@ -21,22 +21,29 @@ You must follow this workflow:
 Invoke before starting:
 - `/speq-cli` — spec discovery, to resolve plan names
 
-`speq-implement`, `speq-record`, and `git-pr-agent` each invoke their own required skills.
+`speq-implement` and `speq-record` invoke their own required skills; `git-agent` requires none.
 
 ## Workflow
 
-### 1. Resolve Target + Branch (delegate)
+### 1. Resolve Target + Branch
 
-`$1` empty → ask the caller which plan. Otherwise:
+`$1` empty → ask the caller which plan. Otherwise check out the target (for a bare plan-name, that is its `feat/<plan-name>` branch):
 
 ```
-Delegate to git-pr-agent — mode: resolve-target
-  input: <$1 — a plan-name, PR number, or branch name>
+Delegate to git-agent — operation: checkout
+  target: <$1 — a plan-name (→ feat/<plan-name>), PR number, or branch name>
+```
+
+If `checkout` reports not-found (the plan exists only locally and was never pushed):
+
+```
+Delegate to git-agent — operation: create-branch
+  branch: feat/<plan-name>
 ```
 
 ### 2. Blocker Check (orchestrator)
 
-Proceed only when `open-questions.md` is resolved. If step 1 reports it unresolved → **stop** and report that the plan has open questions pending human review (resolve via PR comments and `/speq:plan-pr <plan-name>`, or locally with `/speq:plan <plan-name>`). The human-in-the-loop point lives exactly here.
+Read `specs/_plans/<plan-name>/open-questions.md`. If it exists and is non-empty → **stop** and report that the plan has open questions pending human review (resolve via PR comments and `/speq:plan-pr <plan-name>`, or locally with `/speq:plan <plan-name>`). The human-in-the-loop point lives exactly here.
 
 ### 3. Implement
 
@@ -53,24 +60,26 @@ Run the project's real test suites (per `specs/mission.md § Commands` — typic
 - **All green** → invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision.
 - **Any suite red** → **stop**, report the failures, and leave the plan unrecorded.
 
-### 6. PR (delegate)
+### 6. PR
 
-Commit and push, then open or update the PR as **ready**:
+Commit and push, then open or update the PR and mark it ready:
 
 ```
-Delegate to git-pr-agent — mode: commit-and-push
-  plan-name: <plan-name>
+Delegate to git-agent — operation: commit
   paths: implementation files, version bump, verification-report.md
   message: feat(<scope>): implement <plan-name>
 
-Delegate to git-pr-agent — mode: open-or-update-pr
-  plan-name: <plan-name>
+Delegate to git-agent — operation: push
+
+Delegate to git-agent — operation: create-pr
   draft: false
-  title: <type>(<scope>): <slug>   # same derivation rule as speq-plan-pr
+  title: <type>(<scope>): <slug>    # same derivation rule as speq-plan-pr
   body: summary of the implementation diff, both test-suite results (integration + e2e), and the /speq:record outcome
+
+Delegate to git-agent — operation: ready-pr
 ```
 
-This pushes to the same `feat/<plan-name>` branch `speq-plan-pr` created, so it updates that PR (or opens one if the plan was only implemented locally). `draft: false` marks it ready.
+`create-pr` returns the draft PR `speq-plan-pr` opened (or opens one ready if the plan was only implemented locally), and `ready-pr` marks it ready. Leave the PR for human review.
 
 ## Spec Hierarchy (reference)
 
@@ -90,4 +99,4 @@ specs/
 | Target resolution, gating, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Task breakdown, coding, review | `speq-implement` (unchanged) | Already the right split — not duplicated here |
 | Spec merge, archive | `speq-record` (unchanged) | Already the right split — not duplicated here |
-| Branch, commit, push, PR create/update | `git-pr-agent` sub-agent | Mechanical; keeps git/gh detail out of both orchestrators |
+| Branch, commit, push, PR create/update | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |

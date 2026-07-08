@@ -17,6 +17,11 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
+# Version comes from Cargo.toml (single source of truth) and is passed to the
+# mock binary and the in-container assertions via EXPECTED_VERSION.
+source "$PROJECT_ROOT/scripts/lib/version.sh"
+VERSION="$(get_version)"
+
 # Detect if we're cross-platform (macOS host testing Linux Docker)
 HOST_OS="$(uname -s)"
 CROSS_PLATFORM=false
@@ -60,7 +65,7 @@ if [[ "$CROSS_PLATFORM" == "true" ]]; then
     cat > "$TARBALL_DIR/speq-skill-main/target/release/speq" << 'MOCK_EOF'
 #!/bin/sh
 # Mock speq binary for cross-platform Docker testing
-VERSION="0.8.1"
+VERSION="__VERSION__"
 case "$1" in
     --version|-V)
         echo "speq $VERSION"
@@ -83,6 +88,9 @@ case "$1" in
 esac
 exit 0
 MOCK_EOF
+    # Stamp the real Cargo.toml version into the mock (heredoc is quoted).
+    sed -i.bak "s/__VERSION__/$VERSION/" "$TARBALL_DIR/speq-skill-main/target/release/speq"
+    rm -f "$TARBALL_DIR/speq-skill-main/target/release/speq.bak"
     chmod +x "$TARBALL_DIR/speq-skill-main/target/release/speq"
     echo "Created mock binary for cross-platform testing"
 else
@@ -115,6 +123,7 @@ docker run --rm \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
+    -e "EXPECTED_VERSION=$VERSION" \
     speq-install-test -c "/home/testuser/test-install.sh" &
 PIDS+=($!); NAMES+=("install")
 
@@ -124,6 +133,7 @@ docker run --rm \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
+    -e "EXPECTED_VERSION=$VERSION" \
     speq-install-test -c "/home/testuser/test-codex-plugin.sh" &
 PIDS+=($!); NAMES+=("codex-plugin")
 
@@ -133,6 +143,7 @@ docker run --rm \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
+    -e "EXPECTED_VERSION=$VERSION" \
     speq-install-test -c "/home/testuser/test-update.sh" &
 PIDS+=($!); NAMES+=("update")
 
@@ -144,6 +155,7 @@ docker run --rm \
     -v "$TARBALL:/home/testuser/source.tar.gz:ro" \
     -e "SPEQ_LOCAL_TARBALL=/home/testuser/source.tar.gz" \
     -e "SPEQ_PREBUILT=1" \
+    -e "EXPECTED_VERSION=$VERSION" \
     speq-install-test -c "/home/testuser/test-install.sh && /home/testuser/test-uninstall.sh" &
 PIDS+=($!); NAMES+=("uninstall")
 

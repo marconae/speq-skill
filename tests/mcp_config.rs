@@ -112,7 +112,7 @@ mod claude_code_config {
         assert_eq!(
             listed_agents, expected_agents,
             "plugin.json agents array must list exactly the files in .claude/agents/ \
-             (this is the git-pr-agent regression: it shipped in agents/ but wasn't \
+             (this is the git-agent regression: it shipped in agents/ but wasn't \
              registered in the manifest)"
         );
     }

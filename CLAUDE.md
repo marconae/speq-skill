@@ -1,181 +1,20 @@
 # Local Development Rules
 
-You are **building speq-skill while using it**.
+You are building `speq-skill` while using it: the skills in `.claude/skills/` are simultaneously this repo's dev tooling and the source that `scripts/plugin/build.sh` compiles into the Claude and Codex plugin.
 
-## Plugin Development Duality
+## Rules
 
-`.claude/skills/` contains skills that serve two roles:
-1. **Development usage** — Used directly when working on this repo
-2. **Shared plugin source** — Transformed by `scripts/plugin/build.sh` into Claude and Codex plugin artifacts
+- **CLI**: always invoke the local build — `./target/debug/speq <cmd>` (or `./target/release/speq <cmd>` after a release build). Never the global `speq` or `cargo run --`.
+- **Skill names are context-specific**: `/speq-*` in this repo, `/speq:*` in the installed plugin. `build.sh` performs the `speq-*` → `speq:*` rename, drops the `speq-` folder prefix, and stamps version + author from `Cargo.toml`.
+- **Version**: `Cargo.toml` is the single source of truth. `scripts/lib/version.sh` (`get_version`) feeds `build.sh` and the docker tests — never hard-code the version anywhere else.
+- **Tests**: integration tests SHALL use fixtures under `tests/fixtures/`, not inline spec strings.
+- **Git**: `git-agent` is the only agent permitted to write git history or touch a remote; every other agent is read-only.
+- **Commits** follow Conventional Commits — `<type>[scope]: <description>` (+ optional body/footer). Types: `feat` (MINOR), `fix` (PATCH), `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Breaking change = `!` after type/scope or a `BREAKING CHANGE:` footer (MAJOR).
+- **Expert tasks**: `planner-agent` marks reasoning-heavy `tasks.md` lines `[expert]`; `speq-implement` routes those to `implementer-expert-agent`, the rest to `implementer-agent`. Tag sparingly.
+- **Model routing** is hardcoded in each skill/agent frontmatter and stamped by `build.sh` — see `docs/model-routing.md`.
+- **Mission scope**: `specs/mission.md` is the mission for the `speq` CLI only — not for the skills. Skill purpose and intent live in the skill files and `docs/`.
 
-### Directory Structure
+## Commands
 
-```
-.claude/skills/
-├── speq-plan/                   # Workflow skill (orchestrator)
-├── speq-implement/              # Workflow skill (orchestrator)
-├── speq-record/                 # Workflow skill (orchestrator)
-├── speq-plan-pr/                # Workflow skill (orchestrator, headless)
-├── speq-implement-pr/           # Workflow skill (orchestrator, headless)
-├── speq-mission/                # Workflow skill
-├── speq-code-guardrails/        # Utility skill
-├── speq-code-tools/             # Utility skill
-├── speq-ext-research/           # Utility skill
-├── speq-git-discipline/         # Utility skill
-└── speq-cli/                    # Utility skill
-
-.claude/agents/
-├── planner-agent.md             # heavy planning
-├── implementer-agent.md         # standard implementation
-├── implementer-expert-agent.md  # hard, reasoning-heavy tasks
-├── code-reviewer.md             # adversarial review
-├── recorder-agent.md            # deterministic spec merge
-└── git-pr-agent.md              # deterministic git/PR mechanics
-```
-
-### Build Script
-
-The build script (`scripts/plugin/build.sh`):
-- Copies all skills from `.claude/skills/speq-*` into Claude and Codex plugin payloads (drops `speq-` prefix for folders)
-- Transforms frontmatter names: `name: speq-*` → `name: speq:*`
-- Transforms references: `/speq-*` → `/speq:*`
-- Translates Claude-only workflow syntax out of Codex generated files
-- Stamps version and author from `Cargo.toml` into `plugin.json`
-- Builds Claude marketplace structure and Codex plugin/marketplace structure in `dist/marketplace/`
-
-### Invocation Patterns
-
-| Context | Workflow Skills | Headless PR Pipeline | Utility Skills |
-|---------|-----------------|-----------------------|----------------|
-| Local (dev) | `/speq-plan`, `/speq-implement`, `/speq-record`, `/speq-mission` | `/speq-plan-pr`, `/speq-implement-pr` | `/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`, `/speq-git-discipline`, `/speq-cli` |
-| Installed plugin (Claude/Codex) | `/speq:plan`, `/speq:implement`, `/speq:record`, `/speq:mission` | `/speq:plan-pr`, `/speq:implement-pr` | `/speq:code-tools`, `/speq:ext-research`, `/speq:code-guardrails`, `/speq:git-discipline`, `/speq:cli` |
-
-## Model Routing Strategy
-
-Model routing is hardcoded in generated artifacts. Dynamic model-routing configuration is deferred to a later release.
-
-Claude defaults:
-- `speq-plan`, `speq-implement`, `speq-record`, `speq-plan-pr`, `speq-implement-pr`: `model: sonnet`
-- `speq-mission` and utility skills: inherit caller model
-- heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: opus`, `effort: xhigh`
-- `implementer-agent`: `model: sonnet`, `effort: high`
-- `recorder-agent`, `git-pr-agent`: `model: sonnet`, `effort: medium`
-
-Codex defaults:
-- `speq:plan`, `speq:implement`, `speq:record`, `speq:plan-pr`, `speq:implement-pr`: `model: gpt-5.4`, `effort: medium`
-- `speq:mission` and utility skills: inherit caller model
-- heavy agents (`planner-agent`, `implementer-expert-agent`, `code-reviewer`): `model: gpt-5.5`, `effort: xhigh`
-- `implementer-agent`: `model: gpt-5.4`, `effort: high`
-- `recorder-agent`, `git-pr-agent`: `model: gpt-5.4`, `effort: medium`
-
-### Principle
-
-> Orchestration is cheap. Reasoning is expensive. Put the expensive tier only where defects compound.
-
-Workflow skills (`speq-plan`, `speq-implement`, `speq-record`) are thin orchestrators. They read tasks.md, dispatch sub-agents, and confirm results — all tool-call heavy, reasoning light. The sub-agents they spawn do the actual work.
-
-### Sub-agent routing table
-
-| Sub-agent | Tier | Spawned by | Rationale |
-|-----------|------|------------|-----------|
-| `planner-agent` | heavy reasoning | `speq-plan` | Architectural tradeoffs, ADR authoring, MECE decomposition. Defects here compound through every downstream task. |
-| `implementer-agent` | standard | `speq-implement` | Default for coding tasks. |
-| `implementer-expert-agent` | heavy reasoning | `speq-implement` | Only for tasks tagged `[expert]` in tasks.md. Concurrency, cross-file refactors, non-obvious correctness. |
-| `code-reviewer` | heavy reasoning | `speq-implement` | Adversarial review requires holding two large artifacts in mind and surfacing non-obvious defects. |
-| `recorder-agent` | mechanical | `speq-record` | Apply delta markers, validate, archive. No reasoning premium. |
-| `git-pr-agent` | mechanical | `speq-plan-pr`, `speq-implement-pr` | Branch/commit/push/PR create-or-update, and posting/collecting PR comments. No reasoning premium — pure git/gh mechanics. The only agent permitted to write git history or touch a remote. |
-
-Actual model and effort values are stamped into generated platform artifacts by `scripts/plugin/build.sh`.
-
-### Expert-task tagging
-
-`planner-agent` tags tasks that require deep reasoning with `[expert]` at the end of the task line in `tasks.md`:
-
-```markdown
-- [ ] 2.1 Add CLI flag parsing
-- [ ] 2.2 Implement lock-free queue for concurrent spec writes [expert]
-```
-
-`speq-implement` partitions tasks by tag before spawning: untagged → `implementer-agent`, tagged → `implementer-expert-agent`. If the plan is under-tagged, the orchestrator may add `[expert]` when materializing tasks.md — but sparingly. Over-tagging wastes tokens; under-tagging risks defects.
-
-## speq CLI Invocation
-
-**This repo builds `speq` while using it.** Always invoke via local build:
-
-```bash
-./target/debug/speq <command>    # After cargo build
-./target/release/speq <command>  # After cargo build --release
-```
-
-**Never use:**
-- `speq` (global)
-- `cargo run --` (inconsistent)
-- Nested paths like `../target/debug/speq`
-
-## Scripts Directory
-
-```
-scripts/
-├── release/
-│   ├── build.sh    # Build release artifact for current platform
-│   └── test.sh     # Test release artifact locally
-└── plugin/
-    └── build.sh    # Build Claude and Codex plugin artifacts from .claude/skills/
-```
-
-### Release Scripts
-
-```bash
-# Build release for current platform
-./scripts/release/build.sh v0.2.0
-
-# Test release artifact (builds if needed)
-./scripts/release/test.sh v0.2.0
-```
-
-### Plugin Scripts
-
-```bash
-# Build distributable plugin
-./scripts/plugin/build.sh
-```
-
-## Testing Rules
-
-### Integration Tests
-
-Integration tests SHALL use test fixtures instead of inline strings.
-
-```
-tests/
-└── fixtures/           # Test fixture files
-    ├── valid-plan/
-    │   ├── plan.md
-    │   └── domain/feature/spec.md
-    └── invalid-spec/
-        └── spec.md
-```
-
-**Do:**
-```rust
-let fixture_path = Path::new("tests/fixtures/valid-plan");
-let result = validate_plan(fixture_path, "valid-plan");
-```
-
-**Don't:**
-```rust
-let content = r#"# Feature: Test
-## Background
-* context
-## Scenarios
-### Scenario: Test
-* *GIVEN* setup
-"#;
-fs::write(tmp.path().join("spec.md"), content).unwrap();
-```
-
-**Rationale:** Fixtures are easier to maintain, can be validated by the tool itself, and provide realistic test data.
-
-## Mission Reference for speq CLI
-
-See `specs/mission.md` for purpose, tech stack, commands, and architecture of the speq CLI.
+- Build the plugin: `./scripts/plugin/build.sh`
+- Release artifact build / test: `./scripts/release/build.sh <vX.Y.Z>` · `./scripts/release/test.sh <vX.Y.Z>`

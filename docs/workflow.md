@@ -4,6 +4,8 @@
 
 # Workflow Guide
 
+**Jump to:** [Interactive Workflow](#steps--references) · [Headless PR Pipeline](#headless-pr-pipeline)
+
 The speq-skill workflow starts with a one-time **Mission** bootstrap, then follows a repeating **Plan → Implement → Record** cycle.
 
 ```
@@ -22,6 +24,7 @@ The speq-skill workflow starts with a one-time **Mission** bootstrap, then follo
 | [/speq:plan](#speqplan) | Create spec deltas |
 | [/speq:implement](#speqimplement) | Implement plan deltas |
 | [/speq:record](#speqrecord) | Merge deltas into permanent specs |
+| [Headless PR Pipeline](#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
 | [Utility Skills](#utility-skills) | Reusable skills |
 
 ---
@@ -223,7 +226,7 @@ prompting and answering questions, just not in a live chat session.
   `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**;
   `/speq:implement-pr` marks it **ready** once the implementation is pushed.
 - **Git/PR mechanics**: both skills delegate every branch/commit/push/PR
-  operation to `git-pr-agent` — the one sub-agent in this system permitted to
+  operation to `git-agent` — the one sub-agent in this system permitted to
   write git history or touch a remote directly, keeping both orchestrators as
   thin as the interactive ones. See [Model Routing](./model-routing.md).
 

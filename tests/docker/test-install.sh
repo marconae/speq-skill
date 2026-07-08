@@ -2,6 +2,9 @@
 # Integration test: verify install.sh works
 set -euo pipefail
 
+# Expected version is injected by test-docker.sh from Cargo.toml (single source of truth).
+EXPECTED_VERSION="${EXPECTED_VERSION:?EXPECTED_VERSION must be set (injected by test-docker.sh)}"
+
 echo "=== Testing speq-skill installation in Docker ==="
 
 # Test 1: Run install script
@@ -24,8 +27,8 @@ if [[ -z "$VERSION_OUTPUT" ]]; then
     echo "FAIL: speq --version returned empty"
     exit 1
 fi
-if [[ "$VERSION_OUTPUT" != "speq 0.8.1" ]]; then
-    echo "FAIL: expected speq 0.8.1, got: $VERSION_OUTPUT"
+if [[ "$VERSION_OUTPUT" != "speq $EXPECTED_VERSION" ]]; then
+    echo "FAIL: expected speq $EXPECTED_VERSION, got: $VERSION_OUTPUT"
     exit 1
 fi
 echo "PASS: speq --version returns: $VERSION_OUTPUT"

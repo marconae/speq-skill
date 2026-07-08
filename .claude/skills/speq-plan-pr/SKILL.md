@@ -8,31 +8,40 @@ model: sonnet
 
 You are a thin orchestrator with no live user to interview. Your goal is:
 - Turn a feature intent (or an existing plan branch/PR) into a validated plan authored entirely by `planner-agent`, run in headless mode.
-- Land that plan on a `feat/<plan-name>` branch and a draft PR, using `git-pr-agent` for every git/`gh` action.
+- Land that plan on a `feat/<plan-name>` branch and a draft PR, using `git-agent` for every git/`gh` action.
 - Hand any irreducible decision to a human as a PR comment and stop there.
 
 You must follow this workflow:
-- Delegate all planning judgment to `planner-agent` and all git/PR mechanics to `git-pr-agent`; your own work is resolving the input, briefing those agents, and interpreting their returns.
+- Delegate all planning judgment to `planner-agent` and all git/GitHub actions to `git-agent`; your own work is resolving the input, writing the plan's status files, briefing those agents, and interpreting their returns.
 - Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
-- Keep one `feat/<plan-name>` branch and one PR per plan; `git-pr-agent` reuses whatever already exists.
+- Keep one `feat/<plan-name>` branch and one PR per plan; `git-agent`'s `create-pr` reuses whatever PR already exists.
 
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
 - `/speq-cli` — spec discovery and search
 
-`planner-agent` and `git-pr-agent` each invoke their own required skills.
+`planner-agent` invokes its own required skills; `git-agent` requires none.
 
 ## Workflow
 
-### 1. Resolve Target (delegate)
+### 1. Resolve Target
+
+Resolve what to work on and land on the right branch:
 
 ```
-Delegate to git-pr-agent — mode: resolve-target
-  input: <the raw argument the caller passed>
+Delegate to git-agent — operation: checkout
+  target: <the raw argument the caller passed>
 ```
 
-If the input matched nothing existing, treat it as free-text feature intent for a brand-new plan and derive `<plan-name>` the same way `speq-plan` does:
+If `checkout` reports not-found, the argument is free-text feature intent for a brand-new plan. Derive `<plan-name>` the same way `speq-plan` does (verb table below) and create its branch:
+
+```
+Delegate to git-agent — operation: create-branch
+  branch: feat/<plan-name>
+```
+
+Then read from disk yourself: whether `specs/_plans/<plan-name>/` exists, and whether `specs/_plans/<plan-name>/open-questions.md` exists and is non-empty. Take the PR draft/ready state from the `checkout` return.
 
 | Verb | When |
 |------|------|
@@ -54,9 +63,16 @@ Derive the PR title deterministically from `<plan-name>` as a conventional-commi
 
 Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scope segment, emit `<type>: <slug>`.
 
-### 2. Fetch Answers — resume only (delegate)
+### 2. Fetch Answers — resume only
 
-If step 1 reported unresolved `open-questions.md`, delegate to `git-pr-agent` (mode: `fetch-answers`) to pull PR comments and reviews as plain-text Q&A. This forwarded Q&A stands in for the live interview `speq-plan` would otherwise run, and MUST be passed to `planner-agent` in step 4.
+If step 1 found an unresolved `open-questions.md`, pull the human's replies:
+
+```
+Delegate to git-agent — operation: read-comments
+  since: <timestamp of your last "flag open questions" commit>
+```
+
+Forward the returned Q&A to `planner-agent` in step 4 — it stands in for the live interview `speq-plan` would otherwise run.
 
 ### 3. Discovery (orchestrator)
 
@@ -99,34 +115,65 @@ Produce spec deltas and plan.md per your normal workflow. You are in headless mo
 Return the list of files created and the validation result, or an OPEN QUESTIONS: block if you had to stop.
 ```
 
-### 5. Branch on the Result (delegate)
+### 5. Branch on the Result
 
-**Clean return** (no `OPEN QUESTIONS:` sentinel) — the plan is done; ship it as a draft:
+**Clean return** (no `OPEN QUESTIONS:` sentinel) — ship the plan as a draft:
 
 1. Confirm `speq plan validate <plan-name>` passes.
-2. Delegate `commit-and-push`, then `open-or-update-pr`:
+2. Commit the plan and open the draft PR:
    ```
-   Delegate to git-pr-agent — mode: commit-and-push
+   Delegate to git-agent — operation: commit
      paths: the plan directory
      message: spec(plan): <plan-name>
 
-   Delegate to git-pr-agent — mode: open-or-update-pr
+   Delegate to git-agent — operation: push
+
+   Delegate to git-agent — operation: create-pr
      draft: true
-     title: the derived <type>(<scope>): <slug>
+     title: <the derived <type>(<scope>): <slug>>
      body: summarize the plan's Features table and task count, ending
            "Draft pending implementation — run /speq:implement-pr <plan-name> to implement and mark ready"
    ```
-3. If this was a resume of a previously-blocked plan, also delegate `mark-resolved` so the PR comes off draft-blocked state.
+3. If this is a resume of a previously-blocked plan, clear the block yourself: delete `specs/_plans/<plan-name>/open-questions.md` and the `> **Status:** blocked …` banner line from `plan.md`, then:
+   ```
+   Delegate to git-agent — operation: commit
+     paths: the plan directory
+     message: spec(plan): resolve open questions for <plan-name>
 
-**`OPEN QUESTIONS:` returned** — the plan needs a human; persist it and ask async:
+   Delegate to git-agent — operation: push
+   ```
+   The PR stays a draft — `speq-implement-pr` is the only skill that marks it ready.
 
+**`OPEN QUESTIONS:` returned** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
+
+1. Write `specs/_plans/<plan-name>/open-questions.md`:
+   ```markdown
+   # Open Questions: <plan-name>
+
+   speq-plan-pr could not complete this plan without human input. What's done so far is committed on this branch. Reply inline on the PR, or resume with `/speq:plan <plan-name>` locally, or re-run `/speq:plan-pr <plan-name>` after commenting.
+
+   - [ ] <question 1>
+   - [ ] <question 2>
+   ```
+2. Insert `> **Status:** blocked — see open-questions.md` as the first line under `plan.md`'s H1 (skip if already present).
+3. Compose the questions checklist as the PR comment body.
+
+Then:
 ```
-Delegate to git-pr-agent — mode: post-questions
-  questions: <the question list>
-  title: the derived <type>(<scope>): <slug>
-```
+Delegate to git-agent — operation: commit
+  paths: the plan directory
+  message: spec(plan): flag open questions for <plan-name>
 
-It writes `open-questions.md`, flags `plan.md` as blocked, commits, pushes, and opens/updates the PR as **draft** with the title set and the questions posted as a comment.
+Delegate to git-agent — operation: push
+
+Delegate to git-agent — operation: create-pr
+  draft: true
+  title: <the derived <type>(<scope>): <slug>>
+  body: <blocked-plan summary>
+
+Delegate to git-agent — operation: comment-pr
+  body: <the questions checklist from step 3>
+```
 
 ### 6. Report (orchestrator)
 
@@ -146,6 +193,6 @@ specs/
 
 | Step | Performed by | Why |
 |------|--------------|-----|
-| Target resolution, discovery, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
+| Target resolution, discovery, status files, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Spec delta authoring, ADR, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
-| Branch, commit, push, PR create/comment | `git-pr-agent` sub-agent | Mechanical; keeps git/gh detail out of both orchestrators |
+| Branch, commit, push, PR create/comment | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |

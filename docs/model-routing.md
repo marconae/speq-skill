@@ -32,7 +32,7 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `implementer-expert-agent` | `opus` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
-| `git-pr-agent` | `sonnet` | `medium` | Branch/commit/push/PR mechanics — no reasoning premium |
+| `git-agent` | `sonnet` | `medium` | Generic git/GitHub operations — no reasoning premium |
 
 ---
 
@@ -52,7 +52,7 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `implementer-expert-agent` | `gpt-5.5` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
-| `git-pr-agent` | `gpt-5.4` | `medium` | Branch/commit/push/PR mechanics — no reasoning premium |
+| `git-agent` | `gpt-5.4` | `medium` | Generic git/GitHub operations — no reasoning premium |
 
 ---
 

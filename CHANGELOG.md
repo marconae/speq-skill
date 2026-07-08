@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.2
+
+- Rename `git-pr-agent` → `git-agent` and generalize it into a git/GitHub operations worker (create/checkout branches, commit, push, create/comment/read PRs and issues, mark a draft PR ready); it runs one caller-specified operation per invocation on caller-supplied content and authors no content
+- Move plan-pipeline semantics (open-questions.md, blocked banner, feat/<plan-name> naming, spec(plan) messages, comment text) out of the agent into `speq-plan-pr`/`speq-implement-pr`
+- `speq-plan-pr` now always leaves the PR as a draft (including the resume-after-blocked path); `speq-implement-pr` remains the only skill that marks it ready
+
 ## 0.8.1
 
 - Headless PR pipeline now titles PRs with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name, instead of `spec(plan): <plan-name>`

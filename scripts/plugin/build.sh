@@ -23,9 +23,8 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-get_version() {
-    grep '^version' "$PROJECT_ROOT/Cargo.toml" | sed 's/.*"\(.*\)".*/\1/'
-}
+# get_version reads the release version from Cargo.toml (single source of truth).
+source "$SCRIPT_DIR/../lib/version.sh"
 
 get_author() {
     grep '^authors' "$PROJECT_ROOT/Cargo.toml" | sed 's/.*\["\([^"]*\)".*/\1/'
@@ -153,7 +152,7 @@ set_codex_agent_model() {
         planner-agent.md|implementer-expert-agent.md|code-reviewer.md)
             sed_in_place 's/^model: .*/model: gpt-5.5/' "$file"
             ;;
-        implementer-agent.md|recorder-agent.md|git-pr-agent.md)
+        implementer-agent.md|recorder-agent.md|git-agent.md)
             sed_in_place 's/^model: .*/model: gpt-5.4/' "$file"
             ;;
         *)
