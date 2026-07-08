@@ -12,6 +12,7 @@ You are building `speq-skill` while using it: the skills in `.claude/skills/` ar
 - **Commits** follow Conventional Commits — `<type>[scope]: <description>` (+ optional body/footer). Types: `feat` (MINOR), `fix` (PATCH), `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Breaking change = `!` after type/scope or a `BREAKING CHANGE:` footer (MAJOR).
 - **Expert tasks**: `planner-agent` marks reasoning-heavy `tasks.md` lines `[expert]`; `speq-implement` routes those to `implementer-expert-agent`, the rest to `implementer-agent`. Tag sparingly.
 - **Model routing** is hardcoded in each skill/agent frontmatter and stamped by `build.sh` — see `docs/model-routing.md`.
+- **Markdown prose**: never artificially word-wrap prose in Markdown files. Write one logical line per paragraph and list item (soft-wrap) so diffs stay line-per-thought and reflows don't churn. Do not join fenced code, tables, ASCII diagrams, YAML frontmatter, or structured `**Field:**` lines.
 - **Mission scope**: `specs/mission.md` is the mission for the `speq` CLI only — not for the skills. Skill purpose and intent live in the skill files and `docs/`.
 
 ## Commands
