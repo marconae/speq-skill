@@ -20,10 +20,13 @@ speq provides structural verification and exploration tools so AI agents can rel
 
 ## Core Capabilities
 
-1. **Validate spec structure** — Check specs for required sections (Feature, Background, Scenarios), RFC2119 keyword usage, and scenario format
-2. **List features** — Display all specs in a tree view organized by domain, optionally filtered
-3. **Search specs** — Semantic search over scenarios using pure-Rust ONNX inference (tract-onnx) with a locally cached embedding model; no external runtime required
-4. **Record plan deltas** — Merge approved delta specs from `_plans/` into permanent specs and archive the plan
+1. **Retrieve spec content** — Fetch a full feature spec or a single scenario by path (`speq feature get <domain>/<feature>[/<scenario>]`)
+2. **List features and domains** — Display specs in a tree view organized by domain, or list domains alone (`speq domain list`)
+3. **Validate spec structure** — Check specs for required sections (Feature, Background, Scenarios), RFC2119 keyword usage, and scenario format
+4. **Search specs** — Semantic search over scenarios using pure-Rust ONNX inference (tract-onnx) with a locally cached embedding model; no external runtime required
+5. **Inspect plans in flight** — List active plans under `_plans/` and validate a plan's delta specs before recording (`speq plan list` / `speq plan validate <plan>`)
+6. **Record plan deltas** — Merge approved delta specs from `_plans/` into permanent specs and archive the plan
+7. **Track architecture decisions** — Validate and assemble per-plan ADR fragments in `specs/_decision/` into a stable decision record (`speq decision-log validate` / `show`)
 
 ## Out of Scope
 
@@ -42,6 +45,7 @@ speq provides structural verification and exploration tools so AI agents can rel
 | Delta | A proposed change to a spec marked with `<!-- DELTA:NEW -->`, `<!-- DELTA:CHANGED -->`, or `<!-- DELTA:REMOVED -->` |
 | Plan | A set of deltas in `_plans/<plan-name>/` awaiting approval |
 | Record | The action of moving approved deltas from `_plans/` to permanent specs in `specs/` |
+| ADR | An Architecture Decision Record — a single design decision captured as a slug-identified fragment in `specs/_decision/` |
 
 ---
 
@@ -89,7 +93,8 @@ speq-skill/
 │   │   └── <feature>/    # Feature directory
 │   │       └── spec.md   # Specification file
 │   ├── _plans/           # Pending plan deltas
-│   └── _recorded/        # Archived recorded plans
+│   ├── _recorded/        # Archived recorded plans
+│   └── _decision/        # Architecture Decision Record fragments
 └── tests/                # Integration tests
 ```
 
@@ -99,8 +104,10 @@ Simple modular CLI organized by feature. Each module handles a distinct capabili
 
 - `cli` — Command definitions and argument parsing
 - `validate` — Markdown parsing and structural validation rules
+- `validate::decision_log` — Decision-log fragment validation and assembly
 - `feature` — Spec discovery and listing
 - `tree` — Tree view output formatting
+- `plan` — Plan discovery, listing, and delta validation
 - `record` — Delta merging and plan archiving
 
 Data flows from CLI arguments → module handlers → formatted output.

@@ -26,11 +26,13 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
 | `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration — headless |
 | `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration — headless |
+| `/speq:audit` | `sonnet` | inherited | Thin orchestration — health check |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `opus` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `implementer-agent` | `sonnet` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `opus` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
+| `audit-agent` | `opus` | `high` | Mission ↔ spec-library sync |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
 | `git-agent` | `sonnet` | `medium` | Generic git/GitHub operations — no reasoning premium |
 
@@ -46,11 +48,13 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
 | `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
 | `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
+| `/speq:audit` | `gpt-5.4` | `medium` | Thin orchestration — health check |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `implementer-agent` | `gpt-5.4` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `gpt-5.5` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
+| `audit-agent` | `gpt-5.5` | `high` | Mission ↔ spec-library sync |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
 | `git-agent` | `gpt-5.4` | `medium` | Generic git/GitHub operations — no reasoning premium |
 

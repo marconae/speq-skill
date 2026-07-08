@@ -24,6 +24,7 @@ The speq-skill workflow starts with a one-time **Mission** bootstrap, then follo
 | [/speq:plan](#speqplan) | Create spec deltas |
 | [/speq:implement](#speqimplement) | Implement plan deltas |
 | [/speq:record](#speqrecord) | Merge deltas into permanent specs |
+| [/speq:audit](#speqaudit) | Health-check the spec library and guide fixes |
 | [Headless PR Pipeline](#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
 | [Utility Skills](#utility-skills) | Reusable skills |
 
@@ -205,6 +206,21 @@ After a successful `/speq:implement`:
 - **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question rather than stalling on it.
 - **PR title & lifecycle**: the PR is titled with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
 - **Git/PR mechanics**: both skills delegate every branch/commit/push/PR operation to `git-agent` — the one sub-agent in this system permitted to write git history or touch a remote directly, keeping both orchestrators as thin as the interactive ones. See [Model Routing](./model-routing.md).
+
+---
+
+## `/speq:audit`
+
+Health-checks a speq project in one read-only pass, then offers to fix each finding by asking for permission for each change.
+
+**Use when:**
+
+- Inheriting or cloning a speq project and gauging its state
+- Periodically, to catch spec-library drift
+
+**Checks:** spec-library `<domain>/<feature>` structure, `speq feature validate`, decision-log format and validity, `mission.md` ↔ spec-library sync (delegated to `audit-agent`), unrecorded plans in `_plans/`, gitignore hygiene (`_recorded` ignored; `_decision`/`_plans` tracked), recorded-folder naming, library thresholds, and git hygiene.
+
+**Output:** a BLUF summary — a verdict, a `✓/✗/⚠` checks table, and numbered remediations. Structural fixes (migrate an old `decision-log.md`, restructure domains) and the `/speq:mission` handoff for mission drift run only after the user confirms.
 
 ---
 

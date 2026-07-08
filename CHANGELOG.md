@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.11.0
+
+- Add `speq:audit` — a read-only health check for a speq project that runs the spec-library validators and filesystem checks in one pass, then offers to fix each finding, always asking first
+- Checks: `<domain>/<feature>` spec structure, `speq feature validate`, decision-log format and validity, `mission.md` ↔ spec-library sync, unrecorded plans in `_plans/`, `_recorded` gitignore hygiene, `_decision`/`_plans` tracked, recorded-folder naming, library thresholds (>10 scenarios, >8 features), and git hygiene
+- Add `audit-agent` (`opus`/`high`) — verifies `mission.md` against the live spec library and returns the inconsistencies; its findings seed a `/speq:mission` handoff when the user opts to reconcile
+- Remediation is user-gated: trivial fixes apply inline, structural ones (migrate an old `decision-log.md`, restructure domains) run in a spawned worker, and mission drift hands off to `/speq:mission` — the audit never edits `mission.md` or authors specs itself
+
 ## 0.10.0
 
 - Replace the single append-only `specs/decision-log.md` with one committed ADR fragment per plan under `specs/_decision/NNN-<plan-name>.md` — parallel plans write disjoint files, so recording no longer produces git merge conflicts
