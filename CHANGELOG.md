@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.10.0
+
+- Replace the single append-only `specs/decision-log.md` with one committed ADR fragment per plan under `specs/_decision/NNN-<plan-name>.md` — parallel plans write disjoint files, so recording no longer produces git merge conflicts
+- Give each ADR a stable, kebab-case `**ID:**` slug; `Supersedes:` and `Status: Superseded by <slug>` reference slugs instead of `ADR-NNN`, so promoting a new ADR never renumbers or edits an existing one
+- Add `speq decision-log show`: assembles every `specs/_decision/*.md` fragment into one `# Architecture Decision Records` view on stdout, ordered by numeric `NNN-` prefix then filename; writes no merged file
+- `speq decision-log validate` now validates the `specs/_decision/` directory — per-fragment structure, required fields, status vocabulary, and cross-file slug uniqueness and reference resolution; an absent or empty directory passes
+- Archive completed plans to `specs/_recorded/NNN-<plan-name>/`, a record-time sequence number, instead of a `YYYY-MM-DD-<plan-name>` date prefix
+- Drop the `**Date:**` field from ADRs and the plan-level decision log — git history already timestamps every change, so the field was redundant
+- Remove the "Prose style" pointer line from the plan/feature/mission/verification/decision-log templates — `speq-writing-guardrails` already loads from each authoring skill's frontmatter, so the inline pointer added no coverage
+- `recorder-agent` writes only the new fragment for the plan it is recording and never edits another fragment; `planner-agent` now records the superseded decision's title so the recorder can map it to a slug
+- Migrate the prior `specs/decision-log.md` (ADR-001..005) into `specs/_decision/001-refactor-search-pure-rust-inference.md` and `specs/_decision/002-refactor-embeddings-tract-onnx.md`, then delete the old file
+
 ## 0.9.0
 
 - Add `speq:writing-guardrails` — prose guardrails anchored in established methodologies (BLUF/inverted pyramid, Strunk & White, INCOSE GtWR, ISO 29148, RFC 2119) governing the free-text surfaces of speq artifacts and the GitHub PRs/issues/comments the pipeline composes

@@ -1,8 +1,8 @@
-# Architecture Decision Records
+# Decisions: refactor-search-pure-rust-inference
 
-## ADR-001: Adopt pure-Rust inference (Option B) to remove the ONNX Runtime dependency
+## ADR: Adopt pure-Rust inference (Option B) to remove the ONNX Runtime dependency
 
-**Date:** 2026-05-22
+**ID:** pure-rust-inference
 **Plan:** refactor-search-pure-rust-inference
 **Status:** Accepted
 
@@ -24,17 +24,15 @@ Replace `fastembed`/`ort` with a pure-Rust inference path. Remove the ONNX Runti
 
 No ONNX Runtime library is required at build time or runtime. `cargo install speq-skill` requires no native toolchain or system library. The Intel-Mac `dlopen` panic is eliminated structurally. The `Cargo.toml` platform-split `[target.'cfg(...)'.dependencies]` blocks are removed.
 
----
+## ADR: Use candle native BERT (Option B2) as the pure-Rust inference backend
 
-## ADR-002: Use candle native BERT (Option B2) as the pure-Rust inference backend
-
-**Date:** 2026-05-22
+**ID:** candle-native-bert
 **Plan:** refactor-search-pure-rust-inference
-**Status:** Accepted
+**Status:** Superseded by tract-onnx-inference
 
 ### Context
 
-Having decided on a pure-Rust inference path (ADR-001), two sub-variants were evaluated: a pure-Rust ONNX runtime (`tract`, keeping the existing `.onnx` model file) and a native Rust BERT encoder (`candle`, storing the model as `safetensors`). The embedding model `Snowflake/snowflake-arctic-embed-xs` is architecturally `all-MiniLM-L6-v2`, a standard 6-layer BERT encoder — fully expressible natively in Rust.
+Having decided on a pure-Rust inference path (`pure-rust-inference`), two sub-variants were evaluated: a pure-Rust ONNX runtime (`tract`, keeping the existing `.onnx` model file) and a native Rust BERT encoder (`candle`, storing the model as `safetensors`). The embedding model `Snowflake/snowflake-arctic-embed-xs` is architecturally `all-MiniLM-L6-v2`, a standard 6-layer BERT encoder — fully expressible natively in Rust.
 
 ### Decision
 
@@ -49,17 +47,15 @@ Implement inference with `candle-core` + `candle-nn` + `candle-transformers` (`m
 
 Inference is performed by `src/embedding.rs` (`Embedder` type) using `candle` on the CPU device. The model is loaded from `$SPEQ_CACHE/speq/models/` as three files. The `.onnx` model file is no longer used. Embedding dimensionality (384, L2-normalized) and the `.idx` index format are unchanged.
 
----
+## ADR: Move model acquisition out of the binary into the installer
 
-## ADR-003: Move model acquisition out of the binary into the installer
-
-**Date:** 2026-05-22
+**ID:** installer-model-provisioning
 **Plan:** refactor-search-pure-rust-inference
 **Status:** Accepted
 
 ### Context
 
-The previous `fastembed`/`ort` path downloaded the model on first run via `hf-hub`. With the switch to candle (ADR-002), two alternative model-delivery approaches were considered: keep an in-binary downloader or embed the weights with `include_bytes!`. Both have significant downsides for a CLI tool distributed via `cargo install` and a shell installer.
+The previous `fastembed`/`ort` path downloaded the model on first run via `hf-hub`. With the switch to candle (`candle-native-bert`), two alternative model-delivery approaches were considered: keep an in-binary downloader or embed the weights with `include_bytes!`. Both have significant downsides for a CLI tool distributed via `cargo install` and a shell installer.
 
 ### Decision
 
@@ -75,11 +71,9 @@ The `speq` binary contains no model-download code. It only reads model files fro
 
 `speq search` exits with an actionable error (naming the cache directory and provisioning instruction) when model files are absent. The installer must be run (or the model provisioned manually) before search works. Publishing model files as GitHub release assets is required; task 5.3 (release asset publishing) is deferred to when binary distribution ships.
 
----
+## ADR: Snowflake/snowflake-arctic-embed-xs model weights are Apache 2.0 — redistribute with attribution
 
-## ADR-004: Snowflake/snowflake-arctic-embed-xs model weights are Apache 2.0 — redistribute with attribution
-
-**Date:** 2026-05-22
+**ID:** model-weights-apache-2-license
 **Plan:** refactor-search-pure-rust-inference
 **Status:** Accepted
 
@@ -100,31 +94,3 @@ Ship the model weights as release assets. Include the model's Apache 2.0 `LICENS
 ### Consequences
 
 The release script (task 5.3) must bundle the model's Apache 2.0 `LICENSE` (and `NOTICE` if present) in the archive. `cargo deny check` passes because it sees only Rust crate licenses. A separate CI step or checklist item covers model file license compliance. `sentence-transformers/all-MiniLM-L6-v2` (base model, Apache 2.0) and `Snowflake/snowflake-arctic-embed-xs` (fine-tune, Apache 2.0) training data datasets are all permissively licensed.
-
----
-
-## ADR-005: Reverse ADR-002 — adopt tract-onnx and remove the vendored gemm-common patch
-
-**Date:** 2026-05-31
-**Plan:** refactor-embeddings-tract-onnx
-**Status:** Accepted
-
-> Supersedes ADR-002 (candle native BERT).
-
-### Context
-
-ADR-002 chose `candle` native BERT for inference because `candle-transformers` ships a ready-made `BertModel`. That choice transitively pulled in `gemm-common` 0.19.0, which panics on CPUs that expose an L4 cache: `all_info` is a 3-element array indexed by `all_info[level - 1]` with no bounds check. The only workaround was to vendor a patched copy of `gemm-common` under `vendor/gemm-common/` and override it via a `[patch.crates-io]` block in `Cargo.toml`. The user does not want third-party code carried in this repository.
-
-### Decision
-
-Replace `candle-core` + `candle-nn` + `candle-transformers` with `tract-onnx`, a pure-Rust CPU ONNX inference engine with no native dependencies. Load the upstream pre-built `onnx/model.onnx` graph for `Snowflake/snowflake-arctic-embed-xs`. The `tokenizers` crate stays. The model is provisioned as two files — `model.onnx` + `tokenizer.json`; `config.json` is no longer provisioned because the ONNX graph embeds the configuration. Delete `vendor/gemm-common/` and the `[patch.crates-io]` block. Embedding dimensionality (384, L2-normalized), CLS pooling, and the `.idx` index format are unchanged. Shipped in release 0.5.1.
-
-### Options Considered
-
-- **Keep candle + vendored gemm-common patch:** Rejected — leaves third-party code in the repo indefinitely and depends on an unfixed upstream bug.
-- **Wait for an upstream gemm-common fix:** Rejected — unknown timeline; vendored code remains in the interim.
-- **Adopt tract-onnx — chosen:** `tract-onnx` does not depend on `gemm-common`, so the vendored patch and `[patch.crates-io]` override disappear entirely. ADR-002 originally rejected tract for uneven transformer-operator coverage, but consuming the upstream pre-built ONNX graph (rather than converting our own) sidesteps that risk. `tract-onnx` is MIT OR Apache-2.0, compatible with this MIT project.
-
-### Consequences
-
-`vendor/gemm-common/` and the `Cargo.toml` `[patch.crates-io]` block are removed; `gemm-common` no longer appears in `Cargo.lock`. `src/embedding.rs` is rewritten on the tract runnable-model API; the `config.json` constant and read are removed. `src/search.rs` `get_model_file_paths` returns a 2-tuple. `install.sh` provisions `model.onnx` (from the `onnx/` path on HuggingFace) and `tokenizer.json`. The installer's idempotency, error-handling, and custom-cache behavior (ADR-003) and the no-in-binary-download architecture are unchanged. Existing 0.5.0 caches lack `model.onnx`, so a 0.5.1 install re-provisions it.

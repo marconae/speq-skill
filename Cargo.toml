@@ -1,6 +1,6 @@
 [package]
 name = "speq-skill"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2024"
 authors = ["marconae"]
 license = "MIT"
@@ -21,7 +21,6 @@ thiserror = "2.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 dirs = "6.0"
-chrono = "0.4"
 postcard = { version = "1.1", features = ["alloc"] }
 tract-onnx = "0.21"
 tokenizers = { version = "0.21", default-features = false, features = ["onig"] }

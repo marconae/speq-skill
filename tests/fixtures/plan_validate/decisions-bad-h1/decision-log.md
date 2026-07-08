@@ -1,6 +1,5 @@
 # Decision Log: wrong-name
 
-Date: 2026-04-27
 
 ## Design Decisions
 

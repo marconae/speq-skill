@@ -1,7 +1,5 @@
 # Plan: <plan-name>
 
-> Prose style: follow `/speq:writing-guardrails`.
-
 <!--
 STRUCTURAL TEMPLATE - DO NOT COPY-PASTE
 Generate actual content for each section based on your specific plan.

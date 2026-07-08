@@ -32,7 +32,7 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
 }
 
 #[test]
-fn valid_permanent_log_passes() {
+fn valid_decisions_dir_passes() {
     let tmp = TempDir::new().unwrap();
     setup_fixture(&tmp, "valid");
 
@@ -45,33 +45,94 @@ fn valid_permanent_log_passes() {
 }
 
 #[test]
-fn missing_permanent_log_fails() {
+fn absent_decisions_dir_passes() {
     let tmp = TempDir::new().unwrap();
-    setup_fixture(&tmp, "missing");
+    setup_fixture(&tmp, "absent-dir");
+
+    cmd()
+        .current_dir(tmp.path())
+        .args(["decision-log", "validate"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("passed"));
+}
+
+#[test]
+fn duplicate_slug_fails() {
+    let tmp = TempDir::new().unwrap();
+    setup_fixture(&tmp, "duplicate-slug");
 
     cmd()
         .current_dir(tmp.path())
         .args(["decision-log", "validate"])
         .assert()
         .code(1)
-        .stdout(predicate::str::contains("not found"));
+        .stdout(
+            predicate::str::contains("Duplicate").and(predicate::str::contains("use-line-scanner")),
+        );
 }
 
 #[test]
-fn non_sequential_adr_numbers_fail() {
+fn unresolved_supersedes_fails() {
     let tmp = TempDir::new().unwrap();
-    setup_fixture(&tmp, "non-sequential");
+    setup_fixture(&tmp, "unresolved-supersedes");
 
     cmd()
         .current_dir(tmp.path())
         .args(["decision-log", "validate"])
         .assert()
         .code(1)
-        .stdout(predicate::str::contains("ADR-003"));
+        .stdout(
+            predicate::str::contains("dangling-supersede")
+                .and(predicate::str::contains("ghost-slug")),
+        );
 }
 
 #[test]
-fn adr_missing_required_field_fails() {
+fn unresolved_status_slug_fails() {
+    let tmp = TempDir::new().unwrap();
+    setup_fixture(&tmp, "unresolved-status-slug");
+
+    cmd()
+        .current_dir(tmp.path())
+        .args(["decision-log", "validate"])
+        .assert()
+        .code(1)
+        .stdout(
+            predicate::str::contains("dangling-status").and(predicate::str::contains("ghost-slug")),
+        );
+}
+
+#[test]
+fn missing_id_fails() {
+    let tmp = TempDir::new().unwrap();
+    setup_fixture(&tmp, "missing-id");
+
+    cmd()
+        .current_dir(tmp.path())
+        .args(["decision-log", "validate"])
+        .assert()
+        .code(1)
+        .stdout(
+            predicate::str::contains("No identity").and(predicate::str::contains("001-plan-a.md")),
+        );
+}
+
+#[test]
+fn missing_h1_fails() {
+    let tmp = TempDir::new().unwrap();
+    setup_fixture(&tmp, "missing-h1");
+
+    cmd()
+        .current_dir(tmp.path())
+        .args(["decision-log", "validate"])
+        .assert()
+        .code(1)
+        .stdout(predicate::str::contains("001-plan-a.md"));
+}
+
+#[test]
+fn missing_field_fails() {
     let tmp = TempDir::new().unwrap();
     setup_fixture(&tmp, "missing-field");
 
@@ -84,7 +145,7 @@ fn adr_missing_required_field_fails() {
 }
 
 #[test]
-fn invalid_status_value_fails() {
+fn invalid_status_fails() {
     let tmp = TempDir::new().unwrap();
     setup_fixture(&tmp, "invalid-status");
 
@@ -97,16 +158,16 @@ fn invalid_status_value_fails() {
 }
 
 #[test]
-fn adr_must_start_at_001() {
+fn prose_mentioning_field_names_passes() {
     let tmp = TempDir::new().unwrap();
-    setup_fixture(&tmp, "non-start-001");
+    setup_fixture(&tmp, "prose-mentions-field");
 
     cmd()
         .current_dir(tmp.path())
         .args(["decision-log", "validate"])
         .assert()
-        .code(1)
-        .stdout(predicate::str::contains("001"));
+        .success()
+        .stdout(predicate::str::contains("passed"));
 }
 
 #[test]

@@ -104,6 +104,8 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `references/decision-log-
 
 Set `Promotes to ADR: no` for local design choices, scope trims, and implementation details.
 
+When a decision supersedes an earlier one, name the superseded decision's title in the entry — `recorder-agent` maps that title to the superseded ADR's slug when it promotes the entry.
+
 ### 6. Expert-Task Tagging (CRITICAL)
 
 As you decompose the plan into tasks, identify tasks that require deep reasoning. Tag them with `[expert]` at the end of the task line:

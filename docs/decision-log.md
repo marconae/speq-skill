@@ -11,7 +11,7 @@ There are two distinct formats:
 | Format | Location | Purpose |
 |--------|----------|---------|
 | Plan-level log | `specs/_plans/<plan-name>/decision-log.md` | Lightweight notes during planning |
-| Permanent log | `specs/decision-log.md` | Curated ADR archive |
+| Permanent log | `specs/_decision/NNN-<plan-name>.md` (one fragment per plan) | Curated ADR archive |
 
 ---
 
@@ -23,8 +23,6 @@ Created automatically by `planner-agent` during `/speq:plan`. It captures the in
 
 ```markdown
 # Decision Log: <plan-name>
-
-Date: YYYY-MM-DD
 
 ## Interview
 
@@ -49,7 +47,6 @@ Date: YYYY-MM-DD
 
 - The file is **optional**. If absent, `speq plan validate` passes without mention.
 - If present, the H1 must match the plan name exactly: `# Decision Log: <plan-name>`
-- A `Date:` line is required.
 - At least one of `## Interview`, `## Design Decisions`, or `## Review Findings` must be present.
 - `Promotes to ADR:` accepts `yes` or `no`. Any other value produces a warning.
 
@@ -65,18 +62,21 @@ Decision log errors are reported alongside delta spec errors. Decision log warni
 
 ## Permanent Decision Log
 
-Lives at `specs/decision-log.md`. Built incrementally by `recorder-agent` during `/speq:record`: entries marked `Promotes to ADR: yes` in the plan log are promoted here as sequential ADRs.
+Lives at `specs/_decision/`, one committed fragment file per plan: `specs/_decision/NNN-<plan-name>.md`. `recorder-agent` writes a fragment during `/speq:record` for every entry marked `Promotes to ADR: yes` in the plan log. Different plans write different files, so parallel plans never conflict on the same text.
+
+Each ADR carries a stable, kebab-case `**ID:**` slug instead of a sequential number. `Supersedes:` and `Status: Superseded by <slug>` reference that slug, so promoting a new ADR never requires editing or renumbering an older one.
 
 ### Format
 
 ```markdown
-# Architecture Decision Records
+# Decisions: <plan-name>
 
-## ADR-001: <Title>
+## ADR: <Title>
 
-**Date:** YYYY-MM-DD
+**ID:** <slug>
 **Plan:** <plan-name>
 **Status:** Accepted
+**Supersedes:** <superseded-slug>
 
 ### Context
 
@@ -97,19 +97,37 @@ What was decided.
 
 ### Rules
 
-- H1 must be exactly `# Architecture Decision Records`.
-- ADR headings follow `## ADR-NNN: <Title>` — sequential, no gaps, starting at `ADR-001`.
-- Required fields per ADR: `**Date:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`.
-- `**Status:**` must be one of: `Accepted`, `Superseded by ADR-NNN`, `Deprecated`.
-- `### Options Considered` and `### Consequences` are optional.
+- Each fragment's H1 is exactly `# Decisions: <plan-name>`.
+- ADR headings follow `## ADR: <Title>` — no numbering, no ordering requirement between fragments.
+- Required fields per ADR: `**ID:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`.
+- `**ID:**` is a kebab-case slug, unique across every file in `specs/_decision/`.
+- `**Status:**` must be one of: `Accepted`, `Deprecated`, `Superseded by <slug>`.
+- `**Supersedes:**`, `### Options Considered`, and `### Consequences` are optional.
+- `recorder-agent` writes only the new fragment for the plan it is recording — it never edits another fragment.
 
-### Validation
+`recorder-agent` records a one-way forward pointer — `**Supersedes:** <slug>` — on the new ADR only, and never edits the superseded fragment. This forward pointer is the source of truth: a superseded ADR authored through the automated flow keeps `**Status:** Accepted`. The two-way `Status: Superseded by <slug>` form stays valid for hand-authored or migrated entries; the recorder never back-edits a prior fragment.
+
+### Validate vs. Show
+
+Two commands operate on `specs/_decision/`:
+
+| Command | Reads | Writes | Purpose |
+|---------|-------|--------|---------|
+| `speq decision-log validate` | `specs/_decision/*.md` | Nothing | Structure, required fields, status vocabulary, and slug-reference checks |
+| `speq decision-log show` | `specs/_decision/*.md` | Nothing (stdout only) | Prints the assembled `# Architecture Decision Records` view on demand |
+
+`show` never writes a merged file — there is no single permanent-log file to keep in sync. It orders fragments by their numeric `NNN-` prefix, breaking ties by filename; ADRs within a fragment print in the order they were authored.
+
+The `NNN-` prefix is a record-time sequence number, not a date, and is not a global identity — two plans recorded in parallel can legitimately produce the same prefix on different branches. That is a cosmetic tie, not a conflict: slugs, not prefixes, identify ADRs, and `show`'s filename tie-break makes the resulting order deterministic either way.
+
+An absent or empty `specs/_decision/` directory is valid — `validate` passes and `show` prints only the header.
+
+Run either command from the project root:
 
 ```bash
 speq decision-log validate
+speq decision-log show
 ```
-
-Run from the project root. Reads `specs/decision-log.md`. Reports errors for structural violations; exits non-zero on failure.
 
 ---
 
@@ -124,7 +142,11 @@ Run from the project root. Reads `specs/decision-log.md`. Reports errors for str
 
 /speq:record
   └─ recorder-agent promotes entries marked "Promotes to ADR: yes"
-     into specs/decision-log.md as the next ADR
+     into a new specs/_decision/NNN-<plan-name>.md fragment
+
+speq decision-log show
+  └─ assembles every specs/_decision/*.md fragment into one
+     # Architecture Decision Records view, printed to stdout
 ```
 
 ---

@@ -577,8 +577,8 @@ A test feature.
         assert!(!content.contains("DELTA"));
         assert!(content.contains("### Scenario: New test"));
 
-        // Verify plan was archived with date prefix
-        // The archive should be at _recorded/YYYY-MM-DD-test-plan
+        // Verify plan was archived under a numbered folder
+        // The archive should be at _recorded/001-test-plan (empty _recorded, so NNN starts at 001)
         let recorded_dir = specs.join("_recorded");
         let entries: Vec<_> = fs::read_dir(&recorded_dir)
             .unwrap()
@@ -587,18 +587,9 @@ A test feature.
         assert_eq!(entries.len(), 1, "Expected exactly one recorded plan");
 
         let archived_name = entries[0].file_name().to_string_lossy().to_string();
-        assert!(
-            archived_name.ends_with("-test-plan"),
-            "Archive should end with plan name"
-        );
-
-        // Verify date prefix format (YYYY-MM-DD-)
-        let date_prefix = &archived_name[..11];
-        assert!(
-            date_prefix.chars().nth(4) == Some('-')
-                && date_prefix.chars().nth(7) == Some('-')
-                && date_prefix.chars().nth(10) == Some('-'),
-            "Archive should have date prefix format YYYY-MM-DD-"
+        assert_eq!(
+            archived_name, "001-test-plan",
+            "Archive should be numbered NNN-<plan>, starting at 001"
         );
 
         assert!(!specs.join("_plans/test-plan").exists());

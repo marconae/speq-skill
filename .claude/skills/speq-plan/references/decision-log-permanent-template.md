@@ -1,17 +1,15 @@
-# Architecture Decision Records
+# Decisions: <plan-name>
 
-> Prose style: follow `/speq:writing-guardrails`.
+<!-- One fragment per plan. Add one ## ADR block per promoted decision below. -->
+<!-- ID is a kebab-case slug, unique across every file in specs/_decision. -->
+<!-- Supersedes is optional — set it only when this ADR replaces an earlier one. -->
 
-<!-- ADRs are numbered sequentially starting from ADR-001. Never renumber. -->
-<!-- recorder-agent appends new ADRs from plan decision logs. -->
+## ADR: <Title>
 
----
-
-## ADR-001: <Title>
-
-**Date:** YYYY-MM-DD
-**Plan:** `<plan-name>`
+**ID:** <kebab-case-slug>
+**Plan:** <plan-name>
 **Status:** Accepted
+**Supersedes:** <superseded-slug> <!-- optional; only when this ADR supersedes another; value = the superseded ADR's slug -->
 
 ### Context
 

@@ -1,7 +1,6 @@
 use std::fs;
 use std::path::Path;
 
-use chrono::Local;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -41,10 +40,9 @@ pub struct DeltaBlock {
 
 pub fn record_plan(specs_base: &Path, plan_name: &str) -> Result<Vec<String>, RecordError> {
     let plan_dir = specs_base.join("_plans").join(plan_name);
-    let date_prefix = Local::now().format("%Y-%m-%d").to_string();
-    let recorded_dir = specs_base
-        .join("_recorded")
-        .join(format!("{}-{}", date_prefix, plan_name));
+    let recorded_base = specs_base.join("_recorded");
+    let next_number = count_recorded_entries(&recorded_base) + 1;
+    let recorded_dir = recorded_base.join(format!("{next_number:03}-{plan_name}"));
 
     if !plan_dir.exists() {
         return Err(RecordError::PlanNotFound(plan_name.to_string()));
@@ -110,6 +108,13 @@ pub fn record_plan(specs_base: &Path, plan_name: &str) -> Result<Vec<String>, Re
     })?;
 
     Ok(recorded_features)
+}
+
+fn count_recorded_entries(recorded_base: &Path) -> usize {
+    match fs::read_dir(recorded_base) {
+        Ok(entries) => entries.flatten().count(),
+        Err(_) => 0,
+    }
 }
 
 pub fn find_delta_specs(plan_dir: &Path) -> Result<Vec<std::path::PathBuf>, RecordError> {
@@ -729,21 +734,47 @@ Description here.
         assert_eq!(entries.len(), 1, "Expected exactly one recorded plan");
 
         let archived_name = entries[0].file_name().to_string_lossy().to_string();
-        assert!(
-            archived_name.ends_with("-test-plan"),
-            "Archive should end with plan name"
-        );
-
-        // Verify date prefix format (YYYY-MM-DD-)
-        let date_prefix = &archived_name[..11];
-        assert!(
-            date_prefix.chars().nth(4) == Some('-')
-                && date_prefix.chars().nth(7) == Some('-')
-                && date_prefix.chars().nth(10) == Some('-'),
-            "Archive should have date prefix format YYYY-MM-DD-"
+        assert_eq!(
+            archived_name, "001-test-plan",
+            "Archive should be numbered NNN-<plan>, starting at 001"
         );
 
         assert!(!specs.join("_plans/test-plan").exists());
+    }
+
+    #[test]
+    fn record_plan_numbers_second_plan_sequentially() {
+        let tmp = TempDir::new().unwrap();
+        let specs = tmp.path();
+
+        for plan in ["plan-one", "plan-two"] {
+            let plan_dir = specs.join(format!("_plans/{plan}/domain/feature"));
+            fs::create_dir_all(&plan_dir).unwrap();
+            fs::write(
+                plan_dir.join("spec.md"),
+                r#"# Feature: New Feature
+
+Description here.
+
+## Scenarios
+
+<!-- DELTA:NEW -->
+### Scenario: Test
+
+* *GIVEN* setup
+* *WHEN* action
+* *THEN* result SHALL happen
+<!-- /DELTA:NEW -->
+"#,
+            )
+            .unwrap();
+        }
+
+        record_plan(specs, "plan-one").unwrap();
+        record_plan(specs, "plan-two").unwrap();
+
+        assert!(specs.join("_recorded/001-plan-one").exists());
+        assert!(specs.join("_recorded/002-plan-two").exists());
     }
 
     #[test]

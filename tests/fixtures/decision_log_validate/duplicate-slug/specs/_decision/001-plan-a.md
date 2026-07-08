@@ -1,9 +1,10 @@
-# Architecture Decision Records
+# Decisions: plan-a
 
-## ADR-001: Use line-oriented state machine for parsing
+## ADR: Use line scanner
 
-**Date:** 2026-04-27
-**Plan:** add-decision-log-validation
+**ID:** use-line-scanner
+**Plan:** plan-a
+**Status:** Accepted
 
 ### Context
 

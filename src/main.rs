@@ -330,33 +330,35 @@ fn print_validation_results(
 }
 
 fn handle_decision_log_command(command: cli::DecisionLogCommands) -> ExitCode {
-    let log_path = PathBuf::from("specs/decision-log.md");
+    let decisions_dir = PathBuf::from("specs/_decision");
     match command {
-        cli::DecisionLogCommands::Validate => match std::fs::read_to_string(&log_path) {
-            Err(_) => {
-                println!("Error: decision-log.md not found at {}", log_path.display());
+        cli::DecisionLogCommands::Validate => {
+            let result = validate::decision_log::validate_decisions_dir(&decisions_dir);
+            if result.is_success() {
+                println!("Permanent decision log validation passed.");
+                for warn in &result.warnings {
+                    println!("  WARN: {}", warn);
+                }
+                ExitCode::SUCCESS
+            } else {
+                println!("Permanent decision log validation failed:");
+                for error in &result.errors {
+                    println!("  ERROR: {}", error);
+                }
+                for warn in &result.warnings {
+                    println!("  WARN: {}", warn);
+                }
                 ExitCode::from(1)
             }
-            Ok(content) => {
-                let result = validate::decision_log::validate_permanent_log(&content);
-                if result.is_success() {
-                    println!("Permanent decision log validation passed.");
-                    for warn in &result.warnings {
-                        println!("  WARN: {}", warn);
-                    }
-                    ExitCode::SUCCESS
-                } else {
-                    println!("Permanent decision log validation failed:");
-                    for error in &result.errors {
-                        println!("  ERROR: {}", error);
-                    }
-                    for warn in &result.warnings {
-                        println!("  WARN: {}", warn);
-                    }
-                    ExitCode::from(1)
-                }
-            }
-        },
+        }
+        cli::DecisionLogCommands::Show => {
+            let fragments = validate::decision_log::read_fragments(&decisions_dir);
+            print!(
+                "{}",
+                validate::decision_log::render_permanent_log(&fragments)
+            );
+            ExitCode::SUCCESS
+        }
     }
 }
 

@@ -9,7 +9,7 @@ Validates plan structure and spec delta formatting before implementation begins.
 * A plan MAY contain a `decision-log.md` file in the plan-level (lightweight) format
 * A plan MAY contain spec deltas in `<domain>/<feature>/spec.md` files
 * Spec deltas use DELTA markers: `<!-- DELTA:NEW -->`, `<!-- DELTA:CHANGED -->`, `<!-- DELTA:REMOVED -->`
-* Plan-level decision logs use H1 `# Decision Log: <plan-name>`, a `Date:` line, and at least one of `## Interview`, `## Design Decisions`, `## Review Findings`
+* Plan-level decision logs use H1 `# Decision Log: <plan-name>` and at least one of `## Interview`, `## Design Decisions`, `## Review Findings`
 * Steps MUST be formatted as `* *KEYWORD* <text>` (bullet, emphasized uppercase keyword)
 * Step keywords (GIVEN, WHEN, THEN, AND) MUST be uppercase
 * RFC 2119 keywords in THEN steps (MUST, SHALL, SHOULD, MAY, etc.) MUST be uppercase
@@ -112,16 +112,9 @@ Validates plan structure and spec delta formatting before implementation begins.
 * *THEN* the system SHALL report validation passed
 * *AND* the system MUST NOT report any error related to decision-log.md
 
-### Scenario: Validate plan with decision-log missing Date field
-
-* *GIVEN* a plan named "decisions-no-date" exists with a `decision-log.md` that has no `Date:` line
-* *WHEN* the user runs `speq plan validate decisions-no-date`
-* *THEN* the system SHALL report an error indicating the decision log is missing the `Date:` field
-* *AND* the system SHALL exit with non-zero code
-
 ### Scenario: Validate plan with decision-log having no sections
 
-* *GIVEN* a plan named "decisions-no-sections" exists with a `decision-log.md` containing H1 and Date but no `##` section headings
+* *GIVEN* a plan named "decisions-no-sections" exists with a `decision-log.md` containing H1 but no `##` section headings
 * *WHEN* the user runs `speq plan validate decisions-no-sections`
 * *THEN* the system SHALL report an error that the decision log MUST contain at least one of "Interview", "Design Decisions", or "Review Findings" sections
 * *AND* the system SHALL exit with non-zero code

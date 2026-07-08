@@ -41,7 +41,7 @@ pub enum Commands {
         command: SearchCommands,
     },
 
-    /// Validate the permanent decision log
+    /// Manage the permanent decision records under specs/_decision
     DecisionLog {
         #[command(subcommand)]
         command: DecisionLogCommands,
@@ -50,8 +50,11 @@ pub enum Commands {
 
 #[derive(Subcommand)]
 pub enum DecisionLogCommands {
-    /// Validate the permanent decision log at specs/decision-log.md
+    /// Validate the permanent decision records under specs/_decision
     Validate,
+
+    /// Assemble the permanent decision records and print them to stdout
+    Show,
 }
 
 #[derive(Subcommand)]

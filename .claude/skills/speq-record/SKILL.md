@@ -66,7 +66,7 @@ Report to user:
 ✓ Verification report confirmed
 ✓ All deltas merged
 ✓ Spec library validated
-✓ Plan archived: specs/_recorded/YYYY-MM-DD-<plan-name>
+✓ Plan archived: specs/_recorded/NNN-<plan-name>
 ```
 
 ## Work Split (reference)

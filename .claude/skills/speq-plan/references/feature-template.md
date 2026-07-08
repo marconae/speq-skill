@@ -1,7 +1,5 @@
 # Feature: <feature_name>
 
-> Prose style: follow `/speq:writing-guardrails`.
-
 <Concise statement of the business capability and its value. No implementation details. No UI assumptions.>
 
 ## Background

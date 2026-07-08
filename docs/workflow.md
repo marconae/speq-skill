@@ -100,7 +100,7 @@ specs/_plans/<plan-name>/
 └── <domain>/<feature>/spec.md        # Delta specs
 ```
 
-`planner-agent` creates `decision-log.md` automatically during the planning interview, capturing Q&A, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are carried into the permanent `specs/decision-log.md` by `recorder-agent` during `/speq:record`. See [Decision Log](./decision-log.md).
+`planner-agent` creates `decision-log.md` automatically during the planning interview, capturing Q&A, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are carried into a new `specs/_decision/NNN-<plan-name>.md` fragment by `recorder-agent` during `/speq:record`. See [Decision Log](./decision-log.md).
 
 ### Plan Naming Conventions
 
@@ -181,8 +181,8 @@ After a successful `/speq:implement`:
 4. **Clean** — Strips all DELTA markers
 5. **Validate** — Runs `speq feature validate`
 6. **Optimize** — Check whether the specs should be re-organized so that the files are kept short and focused
-7. **Promote decisions** — Entries marked `Promotes to ADR: yes` in `decision-log.md` are appended to `specs/decision-log.md` as the next sequential ADR
-8. **Archive** — Moves plan to `specs/_recorded/<plan-name>/`
+7. **Promote decisions** — Entries marked `Promotes to ADR: yes` in `decision-log.md` are written to a new `specs/_decision/NNN-<plan-name>.md` fragment
+8. **Archive** — Moves plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
 
 ---
 

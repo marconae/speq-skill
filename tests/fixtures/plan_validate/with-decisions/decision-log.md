@@ -1,6 +1,5 @@
 # Decision Log: with-decisions
 
-Date: 2026-04-27
 
 ## Design Decisions
 

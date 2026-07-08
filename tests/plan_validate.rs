@@ -276,19 +276,6 @@ mod decision_log {
     }
 
     #[test]
-    fn plan_decision_log_missing_date_fails() {
-        let tmp = TempDir::new().unwrap();
-        setup_fixture(&tmp, "decisions-no-date");
-
-        cmd()
-            .current_dir(tmp.path())
-            .args(["plan", "validate", "decisions-no-date"])
-            .assert()
-            .code(1)
-            .stdout(predicate::str::contains("Date"));
-    }
-
-    #[test]
     fn plan_decision_log_no_sections_fails() {
         let tmp = TempDir::new().unwrap();
         setup_fixture(&tmp, "decisions-no-sections");

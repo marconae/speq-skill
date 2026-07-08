@@ -1,12 +1,14 @@
 # Feature: CLI Record
 
-The CLI SHALL provide a command to record approved plan deltas into permanent feature specs and archive the plan.
+The CLI SHALL provide a command to record approved plan deltas into permanent feature specs and archive the plan under a numbered folder.
 
 ## Background
 
 * Command syntax: `speq record <plan-name>`
 * Plans are located at `specs/_plans/<plan-name>/`
-* Recorded plans are archived to `specs/_recorded/YYYY-MM-DD-<plan-name>/`
+* Recorded plans are archived to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a zero-padded ordering number
+* `NNN` is the count of existing entries under `specs/_recorded/` plus one, starting at `001`
+* Duplicate `NNN` numbers across parallel plans are acceptable; `specs/_recorded/` is gitignored
 * Delta markers: `<!-- DELTA:NEW -->`, `<!-- DELTA:CHANGED -->`, `<!-- DELTA:REMOVED -->`
 * Exit code 0 on success, 1 on error
 
@@ -44,9 +46,9 @@ The CLI SHALL provide a command to record approved plan deltas into permanent fe
 ### Scenario: Archive plan after recording
 
 * *GIVEN* a successful recording of plan `my-plan`
-* *AND* today's date is `2025-03-15`
+* *AND* `specs/_recorded/` already contains 2 archived entries
 * *WHEN* the recording completes
-* *THEN* the system SHALL move `specs/_plans/my-plan/` to `specs/_recorded/2025-03-15-my-plan/`
+* *THEN* the system SHALL move `specs/_plans/my-plan/` to `specs/_recorded/003-my-plan/`
 
 ### Scenario: Validate after merge
 

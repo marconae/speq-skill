@@ -19,7 +19,7 @@ speq <command> [subcommand] [options]
 | `domain` | List and explore spec domains |
 | `feature` | List, get, and validate feature specs |
 | `plan` | List and validate implementation plans |
-| `decision-log` | Validate the permanent decision log |
+| `decision-log` | Validate and show the permanent decision log |
 | `record` | Merge plan deltas into permanent specs |
 | `search` | Semantic search across scenarios |
 
@@ -150,20 +150,31 @@ Validates:
 
 ### `speq decision-log validate`
 
-Validate the permanent decision log at `specs/decision-log.md`.
+Validate every fragment under `specs/_decision/`.
 
 ```bash
 speq decision-log validate
 ```
 
 Validates:
-- File exists (exits non-zero with an error message if absent)
-- H1 is `# Architecture Decision Records`
-- ADR headings follow `## ADR-NNN: <Title>` — sequential, no gaps, starting at `ADR-001`
-- Each ADR contains all required fields: `**Date:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`
-- `**Status:**` is one of: `Accepted`, `Superseded by ADR-NNN`, `Deprecated`
+- Each fragment's H1 is `# Decisions: <plan-name>`
+- ADR headings follow `## ADR: <Title>`
+- Each ADR contains all required fields: `**ID:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`
+- `**ID:**` is a kebab-case slug, unique across every fragment
+- `**Status:**` is one of: `Accepted`, `Deprecated`, `Superseded by <slug>`
+- Every `**Supersedes:**` and `Superseded by <slug>` reference resolves to a slug defined somewhere in `specs/_decision/`
 
-`### Options Considered` and `### Consequences` are optional and do not trigger errors when absent.
+`### Options Considered` and `### Consequences` are optional and do not trigger errors when absent. An absent or empty `specs/_decision/` directory passes.
+
+### `speq decision-log show`
+
+Assemble every fragment under `specs/_decision/` into one `# Architecture Decision Records` view and print it to stdout.
+
+```bash
+speq decision-log show
+```
+
+Orders fragments by their numeric `NNN-` prefix, breaking ties by filename; ADRs within a fragment print in the order they were authored. Writes nothing to disk — there is no merged file to keep in sync.
 
 See [Decision Log](./decision-log.md) for the full format reference.
 
@@ -183,7 +194,7 @@ This command:
 1. Reads delta specs from `specs/_plans/<plan-name>/`
 2. Merges deltas into permanent specs in `specs/<domain>/<feature>/`
 3. Strips DELTA markers
-4. Archives plan to `specs/_recorded/YYYY-MM-DD-<plan-name>/`
+4. Archives plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
 
 ---
 

@@ -1,7 +1,5 @@
 # Decision Log: <plan-name>
 
-> Prose style: follow `/speq:writing-guardrails`.
-
 <!--
 STRUCTURAL TEMPLATE - DO NOT COPY-PASTE
 Generate actual content from the clarifying interview and plan design.
@@ -9,8 +7,6 @@ Capture interview Q&A verbatim or close paraphrase.
 Mark each decision entry with "Promotes to ADR: yes" if it is a significant
 architectural or workflow decision that belongs in the permanent record.
 -->
-
-Date: YYYY-MM-DD
 
 ## Interview
 

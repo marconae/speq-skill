@@ -1,6 +1,5 @@
 # Decision Log: decisions-bad-promote
 
-Date: 2026-04-27
 
 ## Design Decisions
 
