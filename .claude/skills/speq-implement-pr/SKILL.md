@@ -20,6 +20,7 @@ You must follow this workflow:
 
 Invoke before starting:
 - `/speq-cli` — spec discovery, to resolve plan names
+- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
 `speq-implement` and `speq-record` invoke their own required skills; `git-agent` requires none.
 

@@ -19,6 +19,7 @@ BEFORE starting, invoke these skills:
 - `/speq-ext-research` — API docs and design research
 - `/speq-cli` — Spec discovery and search
 - `/speq-git-discipline` — Version control rules
+- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
 ## Guiding Principles
 

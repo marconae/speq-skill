@@ -20,6 +20,7 @@ You must follow this workflow:
 
 Invoke before starting:
 - `/speq-cli` — spec discovery and search
+- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
 `planner-agent` invokes its own required skills; `git-agent` requires none.
 

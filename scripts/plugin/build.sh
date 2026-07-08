@@ -275,7 +275,7 @@ main() {
     log_info "Codex plugin: $CODEX_PLUGIN_DIR"
     log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission"
     log_info "Headless PR pipeline: /speq:plan-pr, /speq:implement-pr"
-    log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:cli"
+    log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:git-discipline, /speq:cli, /speq:writing-guardrails"
     log_info "Codex model routing: orchestration gpt-5.4/medium, heavy agents gpt-5.5/xhigh, standard implementation gpt-5.4/high, recording gpt-5.4/medium"
     log_info "Marketplace structure built at: $MARKETPLACE_DIR"
 }

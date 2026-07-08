@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.0
+
+- Add `speq:writing-guardrails` — prose guardrails anchored in established methodologies (BLUF/inverted pyramid, Strunk & White, INCOSE GtWR, ISO 29148, RFC 2119) governing the free-text surfaces of speq artifacts and the GitHub PRs/issues/comments the pipeline composes
+- Load it into every prose-authoring component: planner-agent, recorder-agent (ADR step), speq-implement, speq-mission, speq-plan-pr, speq-implement-pr
+- Add a "Prose style" pointer to the plan/feature/mission/verification/decision-log templates
+
 ## 0.8.2
 
 - Rename `git-pr-agent` → `git-agent` and generalize it into a git/GitHub operations worker (create/checkout branches, commit, push, create/comment/read PRs and issues, mark a draft PR ready); it runs one caller-specified operation per invocation on caller-supplied content and authors no content

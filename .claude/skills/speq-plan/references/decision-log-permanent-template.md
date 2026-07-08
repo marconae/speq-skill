@@ -1,5 +1,7 @@
 # Architecture Decision Records
 
+> Prose style: follow `/speq:writing-guardrails`.
+
 <!-- ADRs are numbered sequentially starting from ADR-001. Never renumber. -->
 <!-- recorder-agent appends new ADRs from plan decision logs. -->
 

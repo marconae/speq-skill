@@ -25,6 +25,7 @@ Invoke before starting:
 - `/speq-ext-research` — Library documentation and research
 - `/speq-code-guardrails` — TDD cycle and quality standards
 - `/speq-cli` — spec discovery
+- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
 Subagents (`implementer-agent`, `implementer-expert-agent`, `code-reviewer`) must also invoke their required skills.
 

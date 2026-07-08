@@ -20,6 +20,11 @@ For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.co
 | Clean Code (Martin) | speq-code-guardrails | Code quality |
 | London School TDD | speq-code-guardrails | Testing |
 | SOLID | speq-code-guardrails | Design principles |
+| KISS | speq-code-guardrails | Design principles |
+| DRY | speq-code-guardrails | Design principles |
+| YAGNI | speq-code-guardrails | Design principles |
+| Law of Demeter | speq-code-guardrails | Design principles |
+| Boy Scout Rule | speq-code-guardrails | Code quality |
 | Five Whys | speq-code-guardrails | Root cause analysis |
 | Feynman Technique | speq-code-tools | Comprehension |
 | Evidence Hierarchy | speq-ext-research | Research |
@@ -34,6 +39,15 @@ For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.co
 | Socratic Method | speq-plan | Interview |
 | MECE Partitioning | speq-plan | Problem structuring |
 | EARS Syntax | speq-plan | Requirements |
+| RFC 2119 / 8174 | speq-plan | Requirements |
 | ADR (Nygard format) | speq-plan | Design decisions |
 | Docs-as-Code | speq-record | Documentation |
 | London School TDD | speq-implement (template) | Testing |
+| BLUF / Inverted Pyramid | speq-writing-guardrails | Structure |
+| NN/g F-Pattern | speq-writing-guardrails | Readability |
+| Anthropic context-engineering | speq-writing-guardrails | Agent readability |
+| Strunk & White | speq-writing-guardrails | Concision |
+| Zinsser | speq-writing-guardrails | Concision |
+| INCOSE GtWR | speq-writing-guardrails | Requirements clarity |
+| ISO/IEC/IEEE 29148 | speq-writing-guardrails | Requirements clarity |
+| RFC 2119 / 8174 | speq-writing-guardrails | Prose register |

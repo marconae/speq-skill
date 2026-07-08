@@ -1,5 +1,7 @@
 # Verification Report: <plan-name>
 
+> Prose style: follow `/speq:writing-guardrails`.
+
 **Generated:** <YYYY-MM-DD>
 
 ## Verdict

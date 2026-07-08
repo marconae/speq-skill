@@ -15,6 +15,7 @@ Invoke before starting:
 - `/speq-code-tools` — Codebase exploration
 - `/speq-ext-research` — Tech stack research
 - `/speq-cli` — Spec structure
+- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
 ## Workflow
 

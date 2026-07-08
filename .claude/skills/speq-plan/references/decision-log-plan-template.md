@@ -1,5 +1,7 @@
 # Decision Log: <plan-name>
 
+> Prose style: follow `/speq:writing-guardrails`.
+
 <!--
 STRUCTURAL TEMPLATE - DO NOT COPY-PASTE
 Generate actual content from the clarifying interview and plan design.

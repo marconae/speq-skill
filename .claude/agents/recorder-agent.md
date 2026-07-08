@@ -20,6 +20,7 @@ BEFORE starting, invoke these skills:
 - `/speq-code-tools` — File operations
 - `/speq-cli` — Spec validation
 - `/speq-git-discipline` — Version control rules
+- `/speq-writing-guardrails` — Prose style for ADR promotion (decision-log synthesis)
 
 ## Input You Receive
 

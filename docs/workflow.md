@@ -188,14 +188,7 @@ After a successful `/speq:implement`:
 
 ## Headless PR Pipeline
 
-`/speq:plan-pr` and `/speq:implement-pr` run the same Plan → Implement →
-Record cycle unattended. Autonomous pipelines can't run a live interview, so
-the Q&A has to be decoupled from planning itself: every decision that would
-normally be an `AskUserQuestion` prompt either gets a documented, conventional
-default, or turns into an open question posted on a PR for later reply.
-Human-in-the-loop is converted into an asynchronous process instead of a
-synchronous interview. Humans control the pipeline and still the intent via 
-prompting and answering questions, just not in a live chat session.
+`/speq:plan-pr` and `/speq:implement-pr` run the same Plan → Implement → Record cycle unattended. Autonomous pipelines can't run a live interview, so the Q&A has to be decoupled from planning itself: every decision that would normally be an `AskUserQuestion` prompt either gets a documented, conventional default, or turns into an open question posted on a PR for later reply. Human-in-the-loop is converted into an asynchronous process instead of a synchronous interview. Humans control the pipeline and still the intent via prompting and answering questions, just not in a live chat session.
 
 ```
 /speq:plan-pr <intent>  →  PR (draft; + open questions if blocked)
@@ -206,29 +199,12 @@ prompting and answering questions, just not in a live chat session.
              /speq:implement-pr <name>  →  same PR, updated + marked ready
 ```
 
-- **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and
-  reused by `/speq:implement-pr` — both push to the same PR, there's no
-  separate plan-only branch namespace.
-- **Blocked state**: if planning hits a decision that genuinely needs a
-  human (irreversible, architecturally divergent, or security/compliance
-  relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md`
-  is flagged blocked, and the PR is opened as a draft with the questions
-  posted as a comment. `/speq:implement-pr` refuses to proceed while this
-  file exists.
-- **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>`
-  (it re-fetches new comments/reviews as answers), or check out the branch
-  and finish interactively with `/speq:plan <plan-name>`.
-- **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to
-  `/speq:record`'s library-split question rather than stalling on it.
-- **PR title & lifecycle**: the PR is titled with a conventional-commit
-  feature title `<type>(<scope>): <slug>` derived from the plan-name
-  (`add-search-candle` ⇒ `feat(search): add search candle`), not the
-  `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**;
-  `/speq:implement-pr` marks it **ready** once the implementation is pushed.
-- **Git/PR mechanics**: both skills delegate every branch/commit/push/PR
-  operation to `git-agent` — the one sub-agent in this system permitted to
-  write git history or touch a remote directly, keeping both orchestrators as
-  thin as the interactive ones. See [Model Routing](./model-routing.md).
+- **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and reused by `/speq:implement-pr` — both push to the same PR, there's no separate plan-only branch namespace.
+- **Blocked state**: if planning hits a decision that genuinely needs a human (irreversible, architecturally divergent, or security/compliance relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md` is flagged blocked, and the PR is opened as a draft with the questions posted as a comment. `/speq:implement-pr` refuses to proceed while this file exists.
+- **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>` (it re-fetches new comments/reviews as answers), or check out the branch and finish interactively with `/speq:plan <plan-name>`.
+- **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question rather than stalling on it.
+- **PR title & lifecycle**: the PR is titled with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
+- **Git/PR mechanics**: both skills delegate every branch/commit/push/PR operation to `git-agent` — the one sub-agent in this system permitted to write git history or touch a remote directly, keeping both orchestrators as thin as the interactive ones. See [Model Routing](./model-routing.md).
 
 ---
 
@@ -243,5 +219,6 @@ Reusable guidance invoked by workflow skills:
 | `/speq:code-guardrails` | Code quality guardrails |
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:cli` | speq CLI usage patterns |
+| `/speq:writing-guardrails` | Prose style rules for speq artifacts and GitHub PRs/issues/comments |
 
 See [MCP Servers](./mcp-servers.md) for details on Serena and Context7.
