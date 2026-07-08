@@ -57,11 +57,9 @@ Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 
 Spawn the planner sub-agent with everything it needs:
 
-```python
-Task(
-  subagent_type="planner-agent",
-  description="Plan <plan-name>",
-  prompt="""
+```
+Delegate to planner-agent — Plan <plan-name>
+
 ## Plan Name
 <plan-name>
 
@@ -78,13 +76,9 @@ Task(
 <any research already conducted, or "none — agent to research as needed">
 
 ## Your Task
-Produce spec deltas and plan.md per the `planner-agent` workflow. Tag tasks
-requiring deep reasoning with [expert] so the implementer orchestrator can
-route them to implementer-expert-agent.
+Produce spec deltas and plan.md per the `planner-agent` workflow. Tag tasks requiring deep reasoning with [expert] so the implementer orchestrator can route them to implementer-expert-agent.
 
 Return the list of files created and the validation result.
-"""
-)
 ```
 
 ### 5. Review planner-agent output (orchestrator)

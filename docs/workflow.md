@@ -195,12 +195,12 @@ synchronous interview. Humans control the pipeline and still the intent via
 prompting and answering questions, just not in a live chat session.
 
 ```
-/speq:plan-pr <intent>  →  PR (ready, or draft + open questions)
+/speq:plan-pr <intent>  →  PR (draft; + open questions if blocked)
                                    │
                     (reply on the PR, or /speq:plan <name> locally)
                                    │
                                    ▼
-                     /speq:implement-pr <name>  →  same PR, updated
+             /speq:implement-pr <name>  →  same PR, updated + marked ready
 ```
 
 - **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and
@@ -217,11 +217,15 @@ prompting and answering questions, just not in a live chat session.
   and finish interactively with `/speq:plan <plan-name>`.
 - **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to
   `/speq:record`'s library-split question rather than stalling on it.
+- **PR title & lifecycle**: the PR is titled with a conventional-commit
+  feature title `<type>(<scope>): <slug>` derived from the plan-name
+  (`add-search-candle` ⇒ `feat(search): add search candle`), not the
+  `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**;
+  `/speq:implement-pr` marks it **ready** once the implementation is pushed.
 - **Git/PR mechanics**: both skills delegate every branch/commit/push/PR
   operation to `git-pr-agent` — the one sub-agent in this system permitted to
-  write git history or touch a remote (via `ghbrk`), keeping both
-  orchestrators as thin as the interactive ones. See
-  [Model Routing](./model-routing.md).
+  write git history or touch a remote directly, keeping both orchestrators as
+  thin as the interactive ones. See [Model Routing](./model-routing.md).
 
 ---
 

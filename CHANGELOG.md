@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.1
+
+- Headless PR pipeline now titles PRs with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name, instead of `spec(plan): <plan-name>`
+- `speq-plan-pr` opens the PR as a draft; `speq-implement-pr` marks it ready once the implementation is pushed
+
 ## 0.8.0
 
 - Add a 6th `code-reviewer` category, "YAGNI / Over-Engineering": flags unneeded dependencies, speculative abstractions (single-implementation interfaces/generics/config values), dead flexibility (unused feature flags/extension points), reinvented standard-library logic, and shrinkable code — every finding is delegated to the implementer agents like any other finding, with `[expert]` tagging for removals that have cross-file or subtle-correctness implications
@@ -10,7 +15,7 @@
 ## 0.7.0
 
 - Add `speq-plan-pr` and `speq-implement-pr`: headless, non-interactive counterparts to `speq-plan`/`speq-implement` that plan/implement against a `feat/<plan-name>` branch and open or update a PR
-- Add `git-pr-agent`, the only sub-agent permitted to write git history or touch a remote (proxied through `ghbrk`)
+- Add `git-pr-agent`, the only sub-agent permitted to write git history or touch a remote
 - `planner-agent` gains a headless escalation mode: assume-and-document conventional decisions, escalate only irreducible ones via an `OPEN QUESTIONS:` sentinel
 
 ## 0.6.0

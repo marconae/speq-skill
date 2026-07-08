@@ -121,11 +121,9 @@ For each parallel group in plan's `## Parallelization`:
 
 **Standard subagent invocation:**
 
-```python
-Task(
-  subagent_type="implementer-agent",
-  description="Implement <group-name> standard tasks",
-  prompt="""
+```
+Delegate to implementer-agent — Implement <group-name> standard tasks
+
 ## Your Tasks (standard)
 
 {standard_task_list}
@@ -136,17 +134,13 @@ Task(
 - Tasks file: specs/_plans/{plan_name}/tasks.md
 - Update tasks.md after each task completion (preserve task numbering)
 - Report checkpoint after every 2-3 tasks
-"""
-)
 ```
 
 **Expert subagent invocation:**
 
-```python
-Task(
-  subagent_type="implementer-expert-agent",
-  description="Implement <group-name> expert tasks",
-  prompt="""
+```
+Delegate to implementer-expert-agent — Implement <group-name> expert tasks
+
 ## Your Tasks (expert — reasoning-heavy)
 
 {expert_task_list}
@@ -158,8 +152,6 @@ Task(
 - Preserve the [expert] tag when updating status markers
 - Checkpoint after every 1-2 tasks (expert tasks are heavier)
 - Report key reasoning / invariants applied
-"""
-)
 ```
 
 ### Phase 4: Code Review
@@ -168,11 +160,9 @@ After implementation completes, review all changed files.
 
 1. **Collect changed files** — `git diff --name-only <base>...HEAD`
 2. **Spawn code-reviewer agent:**
-   ```python
-   Task(
-     subagent_type="code-reviewer",
-     description="Review implementation quality",
-     prompt="""
+   ```
+   Delegate to code-reviewer — Review implementation quality
+
    ## Changed Files
 
    {changed_files_list}
@@ -182,8 +172,6 @@ After implementation completes, review all changed files.
    - Plan: specs/_plans/{plan_name}/plan.md
    - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations, YAGNI/over-engineering
    - Structure findings using the **Pyramid Principle**: group by theme, lead each group with the key finding, support with evidence.
-   """
-   )
    ```
 3. **Process findings** — If findings exist:
    - Create fix tasks in `tasks.md` for every finding

@@ -6,57 +6,33 @@ model: sonnet
 
 # Spec Planner, headless (Orchestrator)
 
-This skill is a **thin orchestrator**, thinner than `speq-plan`: it has no
-live user to interview. It gathers whatever context it can, delegates all
-planning reasoning to `planner-agent` (same sub-agent `speq-plan` uses, told
-to operate in headless mode), and delegates every git/PR mechanic to
-`git-pr-agent`. The orchestrator itself never runs a git or `gh` command and
-never authors spec content — it only decides which sub-agent to call next and
-interprets what came back.
+You are a thin orchestrator with no live user to interview. Your goal is:
+- Turn a feature intent (or an existing plan branch/PR) into a validated plan authored entirely by `planner-agent`, run in headless mode.
+- Land that plan on a `feat/<plan-name>` branch and a draft PR, using `git-pr-agent` for every git/`gh` action.
+- Hand any irreducible decision to a human as a PR comment and stop there.
 
-**Why this exists:** `speq-plan` blocks on `AskUserQuestion` for its
-interview — correct for a human driving a live session, but it can't run
-unattended. This skill moves the human-in-the-loop point from "blocks a chat
-session" to "blocks on a PR comment," so autonomous callers can plan a
-feature and hand off async when a decision genuinely needs a person.
+You must follow this workflow:
+- Delegate all planning judgment to `planner-agent` and all git/PR mechanics to `git-pr-agent`; your own work is resolving the input, briefing those agents, and interpreting their returns.
+- Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
+- Keep one `feat/<plan-name>` branch and one PR per plan; `git-pr-agent` reuses whatever already exists.
 
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
-- `/speq-cli` — Spec discovery and search
+- `/speq-cli` — spec discovery and search
 
-`planner-agent` invokes its own required skills (`/speq-code-tools`,
-`/speq-ext-research`, `/speq-cli`, `/speq-git-discipline`) independently.
-`git-pr-agent` invokes its own (`/speq-cli`). Don't duplicate those lists
-here — the orchestrator's job is to call the right sub-agent, not to know
-what it does internally.
+`planner-agent` and `git-pr-agent` each invoke their own required skills.
 
 ## Workflow
 
-### 1. Resolve Mode (delegate)
+### 1. Resolve Target (delegate)
 
-```python
-Task(
-  subagent_type="git-pr-agent",
-  description="Resolve plan-pr target",
-  prompt="""
-## Mode
-resolve-target
-
-## Input
-<the raw argument the caller passed>
-
-## Your Task
-Classify the input (PR number/URL, existing branch, or plan-name), check out
-or create feat/<plan-name> accordingly, and report plan/PR/open-questions
-state per the resolve-target output format.
-"""
-)
+```
+Delegate to git-pr-agent — mode: resolve-target
+  input: <the raw argument the caller passed>
 ```
 
-If the input didn't match anything existing, treat it as free-text feature
-intent for a brand-new plan and derive `<plan-name>` the same way `speq-plan`
-does:
+If the input matched nothing existing, treat it as free-text feature intent for a brand-new plan and derive `<plan-name>` the same way `speq-plan` does:
 
 | Verb | When |
 |------|------|
@@ -68,17 +44,23 @@ does:
 
 Pattern: `<verb>-<feature-scope>[-<qualifier>]`
 
-### 2. Gather Answers — resume only (delegate)
+#### PR-title derivation (shared with `speq-implement-pr`)
 
-If step 1 reported unresolved `open-questions.md`, delegate to
-`git-pr-agent` (`mode: fetch-answers`) to pull PR comments and review
-comments as plain-text Q&A. This stands in for the interview `speq-plan`
-would otherwise run live.
+Derive the PR title deterministically from `<plan-name>` as a conventional-commit feature title `<type>(<scope>): <slug>`:
+
+- **type** — map the verb: `add`/`change` → `feat`, `remove` → `chore`, `refactor` → `refactor`, `fix` → `fix`; fallback `chore` for an unparseable name.
+- **scope** — the `<feature-scope>` segment (the token after the verb).
+- **slug** — the humanized `<plan-name>` (hyphens → spaces).
+
+Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scope segment, emit `<type>: <slug>`.
+
+### 2. Fetch Answers — resume only (delegate)
+
+If step 1 reported unresolved `open-questions.md`, delegate to `git-pr-agent` (mode: `fetch-answers`) to pull PR comments and reviews as plain-text Q&A. This forwarded Q&A stands in for the live interview `speq-plan` would otherwise run, and MUST be passed to `planner-agent` in step 4.
 
 ### 3. Discovery (orchestrator)
 
-Same lightweight calls `speq-plan` makes — enough context to brief
-`planner-agent`, not a full exploration:
+Gather just enough context to brief `planner-agent`, the same lightweight calls `speq-plan` makes:
 
 ```bash
 speq domain list
@@ -90,11 +72,9 @@ speq search query "<relevant terms>"
 
 Same shape `speq-plan` uses, with headless framing added:
 
-```python
-Task(
-  subagent_type="planner-agent",
-  description="Plan <plan-name> (headless)",
-  prompt="""
+```
+Delegate to planner-agent — Plan <plan-name> (headless)
+
 ## Plan Name
 <plan-name>
 
@@ -105,8 +85,7 @@ headless
 <feature intent text, or "see resume Q&A below">
 
 ## Clarifying Interview Results
-<the free-text feature intent (new plan), or the Q&A text step 2 fetched
-(resume) — this stands in for a live interview>
+<the free-text feature intent (new plan), or the Q&A text step 2 fetched (resume) — this stands in for a live interview>
 
 ## Existing Context
 <output of relevant `speq search` / `speq feature get` calls>
@@ -115,40 +94,43 @@ headless
 none — agent to research as needed
 
 ## Your Task
-Produce spec deltas and plan.md per your normal workflow. You are in
-headless mode: follow your "Headless / Non-Interactive Mode" section —
-assume and document conventional decisions, escalate only irreducible ones
-via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
+Produce spec deltas and plan.md per your normal workflow. You are in headless mode: follow your "Headless / Non-Interactive Mode" section — assume and document conventional decisions, escalate only irreducible ones via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
 
-Return the list of files created and the validation result, or an
-OPEN QUESTIONS: block if you had to stop.
-"""
-)
+Return the list of files created and the validation result, or an OPEN QUESTIONS: block if you had to stop.
 ```
 
 ### 5. Branch on the Result (delegate)
 
-**Clean return** (no `OPEN QUESTIONS:` sentinel):
+**Clean return** (no `OPEN QUESTIONS:` sentinel) — the plan is done; ship it as a draft:
 
 1. Confirm `speq plan validate <plan-name>` passes.
-2. Delegate to `git-pr-agent`: `commit-and-push` (the plan directory, message
-   `spec(plan): <plan-name>`) → `open-or-update-pr` (`draft: false`, title
-   `spec(plan): <plan-name>`, body summarizing the plan's Features table and
-   task count, ending "Ready for implementation — run
-   `/speq:implement-pr <plan-name>`").
-3. If this was a resume of a previously-blocked plan, also delegate
-   `mark-resolved`.
+2. Delegate `commit-and-push`, then `open-or-update-pr`:
+   ```
+   Delegate to git-pr-agent — mode: commit-and-push
+     paths: the plan directory
+     message: spec(plan): <plan-name>
 
-**`OPEN QUESTIONS:` returned:**
+   Delegate to git-pr-agent — mode: open-or-update-pr
+     draft: true
+     title: the derived <type>(<scope>): <slug>
+     body: summarize the plan's Features table and task count, ending
+           "Draft pending implementation — run /speq:implement-pr <plan-name> to implement and mark ready"
+   ```
+3. If this was a resume of a previously-blocked plan, also delegate `mark-resolved` so the PR comes off draft-blocked state.
 
-Delegate to `git-pr-agent`: `post-questions` with the question list. It
-writes `open-questions.md`, flags `plan.md` as blocked, commits, pushes, and
-opens/updates the PR as draft with the questions posted as a comment.
+**`OPEN QUESTIONS:` returned** — the plan needs a human; persist it and ask async:
+
+```
+Delegate to git-pr-agent — mode: post-questions
+  questions: <the question list>
+  title: the derived <type>(<scope>): <slug>
+```
+
+It writes `open-questions.md`, flags `plan.md` as blocked, commits, pushes, and opens/updates the PR as **draft** with the title set and the questions posted as a comment.
 
 ### 6. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, and the PR link either
-way.
+Tell the caller whether the plan is ready or blocked, and the PR link either way.
 
 ## Spec Hierarchy (reference)
 
@@ -164,15 +146,6 @@ specs/
 
 | Step | Performed by | Why |
 |------|--------------|-----|
-| Mode resolution, discovery, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
+| Target resolution, discovery, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Spec delta authoring, ADR, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
 | Branch, commit, push, PR create/comment | `git-pr-agent` sub-agent | Mechanical; keeps git/gh detail out of both orchestrators |
-
-## Anti-Patterns
-
-| Pattern | Why Wrong |
-|---------|-----------|
-| Orchestrator runs `git`/`gh` itself | That's `git-pr-agent`'s entire job |
-| Treating headless mode as "never ask" | Irreducible decisions still must escalate — see `planner-agent`'s headless section |
-| Silently dropping open questions on resume | Always re-fetch and forward PR answers before re-planning |
-| Opening a second PR for the same plan | One branch/PR per plan — `git-pr-agent` reuses the existing one |

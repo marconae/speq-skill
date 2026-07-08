@@ -33,11 +33,9 @@ Check: specs/_plans/<plan-name>/verification-report.md exists?
 
 Spawn the recorder sub-agent with the plan name:
 
-```python
-Task(
-  subagent_type="recorder-agent",
-  description="Record <plan-name> into permanent specs",
-  prompt="""
+```
+Delegate to recorder-agent — Record <plan-name> into permanent specs
+
 ## Plan Name
 <plan-name>
 
@@ -47,14 +45,9 @@ Task(
 - Delta specs: specs/_plans/<plan-name>/**/spec.md
 
 ## Your Task
-Merge all delta specs into permanent specs per the `recorder-agent` workflow.
-Validate between merges. Archive the plan on success. If any library threshold
-is exceeded (scenarios > 10, domain features > 8), STOP before archiving and
-return a question for the user.
+Merge all delta specs into permanent specs per the `recorder-agent` workflow. Validate between merges. Archive the plan on success. If any library threshold is exceeded (scenarios > 10, domain features > 8), STOP before archiving and return a question for the user.
 
 Return a summary of merged features and the archive path.
-"""
-)
 ```
 
 ### Phase 4: Handle Threshold Escalations (orchestrator)
