@@ -58,6 +58,14 @@ The main agent acts as **orchestrator**:
 
 ## Workflow
 
+### Phase 0: Load Project Hook (orchestrator)
+
+Check for `.speq/implement-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/implement-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
+Note it (not its full content) as a `Project Hook:` line in every sub-agent brief below — `implementer-agent`, `implementer-expert-agent`, and `code-reviewer` read it themselves from that path when noted.
+
 ### Phase 1: Load Plan
 
 ```
@@ -135,6 +143,7 @@ Delegate to implementer-agent — Implement <group-name> standard tasks
 - Tasks file: specs/_plans/{plan_name}/tasks.md
 - Update tasks.md after each task completion (preserve task numbering)
 - Report checkpoint after every 2-3 tasks
+- Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
 ```
 
 **Expert subagent invocation:**
@@ -153,6 +162,7 @@ Delegate to implementer-expert-agent — Implement <group-name> expert tasks
 - Preserve the [expert] tag when updating status markers
 - Checkpoint after every 1-2 tasks (expert tasks are heavier)
 - Report key reasoning / invariants applied
+- Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
 ```
 
 ### Phase 4: Code Review
@@ -173,6 +183,7 @@ After implementation completes, review all changed files.
    - Plan: specs/_plans/{plan_name}/plan.md
    - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations, YAGNI/over-engineering
    - Structure findings using the **Pyramid Principle**: group by theme, lead each group with the key finding, support with evidence.
+   - Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
    ```
 3. **Process findings** — If findings exist:
    - Create fix tasks in `tasks.md` for every finding

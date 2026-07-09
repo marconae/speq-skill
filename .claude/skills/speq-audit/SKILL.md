@@ -18,6 +18,14 @@ The `audit-agent` sub-agent invokes `/speq-cli` itself. **Read `references/check
 
 ## Workflow
 
+### Phase 0: Load Project Hook (orchestrator)
+
+Check for `.speq/audit-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/audit-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
+Note it (not its full content) as a `Project Hook:` line in the `audit-agent` brief below.
+
 ### Phase 1: Preconditions (orchestrator)
 
 ```
@@ -41,6 +49,7 @@ Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and
 9. Reserved-dir gitignore — `_decision`/`_plans` tracked; only `_recorded` ignored
 10. Git hygiene — `git status --short specs/` is clean
 11. Active-plan validity — `speq plan validate <plan>` per active plan
+12. Project hooks — informational only; list any `.speq/*-hook.md` present
 
 Reuse the CLI (no new commands): `speq feature validate`, `speq decision-log validate`, `speq plan validate`, `speq plan list`, `speq domain list`, `speq feature list`.
 
@@ -58,6 +67,8 @@ Diff the mission against the real spec library. Return two lists: (a) domains/fe
 present in the library but NOT reflected in the mission's Core Capabilities / Domain
 Glossary / Architecture; (b) mission capabilities with NO backing spec. Advisory only —
 do NOT edit mission.md.
+
+Project Hook: <if active, ".speq/audit-hook.md — read it and apply it"; otherwise omit this line>
 ```
 
 If `specs/mission.md` is absent, skip the delegation and mark the check `✗ (no mission.md)`.
@@ -86,6 +97,7 @@ Lead with the verdict (BLUF), then the checks table, then numbered remediations 
 | Recorded-folder naming                | ⚠ | 3 legacy names |
 | Library thresholds                    | ✓ | max 8 scenarios · 5 features |
 | Git hygiene                           | ✓ | specs/ clean |
+| Project hooks                         | — | 1 active: plan-hook.md |
 
 ## Recommended actions  (I ask before each change)
 1. Migrate specs/decision-log.md → specs/_decision/ fragments (7 ADRs → slugs)

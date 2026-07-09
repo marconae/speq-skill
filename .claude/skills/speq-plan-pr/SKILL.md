@@ -26,6 +26,12 @@ Invoke before starting:
 
 ## Workflow
 
+### 0. Load Project Hook (orchestrator)
+
+Check for `.speq/plan-pr-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/plan-pr-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
 ### 1. Resolve Target
 
 Resolve what to work on and land on the right branch:
@@ -110,6 +116,9 @@ headless
 ## External Research
 none — agent to research as needed
 
+## Project Hook
+<if active: note ".speq/plan-pr-hook.md — read it and apply it" — otherwise omit this section>
+
 ## Your Task
 Produce spec deltas and plan.md per your normal workflow. You are in headless mode: follow your "Headless / Non-Interactive Mode" section — assume and document conventional decisions, escalate only irreducible ones via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
 
@@ -134,6 +143,9 @@ Delegate to plan-reviewer — Review <plan-name> (round 1)
 
 ## Plan Artifacts
 plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
+
+## Project Hook
+<if active: note ".speq/plan-pr-hook.md — read it and apply it" — otherwise omit this section>
 ```
 
 **If BLOCKER findings exist:** respawn `planner-agent` with only the BLOCKER list (revise, log each as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate), then respawn `plan-reviewer` for round 2 with the round-1 BLOCKER list to confirm resolution. Do not loop a third time.

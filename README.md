@@ -107,6 +107,7 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 | [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
 | [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
 | [Model Routing](./docs/model-routing.md) | How workflow skills and sub-agents are routed across models |
+| [Hooks](./docs/hooks.md) | Repo-local `.speq/<name>-hook.md` customizations |
 
 ---
 

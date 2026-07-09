@@ -17,6 +17,14 @@ The `recorder-agent` sub-agent invokes `/speq-spec-merge`, `/speq-code-tools`, `
 
 ## Workflow
 
+### Phase 0: Load Project Hook (orchestrator)
+
+Check for `.speq/record-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/record-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
+Note it (not its full content) as a `Project Hook:` line in the `recorder-agent` brief below.
+
 ### Phase 1: Resolve Plan Name (orchestrator)
 
 Get plan name from user prompt. If none specified, use `AskUserQuestion` to present a list of plans under `specs/_plans/`.
@@ -46,6 +54,8 @@ Delegate to recorder-agent — Record <plan-name> into permanent specs
 
 ## Your Task
 Merge all delta specs into permanent specs per the `recorder-agent` workflow. Validate between merges. Archive the plan on success. If any library threshold is exceeded (scenarios > 10, domain features > 8), STOP before archiving and return a question for the user.
+
+Project Hook: <if active, ".speq/record-hook.md — read it and apply it"; otherwise omit this line>
 
 Return a summary of merged features and the archive path.
 ```

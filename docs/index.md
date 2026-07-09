@@ -14,6 +14,7 @@
 | [Spec Library](./spec-library.md) | Spec format, BDD, and RFC keywords                           |
 | [Decision Log](./decision-log.md)   | Design decisions, ADR fragment format, validation, and show   |
 | [Model Routing](./model-routing.md) | Orchestrator skills, specialist sub-agents, and effort tiers |
+| [Hooks](./hooks.md) | Repo-local `.speq/<name>-hook.md` customization for entry-point skills |
 | [CLI Reference](./cli-reference.md) | All CLI commands                                             |
 | [MCP Servers](./mcp-servers.md)     | Pre-configured MCPs: Serena and Context7                     |
 | [Semantic Anchors](./semantic-anchors.md) | Named methodologies grounding each skill |

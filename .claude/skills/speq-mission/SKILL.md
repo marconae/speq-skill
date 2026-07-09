@@ -19,6 +19,12 @@ Invoke before starting:
 
 ## Workflow
 
+### 0. Load Project Hook
+
+Check for `.speq/mission-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/mission-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
 ### 1. Project Detection
 
 Determine project type:

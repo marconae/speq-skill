@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0
+
+- Add repo-local project hooks: if `.speq/<name>-hook.md` exists in a project, the matching entry-point skill (`speq-mission`, `speq-plan`, `speq-plan-pr`, `speq-implement`, `speq-implement-pr`, `speq-record`, `speq-audit`) loads it as its first workflow step, announces `Loaded project hook: .speq/<name>-hook.md`, and treats its content as authoritative — able to add, change, or override any part of the skill's default workflow, including guardrail steps
+- `speq:audit` lists any active `.speq/*-hook.md` files as a new informational check — never a finding, never remediated
+- See [docs/hooks.md](./docs/hooks.md)
+
 ## 0.12.0
 
 - Add `plan-reviewer` (`opus`/`xhigh`) — a diabolus advocatus that adversarially challenges a plan's intent fidelity, feasibility, requirement quality, task breakdown, and prose (per `speq-writing-guardrails`) before it's handed to `/speq:implement`

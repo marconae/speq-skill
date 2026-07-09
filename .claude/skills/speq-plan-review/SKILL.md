@@ -15,7 +15,7 @@ Build the case against approval, not for it. A plan that survives review should 
 
 **Round 2 (if applicable):** re-check every round-1 BLOCKER against the reviser's diff first — confirm each is actually resolved, not reworded — before doing a fresh pass for new ones.
 
-**Non-goal:** do not re-litigate decisions the user already made in the clarifying interview. Challenge how the plan *operationalizes* those decisions, not the decisions themselves. If the user said "use approach X" and the plan uses approach X, that's settled — check whether X is executed soundly, not whether X was the right call.
+**Non-goal:** do not re-litigate decisions the user already made in the clarifying interview. Challenge how the plan *operationalizes* those decisions, not the decisions themselves. If the user said "use approach X" and the plan uses approach X, that's settled — check whether X is executed soundly, not whether X was the right call. A deviation the brief notes as authorized by an active project hook is settled the same way — don't raise it as a finding.
 
 ## Challenge Taxonomy
 

@@ -19,6 +19,12 @@ The `planner-agent` sub-agent invokes `/speq-planning`, `/speq-code-tools`, `/sp
 
 ## Workflow
 
+### 0. Load Project Hook (orchestrator)
+
+Check for `.speq/plan-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/plan-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
 ### 1. Discovery (orchestrator)
 
 Use speq CLI to understand what exists:
@@ -75,6 +81,9 @@ Delegate to planner-agent — Plan <plan-name>
 ## External Research
 <any research already conducted, or "none — agent to research as needed">
 
+## Project Hook
+<if active: note ".speq/plan-hook.md — read it and apply it" — otherwise omit this section>
+
 ## Your Task
 Produce spec deltas and plan.md per the `planner-agent` workflow. Tag tasks requiring deep reasoning with [expert] so the implementer orchestrator can route them to implementer-expert-agent.
 
@@ -109,6 +118,9 @@ Delegate to plan-reviewer — Review <plan-name> (round 1)
 
 ## Plan Artifacts
 plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
+
+## Project Hook
+<if active: note ".speq/plan-hook.md — read it and apply it" — otherwise omit this section>
 ```
 
 **If BLOCKER findings exist:**

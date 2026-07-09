@@ -14,6 +14,7 @@ Detection recipes, thresholds, and remediation procedures for each `speq-audit` 
 - [9. Reserved-dir gitignore](#9-reserved-dir-gitignore)
 - [10. Git hygiene](#10-git-hygiene)
 - [11. Active-plan validity](#11-active-plan-validity)
+- [12. Project hooks](#12-project-hooks)
 - [Remediation: decision-log migration](#remediation-decision-log-migration)
 - [Remediation: domain/feature restructure](#remediation-domainfeature-restructure)
 
@@ -70,6 +71,10 @@ Delegated to `audit-agent` (see SKILL.md Phase 3). The agent returns (a) library
 **Detect:** `speq plan validate <plan>` for each dir under `specs/_plans/`.
 **Signal:** `✓ all valid` / `✗ <plan>: <msg>`.
 **Remediate:** report the validator message; the user fixes the plan.
+
+## 12. Project hooks
+**Detect:** list any `.speq/*-hook.md` files present in the repo root.
+**Signal:** informational only, no `✓`/`✗`/`⚠` — `N hooks active: <filenames>` or `none`. Never a finding, never remediated; this just surfaces that custom behavior is in effect so the reader isn't surprised elsewhere.
 
 ---
 

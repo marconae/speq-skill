@@ -26,6 +26,12 @@ Invoke before starting:
 
 ## Workflow
 
+### 0. Load Project Hook (orchestrator)
+
+Check for `.speq/implement-pr-hook.md` in the repo root.
+- **Present:** read it. Announce "Loaded project hook: .speq/implement-pr-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Absent:** continue normally, no mention.
+
 ### 1. Resolve Target + Branch
 
 `$1` empty → ask the caller which plan. Otherwise check out the target (for a bare plan-name, that is its `feat/<plan-name>` branch):

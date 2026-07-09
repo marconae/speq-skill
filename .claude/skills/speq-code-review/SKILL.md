@@ -7,6 +7,8 @@ description: Code review tag taxonomy and findings output format — guardrail v
 
 Analyze each changed file for the categories below.
 
+**Non-goal:** a deviation the brief notes as authorized by an active project hook (e.g. a skipped guardrail, a relaxed convention) is a settled, intentional choice — don't raise it as a finding under any category below.
+
 ## 1. Guardrail Violations
 
 Per `/speq-code-guardrails`:
