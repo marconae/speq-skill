@@ -103,6 +103,8 @@ specs/_plans/<plan-name>/
 
 `planner-agent` creates `decision-log.md` automatically during the planning interview, capturing Q&A, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are carried into a new `specs/_decision/NNN-<plan-name>.md` fragment by `recorder-agent` during `/speq:record`. See [Decision Log](./decision-log.md).
 
+Before the plan is handed off, `plan-reviewer` adversarially challenges it (intent fidelity, feasibility, requirement quality, task breakdown, prose) and loops BLOCKER findings back to `planner-agent` for revision, capped at 2 rounds; unresolved blockers escalate to the human. Resolved blockers are logged as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`.
+
 ### Plan Naming Conventions
 
 | Verb | When |

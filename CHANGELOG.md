@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.12.0
+
+- Add `plan-reviewer` (`opus`/`xhigh`) — a diabolus advocatus that adversarially challenges a plan's intent fidelity, feasibility, requirement quality, task breakdown, and prose (per `speq-writing-guardrails`) before it's handed to `/speq:implement`
+- Wire it into `/speq:plan` and `/speq:plan-pr` as a bounded critique → revise → re-check loop: BLOCKER findings send `planner-agent` back to revise (logged as `[plan-review]`-prefixed `decision-log.md` `## Review Findings` entries), capped at 2 rounds; unresolved blockers escalate via `AskUserQuestion` (interactive) or the existing `OPEN QUESTIONS:`/draft-PR-comment path (headless) — no new escalation mechanism
+- ADVISORY findings are never persisted or looped on; they're surfaced in the plan-ready report for the human to weigh before implementing
+
 ## 0.11.0
 
 - Add `speq:audit` — a read-only health check for a speq project that runs the spec-library validators and filesystem checks in one pass, then offers to fix each finding, always asking first

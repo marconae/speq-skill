@@ -95,7 +95,7 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `references/decision-log-
 **What to capture:**
 - **Interview section** — verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
 - **Design Decisions section** — one entry per significant choice made while authoring spec deltas or plan.md (architecture patterns, rejected alternatives, scope boundaries)
-- **Review Findings section** — leave empty; populated by `speq-implement` after code review
+- **Review Findings section** — leave empty; populated by this agent (in Revision Mode, below) after `plan-reviewer` blockers, and by `speq-implement` after code review
 
 **For each decision entry**, set `Promotes to ADR: yes` when the decision is:
 - An architectural or workflow pattern adopted project-wide
@@ -170,6 +170,15 @@ If the orchestrator's prompt states `Interview Mode: headless` (used by `speq-pl
 - **Assume and document.** For conventions, naming, implementation details, and any choice with a clearly conventional default, make the call yourself and record it as a `decision-log.md` entry (Rationale explains why this default was chosen). This is the common case — most headless plans should finish without escalating.
 - **Escalate only irreducible decisions** — ones that are irreversible, change what the feature does for a user, diverge architecturally (two genuinely incompatible designs), or touch security/compliance. Before escalating, save every file you've completed so far (plan.md, delta specs, decision-log.md) exactly as they stand — the orchestrator persists this partial state for human review, so it must be usable as-is.
 - **Escalation format.** Return your response prefixed with the exact sentinel `OPEN QUESTIONS:` followed by a markdown bullet list of concrete questions (same bar as the interactive path's "signal back with a concrete question" — headless mode changes when you escalate, not the quality bar for what you escalate). Do not mix this sentinel into a normal completion report.
+
+## Revision Mode
+
+If the orchestrator respawns you with a `plan-reviewer` BLOCKER list instead of a fresh planning brief:
+
+- Address only the named findings — revise the specific `plan.md` section, spec delta, or task line each one points to. Do not rewrite unrelated content.
+- For each blocker you resolve, add a `## Review Findings` entry to `decision-log.md` titled `[plan-review] <short finding title>`, with **Finding** (what `plan-reviewer` flagged), **Direction change** (what you changed), and **Promotes to ADR** (per the normal rule above).
+- Re-run `speq plan validate <plan-name>` before returning.
+- If resolving a blocker surfaces a genuinely irreducible new decision, escalate it exactly as you would during initial planning (interactive: signal back with a concrete question; headless: `OPEN QUESTIONS:` sentinel).
 
 ## Scope Constraints
 

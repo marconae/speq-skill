@@ -40,7 +40,8 @@ Created automatically by `planner-agent` during `/speq:plan`. It captures the in
 
 ## Review Findings
 
-<!-- Populated by speq-implement after code review. -->
+<!-- [plan-review]-prefixed entries: populated by planner-agent after resolving a plan-reviewer blocker.
+     Unprefixed entries: populated by speq-implement after code review. -->
 ```
 
 ### Rules
@@ -136,6 +137,8 @@ speq decision-log show
 ```
 /speq:plan
   └─ planner-agent creates specs/_plans/<plan-name>/decision-log.md
+  └─ plan-reviewer challenges the plan; planner-agent logs resolved
+     blockers as "[plan-review]"-prefixed ## Review Findings entries
 
 /speq:implement
   └─ code-reviewer populates ## Review Findings in decision-log.md

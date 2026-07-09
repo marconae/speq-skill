@@ -89,10 +89,43 @@ When the sub-agent returns:
 2. List all created files
 3. If the sub-agent escalated a question back to you, resolve it with the user and respawn with the clarification
 
-### 6. Explain next steps (orchestrator)
+### 6. Adversarial Plan Review (orchestrator)
+
+`planner-agent` is both author and, until now, sole judge. Before handing the plan off, spawn `plan-reviewer` — a diabolus advocatus — to challenge it. Bounded to 2 rounds total.
+
+**Round 1:**
+
+```
+Delegate to plan-reviewer — Review <plan-name> (round 1)
+
+## Plan Name
+<plan-name>
+
+## User Intent
+<verbatim original request>
+
+## Clarifying Interview Results
+<verbatim Q&A>
+
+## Plan Artifacts
+plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
+```
+
+**If BLOCKER findings exist:**
+
+1. Respawn `planner-agent` with only the BLOCKER list, instructing it to revise the specific plan/spec-delta content addressing each one, log each resolved blocker as a `## Review Findings` entry in `decision-log.md` (`[plan-review]` title prefix), and re-run `speq plan validate`.
+2. Respawn `plan-reviewer` for **round 2**, passing the round-1 BLOCKER list so it confirms each is actually resolved before checking for new ones.
+3. Do not loop a third time, even if round 2 surfaces new BLOCKERs.
+
+**If BLOCKERs remain after round 2** — use `AskUserQuestion`: present the remaining blockers, let the user accept the risk and proceed, or give guidance and respawn `planner-agent` manually.
+
+**ADVISORY findings** are never looped on or persisted — carry them into step 7's report so the user sees them before implementing.
+
+### 7. Explain next steps (orchestrator)
 
 - Inform the user that the plan is created and ready for review
 - List all created files
+- Report any ADVISORY findings from step 6 so the user sees them before implementing
 - Inform the user to call `/speq-implement <plan-name>` to continue
 - Inform the user to call `/clear` to start implementing with a fresh context window
 - If Claude Code is in "plan mode", call `ExitPlanMode` and ask to proceed with cleared context
@@ -112,5 +145,6 @@ specs/
 |------|--------------|-----|
 | Discovery, interview, coordination | This skill (pins Sonnet) | Conversational, tool-call heavy |
 | Spec delta authoring, ADR, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; defect here compounds through implementation |
+| Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation, not after |
 
-The sub-agent pins its own model and effort in its frontmatter, so planning quality is independent of the parent session's configuration.
+Each sub-agent pins its own model and effort in its frontmatter, so planning quality is independent of the parent session's configuration.

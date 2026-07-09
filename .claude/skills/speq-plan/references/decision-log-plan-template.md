@@ -34,8 +34,7 @@ Mark each decision entry with "Promotes to ADR: yes" if it is a significant arch
 
 ## Review Findings
 
-<!-- Significant code-review findings that changed implementation direction. -->
-<!-- Populated by speq-implement after code review. -->
+<!-- Significant review findings that changed direction: plan-review findings (prefix title "[plan-review]"), populated by speq-plan/speq-plan-pr after plan-reviewer resolves a blocker, and code-review findings, populated by speq-implement after code review. -->
 
 ### [1] <Finding title>
 

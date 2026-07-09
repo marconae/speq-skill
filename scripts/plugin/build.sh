@@ -149,7 +149,7 @@ set_codex_agent_model() {
     local filename="$2"
 
     case "$filename" in
-        planner-agent.md|implementer-expert-agent.md|code-reviewer.md|audit-agent.md)
+        planner-agent.md|plan-reviewer.md|implementer-expert-agent.md|code-reviewer.md|audit-agent.md)
             sed_in_place 's/^model: .*/model: gpt-5.5/' "$file"
             ;;
         implementer-agent.md|recorder-agent.md|git-agent.md)

@@ -116,9 +116,35 @@ Produce spec deltas and plan.md per your normal workflow. You are in headless mo
 Return the list of files created and the validation result, or an OPEN QUESTIONS: block if you had to stop.
 ```
 
-### 5. Branch on the Result
+### 5. Adversarial Plan Review
 
-**Clean return** (no `OPEN QUESTIONS:` sentinel) — ship the plan as a draft:
+Skip this step if step 4 returned `OPEN QUESTIONS:` — resolve that first (step 6 handles it). Otherwise, before landing the plan, spawn `plan-reviewer` to challenge it. Bounded to 2 rounds total, same shape `speq-plan` uses:
+
+```
+Delegate to plan-reviewer — Review <plan-name> (round 1)
+
+## Plan Name
+<plan-name>
+
+## User Intent
+<the feature intent text / resume Q&A used in step 4>
+
+## Clarifying Interview Results
+<same text passed to planner-agent in step 4 — headless mode has no live interview>
+
+## Plan Artifacts
+plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
+```
+
+**If BLOCKER findings exist:** respawn `planner-agent` with only the BLOCKER list (revise, log each as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate), then respawn `plan-reviewer` for round 2 with the round-1 BLOCKER list to confirm resolution. Do not loop a third time.
+
+**If BLOCKERs remain after round 2:** treat this exactly like an `OPEN QUESTIONS:` return from `planner-agent` — fold the remaining blockers into step 6's "`OPEN QUESTIONS:` returned" branch as the questions list.
+
+**ADVISORY findings:** carry into step 7's PR body/report; never block or persist.
+
+### 6. Branch on the Result
+
+**Clean return** (no `OPEN QUESTIONS:` sentinel, and no unresolved BLOCKERs from step 5) — ship the plan as a draft:
 
 1. Confirm `speq plan validate <plan-name>` passes.
 2. Commit the plan and open the draft PR:
@@ -145,7 +171,7 @@ Return the list of files created and the validation result, or an OPEN QUESTIONS
    ```
    The PR stays a draft — `speq-implement-pr` is the only skill that marks it ready.
 
-**`OPEN QUESTIONS:` returned** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
+**`OPEN QUESTIONS:` returned (from step 4, or unresolved BLOCKERs from step 5)** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
 
 1. Write `specs/_plans/<plan-name>/open-questions.md`:
    ```markdown
@@ -153,7 +179,7 @@ Return the list of files created and the validation result, or an OPEN QUESTIONS
 
    speq-plan-pr could not complete this plan without human input. What's done so far is committed on this branch. Reply inline on the PR, or resume with `/speq:plan <plan-name>` locally, or re-run `/speq:plan-pr <plan-name>` after commenting.
 
-   - [ ] <question 1>
+   - [ ] <question 1, or the round-2 BLOCKER text from step 5>
    - [ ] <question 2>
    ```
 2. Insert `> **Status:** blocked — see open-questions.md` as the first line under `plan.md`'s H1 (skip if already present).
@@ -176,9 +202,9 @@ Delegate to git-agent — operation: comment-pr
   body: <the questions checklist from step 3>
 ```
 
-### 6. Report (orchestrator)
+### 7. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, and the PR link either way.
+Tell the caller whether the plan is ready or blocked, and the PR link either way. Mention any ADVISORY findings from step 5.
 
 ## Spec Hierarchy (reference)
 
@@ -196,4 +222,5 @@ specs/
 |------|--------------|-----|
 | Target resolution, discovery, status files, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Spec delta authoring, ADR, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
+| Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation, not after |
 | Branch, commit, push, PR create/comment | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |
