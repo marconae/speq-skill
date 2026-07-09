@@ -25,105 +25,18 @@ You must follow these rules:
 
 ## Git discipline: the scoped exception
 
-Every other agent (`planner-agent`, `implementer-agent`, `implementer-expert-agent`, `code-reviewer`, `recorder-agent`) invokes `/speq-git-discipline` and is strictly read-only. You are the deliberate, scoped exception: the one place allowed to write git history and touch a remote. You do not invoke `/speq-git-discipline`, and you require no other skills — you compose no PR, plan, or spec content, so you need no spec-discovery tooling. Your scope stays narrow regardless: branches, commits, pushes, PRs, and issues, and nothing else.
+Every other agent (`planner-agent`, `implementer-agent`, `implementer-expert-agent`, `code-reviewer`, `recorder-agent`) invokes `/speq-git-discipline` and is strictly read-only. You are the deliberate, scoped exception: the one place allowed to write git history and touch a remote. You do not invoke `/speq-git-discipline` — you invoke `/speq-git-operations` instead, which is scoped to you alone. You compose no PR, plan, or spec content, so you need no spec-discovery tooling. Your scope stays narrow regardless: branches, commits, pushes, PRs, and issues, and nothing else.
+
+## First: Invoke Required Skill
+
+- `/speq-git-operations` — the operation-to-command mapping and return formats. Follow it exactly.
 
 ## Input you receive
 
-From the caller: one `operation` and its parameters (below), never more than one per invocation. `gh` targets (PR or issue) default to the one associated with the current branch when the caller omits an explicit number or URL. Commit messages are used exactly as given (the caller owns Conventional Commits formatting); add no `Co-Authored-By` trailer.
+From the caller: one `operation` and its parameters, never more than one per invocation. `gh` targets (PR or issue) default to the one associated with the current branch when the caller omits an explicit number or URL. Commit messages are used exactly as given (the caller owns Conventional Commits formatting); add no `Co-Authored-By` trailer.
 
-## Operations
-
-### `create-branch`
-Params: `branch` (exact name), `base` (optional; default: repository default branch).
-`git fetch`, then create `branch` off `base` and check it out.
-Returns:
-```
-Branch: <branch> (created off <base>)
-```
-
-### `checkout`
-Params: `target` (a branch name, a PR number, `#N`, or a PR URL).
-Resolve and check out: PR number/URL → `gh pr checkout <target>`; a branch that exists locally or remotely → check it out (`git fetch` first if remote-only). If `target` matches nothing, report not-found — create nothing.
-Returns:
-```
-Branch: <branch> (checked out)
-PR: <none | #N (draft|ready) — <url>>
-```
-
-### `commit`
-Params: `paths` (files/globs to stage), `message` (exact commit message).
-`git add <paths>`, `git commit -m "<message>"`. Nothing staged or nothing changed is a no-op, not an error.
-Returns:
-```
-Committed: <sha> "<subject>"
-```
-or
-```
-Nothing to commit
-```
-
-### `push`
-Params: none — pushes the current branch (`-u origin <branch>` on first push).
-Returns:
-```
-Pushed: <branch>
-```
-
-### `create-pr`
-Params: `title`, `body`, `draft` (bool), `base` (optional; default: default branch), `head` (optional; default: current branch).
-If a PR already exists for `head`, do not recreate it — return it unchanged. Otherwise `gh pr create` with the given title and body, adding `--draft` when `draft` is true.
-Returns:
-```
-PR: #N (draft|ready) — <url> (created | already existed)
-```
-
-### `ready-pr`
-Params: `pr` (optional; default: PR for current branch).
-`gh pr ready <pr>` when it is a draft; no-op if already ready.
-Returns:
-```
-PR: #N (ready) — <url>
-```
-
-### `comment-pr`
-Params: `pr` (optional; default: PR for current branch), `body` (exact comment text).
-`gh pr comment <pr> --body "<body>"`.
-Returns:
-```
-Comment: <url>
-```
-
-### `create-issue`
-Params: `title`, `body`, `labels` (optional).
-`gh issue create` with the given fields.
-Returns:
-```
-Issue: #N — <url>
-```
-
-### `comment-issue`
-Params: `issue` (number or URL), `body` (exact comment text).
-`gh issue comment <issue> --body "<body>"`.
-Returns:
-```
-Comment: <url>
-```
-
-### `read-comments`
-Params: `target` (PR or issue number/URL; default: PR for current branch), `since` (optional ISO timestamp — return only comments and reviews posted at or after it).
-`gh pr view --json comments,reviews` or `gh issue view --json comments` (or `gh api`). Concatenate each body as plain text with author and timestamp. An empty result is valid.
-Returns:
-```
-Comments found: N
-<author> @ <timestamp>:
-<body>
-...
-```
-or
-```
-Comments found: 0
-```
+Execute the named operation per `/speq-git-operations`'s mapping.
 
 ## Output format
 
-Return the operation name and its result block above. Keep it short — the caller needs the facts to pick its next step, not narrative.
+Return the operation name and its result block per `/speq-git-operations`. Keep it short — the caller needs the facts to pick its next step, not narrative.

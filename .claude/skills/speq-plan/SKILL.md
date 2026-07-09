@@ -15,7 +15,7 @@ This skill is a **thin orchestrator**. It conducts the clarifying interview, col
 Invoke before starting:
 - `/speq-cli` — Spec discovery and search
 
-The `planner-agent` sub-agent invokes `/speq-code-tools`, `/speq-ext-research`, and `/speq-cli` itself.
+The `planner-agent` sub-agent invokes `/speq-planning`, `/speq-code-tools`, `/speq-ext-research`, and `/speq-cli` itself; `plan-reviewer` invokes `/speq-plan-review`.
 
 ## Workflow
 

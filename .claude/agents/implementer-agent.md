@@ -41,11 +41,7 @@ speq feature get "<domain>/<feature>/<scenario>"
 ```
 
 ### 3. TDD Cycle
-Per `/speq-code-guardrails` skill:
-1. Write failing test
-2. Implement minimum code to pass
-3. Refactor if needed
-4. Verify test passes
+Follow the RED → GREEN → REFACTOR cycle per `/speq-code-guardrails`.
 
 ### 4. Update Progress
 After completing each task:

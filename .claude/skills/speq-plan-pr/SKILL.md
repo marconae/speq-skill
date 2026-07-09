@@ -22,7 +22,7 @@ Invoke before starting:
 - `/speq-cli` — spec discovery and search
 - `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
-`planner-agent` invokes its own required skills; `git-agent` requires none.
+`planner-agent` and `plan-reviewer` invoke their own required skills; `git-agent` invokes `/speq-git-operations`.
 
 ## Workflow
 

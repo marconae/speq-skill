@@ -13,7 +13,7 @@ This skill is a **thin orchestrator**. It verifies preconditions and delegates t
 Invoke before starting:
 - `/speq-cli` — Spec validation
 
-The `recorder-agent` sub-agent invokes `/speq-code-tools`, `/speq-cli`, and `/speq-git-discipline` itself.
+The `recorder-agent` sub-agent invokes `/speq-spec-merge`, `/speq-code-tools`, `/speq-cli`, and `/speq-git-discipline` itself.
 
 ## Workflow
 
