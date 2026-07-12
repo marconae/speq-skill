@@ -1,6 +1,6 @@
 ---
 name: speq-ext-research
-description: Search for external documentation and research triggered by speq-skills.
+description: External documentation and research via Context7 and WebSearch — library APIs and design patterns. Triggered by /speq-mission, /speq-implement, planner-agent, implementer-agent, and implementer-expert-agent when current external sources are needed.
 ---
 
 # External Research

@@ -1,6 +1,6 @@
 ---
 name: speq-mission
-description: Create specs/mission.md via interactive interview. Detects brownfield vs greenfield.
+description: "Create or update specs/mission.md through a Socratic interview; detects brownfield vs greenfield. Use when the user asks to bootstrap or initialize a speq project, write or revise the project mission, or when /speq-audit reports mission drift and seeds this skill with its findings."
 ---
 
 # Mission Creator
@@ -43,196 +43,65 @@ specs/ or similar directory exists?
 
 For existing projects, gather context BEFORE interviewing:
 
-#### 2.1 Detect Tech Stack
-
-| File | Indicates |
-|------|-----------|
-| `Cargo.toml` | Rust project → read dependencies |
-| `package.json` | Node.js → read dependencies, scripts |
-| `go.mod` | Go project → read dependencies |
-| `pyproject.toml` / `requirements.txt` | Python → read dependencies |
-| `pom.xml` / `build.gradle` | Java/Kotlin |
-
-**Important:** This is an exemplary list. Project may use other languages or frameworks. Project may use several technologies.
-
-#### 2.2 Detect Commands
-
-Look for existing scripts:
-
-```bash
-# package.json scripts
-# Makefile targets
-# Cargo.toml aliases
-# pyproject.toml scripts
-```
-
-#### 2.3 Explore Structure
-
-```bash
-# List top-level directories
-ls -la
-
-# Find main source directories
-find . -type d -name "src" -o -name "lib" -o -name "app" | head -20
-```
-
-#### 2.4 Read Existing Docs
-
-Check for existing documentation:
-- `README.md`
-- `docs/`
-- Existing `specs/` if any
+1. **Tech stack** — read the manifest(s): `Cargo.toml`, `package.json`, `go.mod`, `pyproject.toml`/`requirements.txt`, `pom.xml`/`build.gradle`. This is an exemplary list — the project may use other languages, and may use several technologies at once.
+2. **Commands** — look for existing scripts: `package.json` scripts, Makefile targets, `Cargo.toml` aliases, `pyproject.toml` scripts.
+3. **Structure** — list top-level directories; find the main source directories (`src`, `lib`, `app`).
+4. **Docs** — read `README.md`, `docs/`, and any existing `specs/`.
 
 ### 3. Research Phase
 
 For technologies discovered or mentioned:
 
-- **Context7 MCP** — Query library documentation for correct API usage
-- **WebSearch** — Research best practices, alternatives, common patterns
+- **Context7 MCP** — query library documentation for correct API usage
+- **WebSearch** — research best practices, alternatives, common patterns
 
 Use research to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
-Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope.
+Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section below. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope. Brownfield: present what step 2 discovered and ask the user to confirm or correct it ("I found [X]. Is this accurate? What would you add or change?") instead of asking cold.
 
 #### 4.1 Identity & Purpose
-
-**For greenfield:**
-```
-Questions:
-- What is the project name?
-- In one sentence, what does this system do and why does it exist?
-- What problem does this solve?
-- Who experiences this problem?
+- Project name; in one sentence, what does this system do and why does it exist?
+- What problem does this solve, and who experiences it?
 - Why do existing solutions fall short?
-```
-
-**For brownfield:**
-```
-Present discovered information, then ask:
-- "I found [X]. Is this accurate? What would you add/change?"
-- "The README says [Y]. Is this still the current purpose?"
-```
+- Brownfield: "The README says [Y]. Is this still the current purpose?"
 
 #### 4.2 Target Users
-
-```
-Questions:
-- Who are the primary users of this system?
-- What are they trying to achieve?
-- What is their typical workflow?
-```
-
-For brownfield: "Based on the code, it seems targeted at [X]. Is this correct?"
+- Who are the primary users? What are they trying to achieve? What is their typical workflow?
+- Brownfield: "Based on the code, it seems targeted at [X]. Is this correct?"
 
 #### 4.3 Core Capabilities
-
-Apply **User Story Mapping** (Patton) — identify activities, then decompose into capabilities:
-
-```
-Questions:
-- What are the 3-5 core capabilities this system provides?
-- (Describe what it does, not how)
-```
-
-For brownfield: "I found these main modules: [X, Y, Z]. What capabilities do they represent?"
+Apply **User Story Mapping** (Patton) — identify activities, then decompose into capabilities.
+- What are the 3-5 core capabilities this system provides? (What it does, not how.)
+- Brownfield: "I found these main modules: [X, Y, Z]. What capabilities do they represent?"
 
 #### 4.4 Out of Scope
-
-```
-Questions:
 - What does this project explicitly NOT do?
 - What features might users expect but won't be supported?
-```
 
 #### 4.5 Domain Glossary
-
-```
-Questions:
-- Are there domain-specific terms users should understand?
-- Any terms used differently than their common meaning?
-```
-
-For brownfield: "I noticed these terms in the code: [X, Y]. What do they mean in this context?"
+- Are there domain-specific terms users should understand? Any terms used differently than their common meaning?
+- Brownfield: "I noticed these terms in the code: [X, Y]. What do they mean in this context?"
 
 #### 4.6 Tech Stack
-
-**For greenfield:**
-```
-Questions:
-- What language/runtime?
-- What framework (if any)?
-- What database (if any)?
-- What testing framework?
-```
-
-Use Context7 to research mentioned technologies.
-
-**For brownfield:**
-```
-Present discovered stack:
-- "I found: Rust with tokio, clap for CLI, no database. Correct?"
-- "Testing appears to use cargo test. Any additional test frameworks?"
-```
+- Language/runtime, framework, database, testing framework — greenfield: ask each; brownfield: confirm the discovered stack ("I found: Rust with tokio, clap for CLI, no database. Correct?").
+- Use Context7 to research mentioned technologies.
 
 #### 4.7 Commands
-
-**For greenfield:**
-```
-Questions:
-- What is the build command?
-- What is the test command?
-- What is the lint/format command?
-- What is the coverage command?
-```
-
-**For brownfield:**
-```
-Present discovered commands:
-- "Found in package.json: npm run build, npm test. Are these correct?"
-- "No coverage command found. What should it be?"
-```
+- Build, test, lint/format, and coverage commands — greenfield: ask each; brownfield: confirm discovered commands and ask for any missing ones ("No coverage command found. What should it be?").
 
 #### 4.8 Project Structure
-
-**For greenfield:**
-```
-Questions:
-- What is the planned directory structure?
-- What is the purpose of each main directory?
-```
-
-**For brownfield:**
-```
-Present discovered structure and ask for clarification on purpose.
-```
+- Planned directory structure and the purpose of each main directory — brownfield: present the discovered structure and ask for clarification on purpose.
 
 #### 4.9 Architecture
-
-```
-Questions:
-- What is the high-level architecture pattern? (layered, hexagonal, event-driven, etc.)
-- What are the key components and their responsibilities?
-- How does data flow through the system?
-```
+- High-level architecture pattern (layered, hexagonal, event-driven, etc.)? Key components and their responsibilities? How does data flow through the system?
 
 #### 4.10 Constraints
-
-```
-Questions:
-- Technical constraints? (browser-only, offline-first, etc.)
-- Business constraints? (GDPR, multi-tenant, etc.)
-- Performance constraints? (response time, memory limits, etc.)
-```
+- Technical (browser-only, offline-first)? Business (GDPR, multi-tenant)? Performance (response time, memory limits)?
 
 #### 4.11 External Dependencies
-
-```
-Questions:
-- What external services/APIs does this depend on?
-- What happens if each dependency is unavailable?
-```
+- What external services/APIs does this depend on? What happens if each dependency is unavailable?
 
 ### 5. Generate Mission
 
@@ -245,13 +114,7 @@ After collecting ALL information:
 
 ### 6. Review & Iterate
 
-```
-Present the generated mission.md and ask:
-- "Does this accurately capture your project?"
-- "Anything to add, change, or remove?"
-```
-
-Iterate until user approves.
+Present the generated mission.md and ask: "Does this accurately capture your project? Anything to add, change, or remove?" Iterate until the user approves.
 
 ## Interview Guidelines
 

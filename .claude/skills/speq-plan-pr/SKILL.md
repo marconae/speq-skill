@@ -1,6 +1,6 @@
 ---
 name: speq-plan-pr
-description: Headless, non-interactive version of speq-plan. Plans a feature without a live interview, commits the result to a feat/plan-name branch, and opens a PR. If a decision genuinely needs a human, it persists the partial plan and open questions and asks in a PR comment instead of blocking. Arg — plan name, feature intent text, PR number, or branch name.
+description: "Headless, non-interactive version of /speq-plan for CI or agent-driven runs. Plans a feature without a live interview, commits the result to a feat/plan-name branch, and opens a draft PR. If a decision genuinely needs a human, it persists the partial plan and open questions and asks in a PR comment instead of blocking. Arg: plan name, feature intent text, PR number, or branch name."
 model: sonnet
 ---
 
@@ -236,3 +236,12 @@ specs/
 | Spec delta authoring, ADR, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation, not after |
 | Branch, commit, push, PR create/comment | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |
+
+## Anti-Patterns
+
+| Pattern | Why Wrong |
+|---------|-----------|
+| Asking the user a live question | Headless — irreducible decisions go to the PR comment |
+| Running git/gh directly | `git-agent` performs every git and GitHub operation |
+| Marking the PR ready | `speq-implement-pr` owns `ready-pr`; plans stay draft |
+| A third review round | Bounded to 2 — leftover BLOCKERs become open questions |

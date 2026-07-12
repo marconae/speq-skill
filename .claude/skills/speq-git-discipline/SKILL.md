@@ -1,6 +1,6 @@
 ---
 name: speq-git-discipline
-description: Enforce Git discipline for speq-skills.
+description: Read-only git guardrails and the Conventional Commits reference — no history writes, verify changes before completing. Triggered by planner-agent, implementer-agent, implementer-expert-agent, and recorder-agent; git-agent alone is exempt and uses /speq-git-operations instead.
 ---
 
 # Git Discipline

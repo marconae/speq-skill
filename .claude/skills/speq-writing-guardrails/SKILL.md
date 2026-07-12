@@ -1,6 +1,6 @@
 ---
 name: speq-writing-guardrails
-description: Prose guardrails for speq artifacts and GitHub PRs, issues, and comments — front-loaded (BLUF), terse, unambiguous writing anchored in established style and requirements standards. Triggered by speq prose-authoring skills and agents.
+description: Prose guardrails for speq artifacts and GitHub PRs, issues, and comments — front-loaded (BLUF), terse, unambiguous writing anchored in established style and requirements standards. Triggered by /speq-mission, /speq-audit, /speq-implement, /speq-plan-pr, /speq-implement-pr, planner-agent, plan-reviewer, and recorder-agent.
 ---
 
 # Writing Guardrails

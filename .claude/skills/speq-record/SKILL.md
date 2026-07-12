@@ -1,6 +1,6 @@
 ---
 name: speq-record
-description: Merge implemented spec deltas into permanent specs library.
+description: "Merge implemented spec deltas into the permanent specs library and archive the plan. Use when implementation is verified — after /speq-implement produces verification-report.md — or when the user asks to record, merge, or archive a finished plan. Arg: <plan-name>."
 model: sonnet
 ---
 
@@ -13,7 +13,7 @@ This skill is a **thin orchestrator**. It verifies preconditions and delegates t
 Invoke before starting:
 - `/speq-cli` — Spec validation
 
-The `recorder-agent` sub-agent invokes `/speq-spec-merge`, `/speq-code-tools`, `/speq-cli`, and `/speq-git-discipline` itself.
+The `recorder-agent` sub-agent invokes its own required skills.
 
 ## Workflow
 

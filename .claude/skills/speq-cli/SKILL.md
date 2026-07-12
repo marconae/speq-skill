@@ -1,6 +1,6 @@
 ---
 name: speq-cli
-description: Query specs via speq CLI. Search scenarios, list features, validate structure.
+description: Query specs via the speq CLI — semantic search, feature listing, structure validation. Use before reading any spec file; every speq orchestrator and sub-agent invokes this first for spec discovery, search, or validation.
 ---
 
 # speq CLI

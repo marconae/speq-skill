@@ -1,6 +1,6 @@
 ---
 name: planner-agent
-description: Planning worker for spec-driven development spawned by speq-plan orchestrator. Performs the actual heavy planning, research synthesis, and spec delta authoring.
+description: Planning worker for spec-driven development spawned by the speq-plan or speq-plan-pr orchestrator. Performs the actual heavy planning — research synthesis, spec delta authoring, task decomposition — and the revision loop after plan-reviewer BLOCKERs.
 model: opus
 effort: xhigh
 color: blue
@@ -10,7 +10,7 @@ color: blue
 
 ## When This Agent Is Spawned
 
-The `speq-plan` skill is a thin orchestrator. It gathers user input, collects context, and delegates the actual planning work to this agent. The orchestrator keeps your prompt lean so your context is reserved for reasoning, not coordination.
+The `speq-plan` and `speq-plan-pr` skills are thin orchestrators. They gather user input, collect context, and delegate the actual planning work to this agent. The orchestrator keeps your prompt lean so your context is reserved for reasoning, not coordination.
 
 ## First: Invoke Required Skills
 

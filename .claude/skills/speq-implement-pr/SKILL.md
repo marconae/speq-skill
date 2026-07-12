@@ -1,6 +1,6 @@
 ---
 name: speq-implement-pr
-description: "Headless follow-up to speq-plan-pr. Continues on a plan's feat/plan-name branch, runs speq-implement, bumps the version, runs the real test suites, records only if green, then pushes and opens/updates a PR. Arg: plan name, PR number, or branch name."
+description: "Headless follow-up to /speq-plan-pr. Continues on a plan's feat/plan-name branch, runs /speq-implement, bumps the version, runs the real test suites, records only if green, then pushes, opens/updates the PR, and marks it ready. Arg: plan name, PR number, or branch name."
 model: sonnet
 ---
 
@@ -22,7 +22,7 @@ Invoke before starting:
 - `/speq-cli` — spec discovery, to resolve plan names
 - `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
-`speq-implement` and `speq-record` invoke their own required skills; `git-agent` requires none.
+`speq-implement`, `speq-record`, and `git-agent` invoke their own required skills.
 
 ## Workflow
 
@@ -107,3 +107,12 @@ specs/
 | Task breakdown, coding, review | `speq-implement` (unchanged) | Already the right split — not duplicated here |
 | Spec merge, archive | `speq-record` (unchanged) | Already the right split — not duplicated here |
 | Branch, commit, push, PR create/update | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |
+
+## Anti-Patterns
+
+| Pattern | Why Wrong |
+|---------|-----------|
+| Proceeding past a non-empty open-questions.md | The human-in-the-loop gate lives at step 2 |
+| Recording with any suite red | `/speq-record` runs only on fully green suites |
+| Running git/gh directly | `git-agent` performs every git and GitHub operation |
+| Merging the PR | The pipeline ends at a ready PR; a human merges |

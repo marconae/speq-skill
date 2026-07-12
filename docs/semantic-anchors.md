@@ -33,13 +33,15 @@ For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.co
 | Socratic Method | speq-mission | Interview |
 | User Story Mapping (Patton) | speq-mission | Requirements |
 | MECE Partitioning | speq-mission | Problem structuring |
-| BDD (Gherkin syntax) | speq-plan | Specification |
 | Socratic Method | speq-plan | Interview |
 | MECE Partitioning | speq-plan | Problem structuring |
-| EARS Syntax | speq-plan | Requirements |
-| RFC 2119 / 8174 | speq-plan | Requirements |
-| ADR (Nygard format) | speq-plan | Design decisions |
-| Docs-as-Code | speq-record | Documentation |
+| BDD (Gherkin syntax) | speq-planning | Specification |
+| EARS Syntax | speq-planning | Requirements |
+| RFC 2119 / 8174 | speq-planning | Requirements |
+| ADR (Nygard format) | speq-planning | Design decisions |
+| Premortem | speq-plan-review | Risk analysis |
+| Devil's Advocate (diabolus advocatus) | plan-reviewer (agent) | Adversarial review |
+| BLUF (Bottom Line Up Front) | speq-audit | Reporting |
 | London School TDD | speq-implement (template) | Testing |
 | BLUF / Inverted Pyramid | speq-writing-guardrails | Structure |
 | NN/g F-Pattern | speq-writing-guardrails | Readability |

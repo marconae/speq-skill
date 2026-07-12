@@ -1,21 +1,19 @@
 ---
 name: speq-plan
-description: Plan and create spec deltas for new features or changes to existing features.
+description: Plan a feature or change through a clarifying interview, producing spec deltas, plan.md, and decision-log.md via planner-agent with adversarial review. Use when the user asks to plan, spec, design, or scope a new feature, a change or removal of existing behavior, a refactor, or a fix — before any implementation.
 model: sonnet
 ---
 
 # Spec Planner (Orchestrator)
 
-This skill is a **thin orchestrator**. It conducts the clarifying interview, collects context, and then delegates the heavy planning work (spec delta authoring, test mapping, task decomposition) to the `planner-agent` sub-agent.
-
-**Why this split:** Orchestration (asking questions, reading a few files, shepherding the workflow) does not need expensive reasoning. The actual planning — architectural tradeoffs, MECE decomposition, ADR authoring — does. Splitting the work concentrates reasoning on the step that benefits from it.
+This skill is a **thin orchestrator**: it conducts the clarifying interview, collects context, and delegates the heavy planning work (spec delta authoring, test mapping, task decomposition) to the `planner-agent` sub-agent. Orchestration is cheap; reasoning is expensive — the split concentrates reasoning where defects compound.
 
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
 - `/speq-cli` — Spec discovery and search
 
-The `planner-agent` sub-agent invokes `/speq-planning`, `/speq-code-tools`, `/speq-ext-research`, and `/speq-cli` itself; `plan-reviewer` invokes `/speq-plan-review`.
+`planner-agent` and `plan-reviewer` invoke their own required skills.
 
 ## Workflow
 
@@ -160,3 +158,13 @@ specs/
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation, not after |
 
 Each sub-agent pins its own model and effort in its frontmatter, so planning quality is independent of the parent session's configuration.
+
+## Anti-Patterns
+
+| Pattern | Why Wrong |
+|---------|-----------|
+| Authoring plan.md or spec deltas in the orchestrator | `planner-agent` owns all plan authoring |
+| Skipping the clarifying interview | Content comes from user answers, never assumptions |
+| A third review round | Review is bounded to 2 rounds — after that, the user decides |
+| Persisting ADVISORY findings or looping on them | Report-only; they never gate |
+| Embedding spec content in plan.md | Plans reference delta files |

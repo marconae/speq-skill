@@ -1,12 +1,12 @@
 ---
 name: speq-implement
-description: "Orchestrate implementation of reviewed plans according to the spec deltas. Arg: <plan-name>."
+description: "Orchestrate implementation of a reviewed plan: task breakdown, TDD sub-agents, code review, and verification report. Use when the user asks to implement, build, or execute a plan under specs/_plans/ — after /speq-plan, before /speq-record. Arg: <plan-name>."
 model: sonnet
 ---
 
 # Spec Implementer (Orchestrator)
 
-Orchestrate implementation of plans in `specs/_plans/<plan-name>`.
+Orchestrate implementation of the plan in `specs/_plans/<plan-name>`. Get the plan name from the user prompt; ask if none specified.
 
 Orchestration (reading tasks.md, dispatching sub-agents, verifying results) is tool-call heavy but not reasoning-heavy. The sub-agents do the heavy lifting — each pins its own model and effort in its frontmatter:
 
@@ -16,18 +16,16 @@ Orchestration (reading tasks.md, dispatching sub-agents, verifying results) is t
 | `implementer-expert-agent` | Tasks tagged `[expert]` in tasks.md |
 | `code-reviewer` | Final review of all changed files |
 
-Get plan name from user prompt or ask if none specified.
-
 ## Required Skills
 
 Invoke before starting:
 - `/speq-code-tools` — Semantic code navigation and editing
 - `/speq-ext-research` — Library documentation and research
 - `/speq-code-guardrails` — TDD cycle and quality standards
-- `/speq-cli` — spec discovery
+- `/speq-cli` — Spec discovery
 - `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
 
-Subagents (`implementer-agent`, `implementer-expert-agent`, `code-reviewer`) must also invoke their required skills.
+Sub-agents (`implementer-agent`, `implementer-expert-agent`, `code-reviewer`) invoke their own required skills.
 
 ## Orchestrator Role
 
@@ -36,25 +34,9 @@ The main agent acts as **orchestrator**:
 - Spawns sub-agents for parallel task groups
 - Updates task status after sub-agent completion
 - Never implements directly — delegates all coding work
-- Rotates sub-agents to maintain fresh context windows
+- Rotates sub-agents to keep context windows fresh
 
-## Context Window Management
-
-**Strategy:** Rotate sub-agents to maintain fresh context.
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `max_tasks_per_agent` | 5 | Tasks before considering rotation |
-| `checkpoint_interval` | 2-3 | Tasks between progress reports |
-
-**Rotation workflow:**
-1. Sub-agent completes tasks, updates tasks.md after each
-2. Sub-agent reports checkpoint after 2-3 tasks
-3. If max_tasks reached OR sub-agent reports "ROTATION NEEDED":
-   - Read tasks.md for current state
-   - Note completed tasks from sub-agent return
-   - Spawn fresh agent with remaining tasks
-4. Continue until group complete
+**Rotation rule:** sub-agents checkpoint after every 2-3 tasks (expert: 1-2). When a sub-agent has completed `max_tasks_per_agent` (default 5) tasks, or returns `ROTATION NEEDED`, read tasks.md for current state, note the completed tasks from the sub-agent's return, and spawn a fresh agent of the SAME type with the remaining tasks. Continue until the group is complete.
 
 ## Workflow
 
@@ -123,7 +105,7 @@ For each parallel group in plan's `## Parallelization`:
    - Expert tasks → `implementer-expert-agent`
    - Spawn in parallel when both exist and they touch disjoint files; otherwise sequence expert first (they often set up invariants the standard tasks rely on)
 4. **Await completion** — Each sub-agent returns with results or rotation signal
-5. **Handle rotation** — If a sub-agent signals rotation, spawn fresh agent of the SAME type with remaining tasks of that tag
+5. **Handle rotation** — Apply the Rotation rule above: fresh agent of the SAME type, remaining tasks of that tag
 6. **Mark completed** — Update tasks.md: `[~]` → `[x]` (preserve `[expert]` tag)
 7. **Update TaskTools** — `TaskUpdate(taskId, status: "completed")`
 8. **Next group** — Proceed to next parallel group
@@ -167,7 +149,7 @@ Delegate to implementer-expert-agent — Implement <group-name> expert tasks
 
 ### Phase 4: Code Review
 
-After implementation completes, review all changed files.
+After implementation completes, review all changed files. Code review runs ONCE per implementation — after fix tasks complete, proceed to Phase 5 (its checks verify the fixes); do not respawn `code-reviewer` for a second round.
 
 1. **Collect changed files** — `git diff --name-only <base>...HEAD`
 2. **Spawn code-reviewer agent:**
@@ -252,3 +234,13 @@ If context is lost or compacted:
 | `references/tdd-cycle-checklist.md` | Sub-agent TDD reference |
 | `references/task-flow.md` | Task lifecycle management |
 | `references/verification-template.md` | Phase 6 report generation |
+
+## Anti-Patterns
+
+| Pattern | Why Wrong |
+|---------|-----------|
+| Orchestrator writes code directly | All coding is delegated to sub-agents |
+| Dropping the `[expert]` tag on a status flip | The tag must survive `[ ]` → `[~]` → `[x]` |
+| Marking `[x]` without a sub-agent completion return | Only verified completions are done |
+| A second code-review round | Review runs once; Phase 5 verifies the fixes |
+| Skipping the verification report | `/speq-record` gates on it |

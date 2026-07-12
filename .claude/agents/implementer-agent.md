@@ -1,6 +1,6 @@
 ---
 name: implementer-agent
-description: Implementation worker for spec-driven development spawned by orchestrator. Standard implementation tasks.
+description: Standard implementation worker for spec-driven development spawned by the speq-implement orchestrator. Executes untagged tasks.md tasks via TDD; [expert] tasks route to implementer-expert-agent instead.
 model: sonnet
 effort: high
 color: red
@@ -50,8 +50,6 @@ Edit: specs/_plans/{plan_name}/tasks.md
 Change: `[~] X.Y <task>` → `[x] X.Y <task>`
 ```
 
-Your assignment never contains `[expert]` tasks — those are routed to `implementer-expert-agent`. If you see one in your prompt by accident, stop and signal the orchestrator.
-
 ## Checkpoint Reporting
 
 After every 2-3 completed tasks, output:
@@ -67,6 +65,7 @@ This allows the orchestrator to track progress and decide on rotation.
 ## Scope Constraints
 
 - Implement ONLY tasks listed in your assignment
+- Your assignment never contains `[expert]` tasks — those route to `implementer-expert-agent`. If one appears in your prompt by accident, stop and signal the orchestrator
 - Do NOT add features not in spec
 - Do NOT refactor unrelated code
 - Do NOT modify files outside scope
