@@ -15,24 +15,22 @@ speq-skill integrates with popular MCP (Model Context Protocol) servers for enha
 | [Serena](https://github.com/oraios/serena) | Semantic code navigation and editing |
 | [Context7](https://github.com/upstash/context7) | Library documentation lookup |
 
-Both servers are declared in the generated plugin MCP configuration as a convenience. They are standard open-source MCP servers launched from their respective upstream packages — speq-skill does not bundle or modify them. Their behavior, limitations, and licensing are governed by their own documentation.
+Both servers are declared in the generated plugin's MCP configuration and launched from their upstream packages. See their own documentation for behavior, limitations, and licensing.
 
 ---
 
-## How speq-skill Uses Them
+## How speq-skill uses them
 
-### Code Comprehension (Serena)
+### Code comprehension (Serena)
 
-The `/speq:code-tools` skill leverages Serena for semantic code operations:
+The `/speq:code-tools` skill uses Serena for semantic code operations:
 
 - **Explore** — Navigate codebase structure at the symbol level (classes, functions, methods)
 - **Understand** — Find where symbols are defined and referenced
 - **Edit** — Make precise changes to specific symbols without touching surrounding code
 - **Verify** — Confirm changes haven't broken references
 
-This replaces raw text operations (`grep`, `find`, `sed`) with semantic operations that understand code structure.
-
-### External Research (Context7 + WebSearch)
+### External research (Context7 + WebSearch)
 
 The `/speq:ext-research` skill combines Context7 and WebSearch:
 
@@ -44,14 +42,14 @@ Need library API details?
          └─ No  → Proceed with existing knowledge
 ```
 
-**Context7** — Queries library documentation for correct, up-to-date API usage. Prevents hallucinated method names or deprecated patterns.
+**Context7** — Queries library documentation for correct, up-to-date API usage.
 
 > [!NOTE]
-> The Context7 MCP server is open source (MIT licensed), but it connects to a cloud service. See [Context7](https://context7.com) for details.
+> The Context7 MCP server is open source (MIT licensed) but connects to a cloud service. See [Context7](https://context7.com) for details.
 
 **WebSearch** — Researches design patterns, architecture decisions, and industry best practices.
 
-### Combined Workflow
+### Combined workflow
 
 During implementation, the skills work together:
 
@@ -73,7 +71,7 @@ MCP servers are configured in each generated plugin's `.mcp.json` file:
 
 The Claude plugin starts Serena with the Claude Code context. The Codex plugin starts Serena with the Codex context and `--project-from-cwd`, matching Serena's [Codex client guidance](https://oraios.github.io/serena/02-usage/030_clients.html#codex-cli-and-app).
 
-The installer registers the local Codex marketplace with `codex plugin marketplace add` when the Codex CLI is available, keeps the MCP declarations in the generated plugin payload, and explicitly registers the Codex MCP servers with:
+When the Codex CLI is available, the installer registers the local Codex marketplace with `codex plugin marketplace add`, keeps the MCP declarations in the generated plugin payload, and registers the Codex MCP servers with:
 
 ```bash
 codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex

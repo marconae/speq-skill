@@ -4,13 +4,13 @@
 
 # Spec Library
 
-Specs capture the intent expressed in features and scenarios. This guide covers the spec format, the BDD/Gherkin pattern, RFC 2119 keywords, and why this structure matters when AI coding agents are the primary consumers of the specs.
+The permanent spec format: BDD/Gherkin scenarios expressing requirements in RFC 2119 keywords, organized under `specs/`.
 
 ---
 
-## Spec Structure
+## Spec structure
 
-Specs live in a two-level hierarchy under the `specs/` directory:
+Specs live in a two-level hierarchy under `specs/`:
 
 ```
 specs/
@@ -27,15 +27,15 @@ specs/
         └── spec.md
 ```
 
-Every `spec.md` has four required parts:
+Every `spec.md` has five required parts:
 
-1. **`# Feature:`** — The feature name and a one-sentence description
-2. **Description** — Free-text context below the feature heading
-3. **`## Background`** — Bullet list of facts that apply to all scenarios
-4. **`## Scenarios`** — Container for one or more scenario blocks
-5. **`### Scenario:`** — Individual scenario with GIVEN/WHEN/THEN steps
+1. **`# Feature:`** — the feature name and a one-sentence description
+2. **Description** — free-text context below the feature heading
+3. **`## Background`** — bullet list of facts that apply to all scenarios
+4. **`## Scenarios`** — container for one or more scenario blocks
+5. **`### Scenario:`** — individual scenario with GIVEN/WHEN/THEN steps
 
-Here is a complete minimal spec:
+A complete minimal spec:
 
 ```markdown
 # Feature: Password Strength
@@ -66,8 +66,6 @@ The system SHALL enforce minimum password strength requirements during account c
 * *AND* the system SHALL NOT lock the user out
 ```
 
----
-
 ## BDD and Gherkin
 
 Specs use a Markdown adaptation of Gherkin's [Given-When-Then](https://cucumber.io/docs/gherkin/reference/) pattern:
@@ -89,11 +87,9 @@ Each step is a Markdown bullet with the keyword in italic:
 * *AND* the system SHALL log the deletion event
 ```
 
-*AND* always inherits the type of the step before it. In the example above, the first AND is another GIVEN; the last AND is another THEN.
+*AND* inherits the type of the step before it. In the example above, the first AND is another GIVEN; the last AND is another THEN.
 
----
-
-## RFC 2119 Keywords
+## RFC 2119 keywords
 
 Specs use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords to express requirement levels. Keywords MUST be UPPERCASE.
 
@@ -110,35 +106,22 @@ Rules for keyword usage:
 - *GIVEN* and *WHEN* steps may omit keywords — they describe context and actions, not requirements.
 - Keywords must appear in UPPERCASE to be recognized by the validator.
 
----
+## Structure and AI coding agents
 
-## Why This Matters for AI Coding Agents
+- GIVEN/WHEN/THEN sets up state, action, and expected outcome explicitly, instead of leaving intent to prose the agent must interpret.
+- SHALL / SHALL NOT mark what's mandatory and prohibited — including negative requirements agents otherwise default to adding, such as retries or fallback logic.
+- SHOULD / MAY mark what's recommended or optional, so the agent doesn't over-implement.
+- Edge cases (empty input, null values, timeouts) need their own scenario; an agent won't infer behavior for cases the spec omits.
 
-When an AI coding agent reads your specs, structured specs help to understand the intent:
+## Fine-grained context via the speq CLI
 
-**Vague specs produce vague code.** A sentence like "handle invalid logins appropriately" forces the agent to guess what "appropriately" means. Does it lock the account? Show an error? Log the attempt? The agent will invent an answer based on its training data, not your intent.
+The `speq` CLI retrieves specs at three levels of granularity:
 
-**BDD structure is machine-parseable.** The agent knows exactly what state to set up (GIVEN), what action to perform (WHEN), and what outcome to assert (THEN).
+- **Domain** — `speq domain list` shows all spec domains
+- **Feature** — `speq feature get <domain>/<feature>` retrieves a single feature spec
+- **Scenario** — `speq search query "..."` returns matching scenarios, not whole files
 
-**RFC keywords eliminate ambiguity about requirement levels.** SHALL tells the agent this is mandatory. SHOULD tells it this is recommended but not required. MAY tells it this is optional.
-
-**SHALL NOT / MUST NOT prevent "helpful" additions.** Agents tend to add defensive logic: automatic retries, extra validations, fallback behaviors. If your spec says the system SHALL NOT retry after authentication failure, the agent knows to leave that out.
-
-**Edge cases need explicit scenarios.** If you don't specify what happens with empty input, a null value, or a network timeout, the agent might guess.
-
----
-
-## Fine-Grained Context via the speq CLI
-
-The `speq` CLI is designed for granular spec retrieval, so agents load only what is necessary to understand the task.
-
-- **Domain-level** — `speq domain list` shows all spec domains
-- **Feature-level** — `speq feature get <domain>/<feature>` retrieves a single feature spec
-- **Scenario-level** — `speq search query "..."` returns matching scenarios, not whole files
-
-This granularity matters because AI coding agents operate within a context window. Loading your entire spec library wastes tokens and dilutes focus. With `speq search`, the agent is able to find the relevant features and scenarios.
-
----
+Agents operate within a context window; loading the full library wastes tokens.
 
 ## Validation
 

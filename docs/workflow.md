@@ -4,9 +4,9 @@
 
 # Workflow Guide
 
-**Jump to:** [Interactive Workflow](#steps--references) · [Headless PR Pipeline](#headless-pr-pipeline)
+**Jump to:** [Interactive workflow](#steps-and-references) · [Headless PR Pipeline](#headless-pr-pipeline)
 
-The speq-skill workflow starts with a one-time **Mission** bootstrap, then follows a repeating **Plan → Implement → Record** cycle.
+The speq-skill workflow starts with a one-time **Mission** bootstrap, then repeats a **Plan → Implement → Record** cycle.
 
 ```
 /speq:mission → specs/mission.md  (once per project)
@@ -16,7 +16,7 @@ The speq-skill workflow starts with a one-time **Mission** bootstrap, then follo
 /speq:plan    →  /speq:implement  →  /speq:record     (repeat)
 ```
 
-### Steps & References
+### Steps and references
 
 | Step | Description |
 |------|-------------|
@@ -26,34 +26,24 @@ The speq-skill workflow starts with a one-time **Mission** bootstrap, then follo
 | [/speq:record](#speqrecord) | Merge deltas into permanent specs |
 | [/speq:audit](#speqaudit) | Health-check the spec library and guide fixes |
 | [Headless PR Pipeline](#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
-| [Utility Skills](#utility-skills) | Reusable skills |
+| [Utility skills](#utility-skills) | Reusable skills |
 
 ---
 
 ## `/speq:mission`
 
-Create a project mission file through an interactive interview.
+Generate `specs/mission.md` through an interactive interview. Run once per project.
 
-### Purpose
+**When to use:** starting a new project with speq-skill, or adding specs to an existing codebase.
 
-- Initialize specs for a new project
-- Document an existing codebase
-- Generate `specs/mission.md` with project context
+### What it does
 
-### When to Use
-
-- Starting a new project with speq-skill
-- Adding specs to an existing codebase
-- Updating project documentation
-
-### What It Does
-
-1. **Project Type** — Determines brownfield (existing code) vs. greenfield (new project)
+1. **Project type** — Determines brownfield (existing code) vs. greenfield (new project)
 2. **Exploration** — For brownfield projects, explores tech stack, commands, structure
 3. **Interview** — Asks clarifying questions about purpose, users, capabilities
 4. **Generation** — Creates `specs/mission.md` with all gathered information
 
-### Interview Topics
+### Interview topics
 
 The agent covers 11 areas, grouping related questions to keep the interview focused:
 
@@ -72,27 +62,17 @@ The agent covers 11 areas, grouping related questions to keep the interview focu
 | External Dependencies | Services/APIs the project depends on |
 
 > [!NOTE]
-> `/speq:mission` runs once per project. The following three steps form the repeating development cycle.
+> `/speq:mission` runs once per project. The next three steps form the repeating development cycle.
 
 ---
 
 ## `/speq:plan`
 
-Create feature spec deltas including an implementation plan.
+Create feature spec deltas and an implementation plan, staged in `specs/_plans/<plan-name>/`.
 
-### Purpose
+**When to use:** starting new feature development, modifying existing behavior, or refactoring spec-first.
 
-- Define new features or changes as spec deltas
-- Stage changes in `specs/_plans/<plan-name>/`
-- Prepare for implementation with a comprehensive plan
-
-### When to Use
-
-- Starting new feature development
-- Modifying existing behavior
-- Refactoring with spec-first approach
-
-### Output Structure
+### Output structure
 
 ```
 specs/_plans/<plan-name>/
@@ -101,11 +81,11 @@ specs/_plans/<plan-name>/
 └── <domain>/<feature>/spec.md        # Delta specs
 ```
 
-`planner-agent` creates `decision-log.md` automatically during the planning interview, capturing Q&A, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are carried into a new `specs/_decision/NNN-<plan-name>.md` fragment by `recorder-agent` during `/speq:record`. See [Decision Log](./decision-log.md).
+`planner-agent` creates `decision-log.md` during the planning interview, capturing Q&A, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` become a new `specs/_decision/NNN-<plan-name>.md` fragment when `recorder-agent` runs `/speq:record`. See [Decision Log](./decision-log.md).
 
-Before the plan is handed off, `plan-reviewer` adversarially challenges it (intent fidelity, feasibility, requirement quality, task breakdown, prose) and loops BLOCKER findings back to `planner-agent` for revision, capped at 2 rounds; unresolved blockers escalate to the human. Resolved blockers are logged as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`.
+Before handoff, `plan-reviewer` adversarially challenges the plan (intent fidelity, feasibility, requirement quality, task breakdown, prose) and loops BLOCKER findings back to `planner-agent` for revision, capped at 2 rounds; unresolved blockers escalate to the human. Resolved blockers are logged as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`.
 
-### Plan Naming Conventions
+### Plan naming
 
 | Verb | When |
 |------|------|
@@ -123,28 +103,20 @@ Examples: `add-user-auth`, `fix-validation-edge-case`, `refactor-search-module`
 
 ## `/speq:implement`
 
-Implement approved plan deltas — orchestrates tasks, delegates to sub-agents, reviews code, and produces a verification report.
+Implement approved plan deltas — orchestrate tasks, delegate to sub-agents, review code, and produce a verification report.
 
-### Purpose
-
-- Implement planned features and changes according to the spec deltas
-- Guide implementation with targeted guardrails
-- Generate verification evidence
-
-### When to Use
-
-After `/speq:plan` to implement a plan:
+**When to use:** after `/speq:plan`, to implement a plan:
 
 ```bash
 /speq:implement <plan-name>
 ```
 
-### What It Does
+### What it does
 
 1. Loads the plan and creates a task breakdown
 2. Partitions tasks by tag — `[expert]`-tagged tasks route to `implementer-expert-agent`, all others to `implementer-agent` (see [Model Routing](./model-routing.md))
 3. Spawns sub-agents to work through tasks (with context rotation)
-4. Loads targeted guardrails for clean code, unit testing and integration testing
+4. Loads targeted guardrails for clean code, unit testing, and integration testing
 5. Runs code review on changed files via `code-reviewer`
 6. Executes build, test, and lint verification
 7. Generates a verification report
@@ -155,21 +127,13 @@ After `/speq:plan` to implement a plan:
 
 Merge implemented spec deltas into the permanent spec library.
 
-### Purpose
-
-- Finalize implemented features
-- Update permanent spec library
-- Archive completed plans
-
-### When to Use
-
-After a successful `/speq:implement`:
+**When to use:** after a successful `/speq:implement`:
 
 ```bash
 /speq:record <plan-name>
 ```
 
-### What It Does
+### What it does
 
 1. **Verify** — Checks `verification-report.md` exists
 2. **Load** — Reads plan and delta specs
@@ -183,15 +147,15 @@ After a successful `/speq:implement`:
 
 4. **Clean** — Strips all DELTA markers
 5. **Validate** — Runs `speq feature validate`
-6. **Optimize** — Check whether the specs should be re-organized so that the files are kept short and focused
+6. **Check thresholds** — Flags any feature over 10 scenarios or domain over 8 features and asks you how to split it; never reorganizes without your decision
 7. **Promote decisions** — Entries marked `Promotes to ADR: yes` in `decision-log.md` are written to a new `specs/_decision/NNN-<plan-name>.md` fragment
-8. **Archive** — Moves plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
+8. **Archive** — Moves the plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
 
 ---
 
 ## Headless PR Pipeline
 
-`/speq:plan-pr` and `/speq:implement-pr` run the same Plan → Implement → Record cycle unattended. Autonomous pipelines can't run a live interview, so the Q&A has to be decoupled from planning itself: every decision that would normally be an `AskUserQuestion` prompt either gets a documented, conventional default, or turns into an open question posted on a PR for later reply. Human-in-the-loop is converted into an asynchronous process instead of a synchronous interview. Humans control the pipeline and still the intent via prompting and answering questions, just not in a live chat session.
+`/speq:plan-pr` and `/speq:implement-pr` run the same Plan → Implement → Record cycle unattended. Without a live interview, each decision that would normally prompt with `AskUserQuestion` either takes a documented default or becomes an open question posted on the PR for later reply.
 
 ```
 /speq:plan-pr <intent>  →  PR (draft; + open questions if blocked)
@@ -202,18 +166,18 @@ After a successful `/speq:implement`:
              /speq:implement-pr <name>  →  same PR, updated + marked ready
 ```
 
-- **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and reused by `/speq:implement-pr` — both push to the same PR, there's no separate plan-only branch namespace.
-- **Blocked state**: if planning hits a decision that genuinely needs a human (irreversible, architecturally divergent, or security/compliance relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md` is flagged blocked, and the PR is opened as a draft with the questions posted as a comment. `/speq:implement-pr` refuses to proceed while this file exists.
-- **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>` (it re-fetches new comments/reviews as answers), or check out the branch and finish interactively with `/speq:plan <plan-name>`.
-- **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question rather than stalling on it.
-- **PR title & lifecycle**: the PR is titled with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
-- **Git/PR mechanics**: both skills delegate every branch/commit/push/PR operation to `git-agent` — the one sub-agent in this system permitted to write git history or touch a remote directly, keeping both orchestrators as thin as the interactive ones. See [Model Routing](./model-routing.md).
+- **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and reused by `/speq:implement-pr`. Both push to the same PR; there is no separate plan-only branch.
+- **Blocked state**: if planning hits a decision that genuinely needs a human (irreversible, architecturally divergent, or security/compliance relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md` is flagged blocked, and the PR opens as a draft with the questions posted as a comment. `/speq:implement-pr` refuses to proceed while this file exists.
+- **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>` (it re-fetches new comments and reviews as answers), or check out the branch and finish interactively with `/speq:plan <plan-name>`.
+- **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question.
+- **PR title & lifecycle**: the PR title uses a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
+- **Git/PR mechanics**: both skills delegate every branch, commit, push, and PR operation to `git-agent` — the one sub-agent permitted to write git history or touch a remote. See [Model Routing](./model-routing.md).
 
 ---
 
 ## `/speq:audit`
 
-Health-checks a speq project in one read-only pass, then offers to fix each finding by asking for permission for each change.
+Health-check a speq project in one read-only pass, then fix each finding after asking permission for the change.
 
 **Use when:**
 
@@ -226,7 +190,7 @@ Health-checks a speq project in one read-only pass, then offers to fix each find
 
 ---
 
-## Utility Skills
+## Utility skills
 
 Reusable guidance invoked by workflow skills:
 

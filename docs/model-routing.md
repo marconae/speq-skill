@@ -4,7 +4,7 @@
 
 # Model Routing
 
-speq-skill routes work between a main session, workflow skills, and specialist sub-agents. The routing is hardcoded in generated Claude and Codex plugin artifacts for `0.4.0`; a dynamic routing config is deferred to a later version.
+speq-skill routes work between a main session, workflow skills, and specialist sub-agents. Routing is hardcoded in the generated Claude and Codex plugin artifacts.
 
 ---
 
@@ -12,11 +12,11 @@ speq-skill routes work between a main session, workflow skills, and specialist s
 
 > Orchestration is cheap. Reasoning is expensive.
 
-Workflow skills coordinate the work: they gather context, ask clarifying questions, verify preconditions, and dispatch specialist roles. Planning, expert implementation, and review use the heavier reasoning tier because mistakes there compound downstream.
+Workflow skills coordinate the work — gather context, ask clarifying questions, verify preconditions, dispatch specialist roles. Planning, expert implementation, and review use the heavier reasoning tier because mistakes there compound downstream.
 
 ---
 
-## Claude Routing
+## Claude routing
 
 | Skill or agent | Model | Effort | Notes |
 |----------------|-------|--------|-------|
@@ -39,7 +39,7 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 
 ---
 
-## Codex Routing
+## Codex routing
 
 | Skill or agent | Model | Effort | Notes |
 |----------------|-------|--------|-------|
@@ -62,7 +62,7 @@ Workflow skills coordinate the work: they gather context, ask clarifying questio
 
 ---
 
-## Expert Task Tagging
+## Expert task tagging
 
 `planner-agent` marks tasks requiring deep reasoning with `[expert]`:
 

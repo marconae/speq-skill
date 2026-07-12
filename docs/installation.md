@@ -4,28 +4,24 @@
 
 # Installation
 
-## Quick Install
+## Quick install
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
 > [!NOTE]
-> The installer downloads a pre-built `speq` binary for your platform when one is available (Linux x86_64/ARM64, macOS Apple Silicon), falling back to building from source using the Rust toolchain. If you don't have Rust installed and a source build is needed, the installer will offer to install it for you via [rustup](https://rustup.rs/).
+> The installer downloads a pre-built `speq` binary for your platform when one is available (Linux x86_64/ARM64, macOS Apple Silicon). Otherwise it builds from source with the Rust toolchain, offering to install [rustup](https://rustup.rs/) for you if Rust is missing.
 
-Then open Claude Code or Codex and type `/speq:mission` to start.
-
----
+Open Claude Code or Codex and type `/speq:mission` to start.
 
 ## Prerequisites
 
-- **macOS or Linux** (Windows via Windows Subsystem for Linux (WSL))
-- **Claude Code CLI** or **Codex CLI/App** installed and configured
-- **Rust toolchain** — only needed if no pre-built binary matches your platform (installed automatically if missing, or via [rustup](https://rustup.rs/))
+- macOS or Linux (Windows via WSL)
+- Claude Code CLI or Codex CLI/App, installed and configured
+- Rust toolchain — only needed if no pre-built binary matches your platform; the installer installs it for you if missing, or get it via [rustup](https://rustup.rs/)
 
----
-
-## What Gets Installed
+## What gets installed
 
 | Component | Location |
 |-----------|----------|
@@ -39,20 +35,18 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 | Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
 | Embeddings model | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
 
-The installer automatically:
-- Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon) and copies it to your PATH; other platforms (e.g. Intel Mac) fall back to downloading the release source and building `speq` with the Rust toolchain
+The installer also:
+- Copies the pre-built `speq` binary to your PATH, or, on platforms without one (e.g. Intel Mac), downloads the release source and builds it with the Rust toolchain
 - Installs the speq-skill plugin for Claude Code and Codex
-- Registers the local Codex marketplace with `codex plugin marketplace add` when Codex is installed
-- Registers Serena and Context7 with `codex mcp add` when Codex is installed
+- Registers the local Codex marketplace via `codex plugin marketplace add`, when Codex is installed
+- Registers Serena and Context7 via `codex mcp add`, when Codex is installed
 - Installs Codex skills into `$CODEX_HOME/skills` so Codex can load `/speq:*`
 - Installs plugin MCP configuration for Serena and Context7
 - Downloads the `snowflake-arctic-embed-xs` embedding model (~23 MB) into `~/.cache/speq/models/`
 
----
+## Install from source
 
-## Installation from Source
-
-To build from source manually instead of using the pre-built binary (or if your platform has no pre-built binary):
+To build manually instead of using the pre-built binary — or if your platform has none:
 
 ```bash
 # Clone the repository
@@ -63,11 +57,9 @@ git clone https://github.com/marconae/speq-skill && cd speq-skill
 ```
 
 > [!NOTE]
-> Requires Rust toolchain (install via [rustup](https://rustup.rs/)).
+> Requires the Rust toolchain (install via [rustup](https://rustup.rs/)).
 
----
-
-## Verify Installation
+## Verify installation
 
 ```bash
 # Check CLI is available
@@ -97,8 +89,6 @@ codex
 /speq:mission
 ```
 
----
-
 ## Update
 
 Re-run the install script to get the latest version:
@@ -107,21 +97,17 @@ Re-run the install script to get the latest version:
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
----
-
 ## Uninstall
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/uninstall.sh | bash
 ```
 
-If installed from source, you can also run locally:
+If you installed from source, run locally instead:
 
 ```bash
 ./scripts/uninstall.sh
 ```
-
----
 
 ## Troubleshooting
 
@@ -131,7 +117,7 @@ Add `~/.local/bin` to your PATH.
 
 ### Rust build errors
 
-Only relevant if the installer fell back to a source build (no pre-built binary for your platform) or you ran `./scripts/local-install.sh` directly. Ensure Rust toolchain is installed and up to date:
+If the installer fell back to a source build (no pre-built binary for your platform), or you ran `./scripts/local-install.sh` directly, update your Rust toolchain:
 
 ```bash
 # Install Rust
@@ -143,7 +129,7 @@ rustup update
 
 ### Plugin not found in Claude Code
 
-1. Verify plugin is installed:
+1. Verify the plugin is installed:
    ```bash
    ls ~/.speq-skill/plugins/speq-skill/.claude-plugin/plugin.json
    ```
@@ -153,7 +139,7 @@ rustup update
    claude
    ```
 
-3. Check plugin loads:
+3. Check the plugin loads:
    ```
    /speq:mission
    ```
@@ -198,26 +184,24 @@ rustup update
 
 ### MCP server connection errors
 
-The plugin depends on Serena and Context7 MCP servers. If you see connection errors:
+The plugin depends on the Serena and Context7 MCP servers. If you see connection errors:
 
-1. Check servers are installed:
+1. Check the servers are installed:
    ```bash
    ls ~/.speq-skill/plugins/speq-skill/.mcp.json
    ls ~/.speq-skill/codex/plugins/speq-skill/.mcp.json
    ```
 
-2. Verify server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex
+2. Verify the server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude, or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex.
 
-3. Ensure the Codex marketplace and MCP servers are registered if you use Codex:
+3. If you use Codex, ensure the marketplace and MCP servers are registered:
    ```bash
    codex plugin marketplace add ~/.speq-skill/codex
    codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
    codex mcp add context7 -- npx -y @upstash/context7-mcp
    ```
 
-4. Restart Claude Code or Codex to reconnect
-
----
+4. Restart Claude Code or Codex to reconnect.
 
 ## Dependencies
 

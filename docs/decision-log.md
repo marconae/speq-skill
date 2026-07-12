@@ -15,9 +15,9 @@ There are two distinct formats:
 
 ---
 
-## Plan-level Decision Log
+## Plan-level decision log
 
-Created automatically by `planner-agent` during `/speq:plan`. It captures the interview Q&A and design choices in a conversational format.
+`planner-agent` creates it automatically during `/speq:plan`, capturing the interview Q&A and design choices in a conversational format.
 
 ### Format
 
@@ -61,11 +61,13 @@ Decision log errors are reported alongside delta spec errors. Decision log warni
 
 ---
 
-## Permanent Decision Log
+## Permanent decision log
 
-Lives at `specs/_decision/`, one committed fragment file per plan: `specs/_decision/NNN-<plan-name>.md`. `recorder-agent` writes a fragment during `/speq:record` for every entry marked `Promotes to ADR: yes` in the plan log. Different plans write different files, so parallel plans never conflict on the same text.
+Lives at `specs/_decision/`, one committed fragment file per plan: `specs/_decision/NNN-<plan-name>.md`. `recorder-agent` writes a fragment during `/speq:record` for every entry marked `Promotes to ADR: yes` in the plan log.
 
-Each ADR carries a stable, kebab-case `**ID:**` slug instead of a sequential number. `Supersedes:` and `Status: Superseded by <slug>` reference that slug, so promoting a new ADR never requires editing or renumbering an older one.
+### Why fragments and slugs
+
+Each plan writes its own fragment, so parallel plans never conflict on the same file. ADRs are identified by a stable, kebab-case slug instead of a sequential number, so promoting a new ADR never requires editing or renumbering an older one.
 
 ### Format
 
@@ -104,11 +106,10 @@ What was decided.
 - `**ID:**` is a kebab-case slug, unique across every file in `specs/_decision/`.
 - `**Status:**` must be one of: `Accepted`, `Deprecated`, `Superseded by <slug>`.
 - `**Supersedes:**`, `### Options Considered`, and `### Consequences` are optional.
-- `recorder-agent` writes only the new fragment for the plan it is recording — it never edits another fragment.
+- `recorder-agent` writes only the new fragment for the plan it is recording; it never edits another fragment.
+- `recorder-agent` sets `**Supersedes:** <slug>` on the new ADR as a one-way forward pointer — a superseded ADR keeps `**Status:** Accepted`. The two-way `Status: Superseded by <slug>` form applies to hand-authored or migrated entries.
 
-`recorder-agent` records a one-way forward pointer — `**Supersedes:** <slug>` — on the new ADR only, and never edits the superseded fragment. This forward pointer is the source of truth: a superseded ADR authored through the automated flow keeps `**Status:** Accepted`. The two-way `Status: Superseded by <slug>` form stays valid for hand-authored or migrated entries; the recorder never back-edits a prior fragment.
-
-### Validate vs. Show
+### Validate vs. show
 
 Two commands operate on `specs/_decision/`:
 
@@ -117,9 +118,9 @@ Two commands operate on `specs/_decision/`:
 | `speq decision-log validate` | `specs/_decision/*.md` | Nothing | Structure, required fields, status vocabulary, and slug-reference checks |
 | `speq decision-log show` | `specs/_decision/*.md` | Nothing (stdout only) | Prints the assembled `# Architecture Decision Records` view on demand |
 
-`show` never writes a merged file — there is no single permanent-log file to keep in sync. It orders fragments by their numeric `NNN-` prefix, breaking ties by filename; ADRs within a fragment print in the order they were authored.
+`show` prints an assembled view and writes nothing to disk. It orders fragments by their numeric `NNN-` prefix, breaking ties by filename; ADRs within a fragment print in the order they were authored.
 
-The `NNN-` prefix is a record-time sequence number, not a date, and is not a global identity — two plans recorded in parallel can legitimately produce the same prefix on different branches. That is a cosmetic tie, not a conflict: slugs, not prefixes, identify ADRs, and `show`'s filename tie-break makes the resulting order deterministic either way.
+The `NNN-` prefix is a record-time sequence number, not a date or global identity: two plans recorded in parallel on different branches can produce the same prefix. Slugs identify ADRs; `show`'s filename tie-break keeps the printed order deterministic regardless.
 
 An absent or empty `specs/_decision/` directory is valid — `validate` passes and `show` prints only the header.
 
@@ -132,7 +133,7 @@ speq decision-log show
 
 ---
 
-## Workflow Integration
+## Workflow integration
 
 ```
 /speq:plan
@@ -154,8 +155,9 @@ speq decision-log show
 
 ---
 
-## Design Traceability and Human Creative Input
+## Design traceability and human creative input
 
-The plan-level log's `Decision / Alternatives / Rationale` structure creates a structured record of the human creative choices made during development. The permanent log provides a timestamped, immutable archive of those choices across the project's lifetime.
+The plan-level log's `Decision / Alternatives / Rationale` fields record the creative choices made during development. The permanent log preserves them as a timestamped, immutable archive across the project's lifetime.
 
+> [!IMPORTANT]
 > *This is not legal advice. Consult qualified counsel for copyright questions specific to your jurisdiction and use case.*
