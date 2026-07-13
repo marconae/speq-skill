@@ -23,7 +23,7 @@ jobs:
         run: cargo clippy -- -D warnings
 
       - name: Check licenses and advisories
-        uses: EmbarkStudios/cargo-deny-action@v2
+        uses: EmbarkStudios/cargo-deny-action@v2.0.20
         with:
           command: check licenses advisories
 
