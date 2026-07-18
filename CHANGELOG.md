@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.13.1
+
+- Parallelize `index_specs`/`search_specs` with rayon, using order-preserving collects so ranking stays byte-identical to the serial implementation; 38% faster index build on a 1,000-scenario fixture
+- Sharpen skill and agent frontmatter descriptions to name concrete triggers and callers instead of terse one-liners, for more reliable auto-invocation; DRY up orchestrator/sub-agent cross-references and collapse `speq-mission`'s duplicated question blocks
+
 ## 0.13.0
 
 - Add repo-local `.speq/<name>-hook.md` project hooks: entry-point skills (`speq-mission`, `speq-plan`, `speq-plan-pr`, `speq-implement`, `speq-implement-pr`, `speq-record`, `speq-audit`) load them as an authoritative first workflow step, able to override any part of the default workflow, including guardrails
