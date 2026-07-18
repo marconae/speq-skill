@@ -24,6 +24,7 @@ dirs = "6.0"
 postcard = { version = "1.1", features = ["alloc"] }
 tract-onnx = "0.21"
 tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
+rayon = "1"
 
 [dev-dependencies]
 assert_cmd = "2"

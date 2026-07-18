@@ -1611,6 +1611,7 @@ dependencies = [
  "postcard",
  "predicates",
  "pulldown-cmark",
+ "rayon",
  "serde",
  "serde_json",
  "serial_test",

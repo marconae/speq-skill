@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -101,40 +102,66 @@ pub fn get_model_file_paths() -> (PathBuf, PathBuf) {
 pub fn index_specs(base: &Path) -> Result<usize, String> {
     let embedder = crate::embedding::Embedder::load_model()?;
 
-    // Discover all features
+    // Discover all features (deterministically ordered: domains then features).
     let features = discover_features(base);
-    let mut indexed_scenarios = Vec::new();
 
-    for fp in features {
-        let spec_path = fp.spec_path(base);
-        if !spec_path.exists() {
-            continue;
-        }
+    // (domain, feature, scenario, embedding-content) for one parsed scenario.
+    type ScenarioRow = (String, String, String, String);
 
-        let content = std::fs::read_to_string(&spec_path)
-            .map_err(|e| format!("Failed to read {}: {}", spec_path.display(), e))?;
+    // Parse each spec in parallel. Stage 1 collects an ORDERED
+    // `Vec<Result<_, String>>`: rayon preserves index order for an
+    // `IndexedParallelIterator`, so batches stay in discovery order and a
+    // missing spec maps to an empty batch (the serial `continue`).
+    let batches: Vec<Result<Vec<ScenarioRow>, String>> = features
+        .par_iter()
+        .map(|fp| {
+            let spec_path = fp.spec_path(base);
+            if !spec_path.exists() {
+                return Ok(Vec::new());
+            }
 
-        let parsed = parser::parse(&content).map_err(|e| format!("Failed to parse: {}", e))?;
+            let content = std::fs::read_to_string(&spec_path)
+                .map_err(|e| format!("Failed to read {}: {}", spec_path.display(), e))?;
 
-        for scenario in &parsed.spec.scenarios {
-            // Build scenario content for embedding
-            let steps_text: String = scenario
-                .steps
+            let parsed = parser::parse(&content).map_err(|e| format!("Failed to parse: {}", e))?;
+
+            let scenarios = parsed
+                .spec
+                .scenarios
                 .iter()
-                .map(|s| format!("{:?} {}", s.kind, s.text))
-                .collect::<Vec<_>>()
-                .join("\n");
+                .map(|scenario| {
+                    let steps_text: String = scenario
+                        .steps
+                        .iter()
+                        .map(|s| format!("{:?} {}", s.kind, s.text))
+                        .collect::<Vec<_>>()
+                        .join("\n");
 
-            let scenario_content = format!("{}\n{}", scenario.name, steps_text);
+                    let scenario_content = format!("{}\n{}", scenario.name, steps_text);
 
-            indexed_scenarios.push((
-                fp.domain.clone(),
-                fp.feature.clone(),
-                scenario.name.clone(),
-                scenario_content,
-            ));
-        }
-    }
+                    (
+                        fp.domain.clone(),
+                        fp.feature.clone(),
+                        scenario.name.clone(),
+                        scenario_content,
+                    )
+                })
+                .collect();
+
+            Ok(scenarios)
+        })
+        .collect();
+
+    // Stage 2: fold the ordered Vec SEQUENTIALLY so the FIRST discovery-order
+    // `Err` surfaces (matching the serial `?`-on-first-error), then flatten in
+    // order. A direct parallel `collect::<Result<Vec<_>>>()` would surface an
+    // arbitrary error when multiple specs fail.
+    let indexed_scenarios: Vec<ScenarioRow> = batches
+        .into_iter()
+        .collect::<Result<Vec<_>, String>>()?
+        .into_iter()
+        .flatten()
+        .collect();
 
     if indexed_scenarios.is_empty() {
         return Ok(0);
@@ -204,7 +231,7 @@ pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, Stri
     // Calculate cosine similarity and rank results
     let mut scored: Vec<(f32, &IndexedScenario)> = index
         .scenarios
-        .iter()
+        .par_iter()
         .map(|s| (cosine_similarity(query_embedding, &s.embedding), s))
         .collect();
 
