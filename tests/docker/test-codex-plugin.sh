@@ -99,7 +99,7 @@ echo ""
 echo "--- Test 5: Verify Codex loads /speq:* skill metadata ---"
 PROMPT_INPUT="$(codex debug prompt-input "/speq:mission" 2>/tmp/codex-debug-stderr.txt)"
 
-if ! grep -q -- "- speq:mission: Create specs/mission.md" <<< "$PROMPT_INPUT"; then
+if ! grep -q -- "- speq:mission: Create or update specs/mission.md" <<< "$PROMPT_INPUT"; then
     echo "FAIL: Codex prompt input did not include speq:mission skill metadata"
     echo "--- codex debug stderr ---"
     cat /tmp/codex-debug-stderr.txt
@@ -108,7 +108,7 @@ if ! grep -q -- "- speq:mission: Create specs/mission.md" <<< "$PROMPT_INPUT"; t
     exit 1
 fi
 
-if ! grep -q -- "- speq:plan: Plan and create spec deltas" <<< "$PROMPT_INPUT"; then
+if ! grep -q -- "- speq:plan: Plan a feature or change through a clarifying interview" <<< "$PROMPT_INPUT"; then
     echo "FAIL: Codex prompt input did not include speq:plan skill metadata"
     echo "--- prompt input excerpt ---"
     grep -n "Available skills\\|speq:" <<< "$PROMPT_INPUT" || true
