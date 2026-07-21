@@ -70,7 +70,7 @@ if [[ ! -f ~/.speq-skill/codex/plugins/speq-skill/.mcp.json ]]; then
 fi
 echo "PASS: Codex MCP config exists"
 
-if ! grep -q '^name: plan$' ~/.speq-skill/codex/plugins/speq-skill/skills/plan/SKILL.md; then
+if ! grep -q '^name: speq:plan$' ~/.speq-skill/codex/plugins/speq-skill/skills/plan/SKILL.md; then
     echo "FAIL: Codex /speq:plan skill name missing"
     exit 1
 fi

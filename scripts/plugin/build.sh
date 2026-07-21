@@ -59,8 +59,17 @@ transform_common_markdown() {
     local file="$1"
     local source_name="$2"
     local target_name="$3"
+    local platform="$4"
 
-    sed_in_place "s/^name: $source_name$/name: $target_name/" "$file"
+    if [[ "$platform" == "codex" ]]; then
+        # Codex renders a skill's frontmatter `name:` verbatim in its prompt
+        # metadata (no plugin-namespace prefixing), so it must carry the
+        # speq: prefix itself. Claude Code applies that namespace on load,
+        # so its copy keeps the bare name.
+        sed_in_place "s/^name: $source_name$/name: speq:$target_name/" "$file"
+    else
+        sed_in_place "s/^name: $source_name$/name: $target_name/" "$file"
+    fi
     sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)|/speq:\1|g' "$file"
 }
 
@@ -120,7 +129,7 @@ copy_skill_for_platform() {
         cp -r "$source_path" "$target_path"
 
         find "$target_path" -name "*.md" -type f | while read -r file; do
-            transform_common_markdown "$file" "$source_name" "$target_name"
+            transform_common_markdown "$file" "$source_name" "$target_name" "$platform"
             if [[ "$platform" == "codex" ]]; then
                 transform_codex_markdown "$file"
                 set_codex_skill_model "$file" "$source_name"
