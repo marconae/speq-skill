@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.2
+
+- Fix `build.sh` baking the `speq:` plugin namespace into each skill's own `name:` frontmatter, doubling up with the namespace Claude Code already applies at load time and producing `speq:speq:<skill>` everywhere; skill `name:` is now bare, matching how other plugins (e.g. `ponytail`) declare it
+
 ## 0.13.1
 
 - Parallelize `index_specs`/`search_specs` with rayon, using order-preserving collects so ranking stays byte-identical to the serial implementation; 38% faster index build on a 1,000-scenario fixture
