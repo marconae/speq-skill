@@ -132,10 +132,10 @@ else
     exit 1
 fi
 
-if grep -q '^name: speq:plan$' "$CODEX_PLUGIN_DIR/skills/plan/SKILL.md"; then
+if grep -q '^name: plan$' "$CODEX_PLUGIN_DIR/skills/plan/SKILL.md"; then
     echo "OK Codex /speq:plan skill name"
 else
-    echo "ERROR: Codex skill name is not speq:plan"
+    echo "ERROR: Codex skill name is not plan (Claude Code applies the speq: plugin namespace itself)"
     exit 1
 fi
 

@@ -60,7 +60,7 @@ transform_common_markdown() {
     local source_name="$2"
     local target_name="$3"
 
-    sed_in_place "s/^name: $source_name$/name: speq:$target_name/" "$file"
+    sed_in_place "s/^name: $source_name$/name: $target_name/" "$file"
     sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)|/speq:\1|g' "$file"
 }
 
