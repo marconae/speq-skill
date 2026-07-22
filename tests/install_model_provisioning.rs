@@ -67,6 +67,25 @@ exit 22
     fs::set_permissions(&curl_path, perms).expect("chmod fake curl");
 }
 
+/// Write a fake `uname` executable into `dir` that echoes `kernel_name` for
+/// `-s`/`--kernel-name` args, matching the one call shape `install.sh` uses.
+fn install_fake_uname(dir: &Path, kernel_name: &str) {
+    let script = format!(
+        r#"#!/usr/bin/env bash
+case "$1" in
+    -s|--kernel-name)
+        echo "{kernel_name}"
+        ;;
+esac
+"#
+    );
+    let uname_path = dir.join("uname");
+    fs::write(&uname_path, script).expect("write fake uname");
+    let mut perms = fs::metadata(&uname_path).unwrap().permissions();
+    perms.set_mode(0o755);
+    fs::set_permissions(&uname_path, perms).expect("chmod fake uname");
+}
+
 /// Run `provision_embedding_model` from `install.sh` with `curl` faked.
 ///
 /// `fixture_dir` is the directory the fake curl copies from; pointing it at a
@@ -90,6 +109,41 @@ fn run_provisioning(cache_dir: &Path, fixture_dir: &Path) -> std::process::Outpu
         .env("SPEQ_CACHE_DIR", cache_dir)
         .output()
         .expect("run provisioning")
+}
+
+/// Run `provision_embedding_model` with `curl` and `uname` faked, `$HOME`
+/// pinned to `home_dir`, and `$SPEQ_CACHE_DIR` left unset so the installer's
+/// default (platform-dependent) cache-directory resolution is exercised.
+fn run_provisioning_with_platform(
+    home_dir: &Path,
+    fixture_dir: &Path,
+    kernel_name: &str,
+    clear_xdg_cache_home: bool,
+) -> std::process::Output {
+    let fake_bin = TempDir::new().unwrap();
+    install_fake_curl(fake_bin.path());
+    install_fake_uname(fake_bin.path(), kernel_name);
+
+    let original_path = std::env::var("PATH").unwrap_or_default();
+    let patched_path = format!("{}:{}", fake_bin.path().display(), original_path);
+
+    let command = format!(
+        "source {} && provision_embedding_model",
+        install_script().display()
+    );
+
+    let mut cmd = Command::new("bash");
+    cmd.args(["-c", &command])
+        .env("PATH", patched_path)
+        .env("FAKE_CURL_FIXTURE_DIR", fixture_dir)
+        .env("HOME", home_dir)
+        .env_remove("SPEQ_CACHE_DIR");
+
+    if clear_xdg_cache_home {
+        cmd.env_remove("XDG_CACHE_HOME");
+    }
+
+    cmd.output().expect("run provisioning")
 }
 
 #[test]
@@ -196,4 +250,43 @@ fn installer_provisions_model_into_custom_cache_dir() {
         stdout.contains(&model_dir.display().to_string()),
         "expected provisioning message to name the custom model dir, got: {stdout}"
     );
+}
+
+#[test]
+fn installer_provisions_model_into_macos_cache_dir() {
+    let home = TempDir::new().unwrap();
+
+    let output = run_provisioning_with_platform(home.path(), &model_stub_dir(), "Darwin", false);
+
+    assert!(
+        output.status.success(),
+        "provisioning failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let model_dir = home
+        .path()
+        .join("Library")
+        .join("Caches")
+        .join("speq")
+        .join("models");
+    assert!(model_dir.join("model.onnx").exists());
+    assert!(model_dir.join("tokenizer.json").exists());
+}
+
+#[test]
+fn installer_provisions_model_into_linux_cache_dir() {
+    let home = TempDir::new().unwrap();
+
+    let output = run_provisioning_with_platform(home.path(), &model_stub_dir(), "Linux", true);
+
+    assert!(
+        output.status.success(),
+        "provisioning failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+
+    let model_dir = home.path().join(".cache").join("speq").join("models");
+    assert!(model_dir.join("model.onnx").exists());
+    assert!(model_dir.join("tokenizer.json").exists());
 }

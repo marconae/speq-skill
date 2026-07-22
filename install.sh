@@ -363,6 +363,18 @@ build_from_source() {
     install_codex_skills
 }
 
+# Resolve the platform-native cache directory, mirroring the `dirs` crate's
+# split used by the speq binary's own get_cache_path(): macOS uses
+# ~/Library/Caches, everything else follows the XDG convention.
+default_cache_dir() {
+    local os
+    os=$(uname -s)
+    case "$os" in
+        Darwin) echo "$HOME/Library/Caches" ;;
+        *)      echo "${XDG_CACHE_HOME:-$HOME/.cache}" ;;
+    esac
+}
+
 # Download the embedding model files from HuggingFace into the model cache directory
 provision_embedding_model() {
     local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main"
@@ -370,8 +382,9 @@ provision_embedding_model() {
     if [[ -n "${SPEQ_CACHE_DIR:-}" ]]; then
         local MODEL_DIR="${SPEQ_CACHE_DIR}/models"
     else
-        local xdg_cache="${XDG_CACHE_HOME:-$HOME/.cache}"
-        local MODEL_DIR="${xdg_cache}/speq/models"
+        local cache_dir
+        cache_dir=$(default_cache_dir)
+        local MODEL_DIR="${cache_dir}/speq/models"
     fi
 
     local files=("model.onnx" "tokenizer.json")
