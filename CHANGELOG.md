@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.13.3
+
+- Fix `install.sh` hardcoding the Linux/XDG cache-directory convention (`${XDG_CACHE_HOME:-$HOME/.cache}/speq/models`) for every platform; on macOS the `speq` binary reads its model cache from `~/Library/Caches/speq/models` (via the `dirs` crate), so the installer was silently provisioning the model into a directory the binary never looked at, and `speq search query` reported the model missing even right after a fresh install
+
 ## 0.13.2
 
 - Fix `build.sh` baking the `speq:` plugin namespace into each skill's own `name:` frontmatter, doubling up with the namespace Claude Code already applies at load time and producing `speq:speq:<skill>` everywhere; skill `name:` is now bare, matching how other plugins (e.g. `ponytail`) declare it
