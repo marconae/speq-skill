@@ -58,7 +58,7 @@ Populate plan.md per `.claude/skills/speq-plan/references/plan-template.md`:
 
 1. **Context** — why the change is being made
 2. **Features** — table referencing spec delta files (NEVER embed spec content); immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
-3. **Design** — ADR for new features / major changes; skip for minor fixes
+3. **Design** — ADR for new features / major changes; skip for minor fixes. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 4. **Tasks** — work breakdown in implementation order
 5. **Parallelization** — groups of tasks that can run concurrently
 6. **Verification** — Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)

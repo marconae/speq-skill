@@ -1,6 +1,6 @@
 ---
 name: speq-plan-review
-description: Adversarial plan-review method and challenge taxonomy — premortem framing, 14-tag/5-axis taxonomy, severity discipline, and findings output format. Triggered by plan-reviewer.
+description: Adversarial plan-review method and challenge taxonomy — premortem framing, multi-axis challenge taxonomy, severity discipline, and findings output format. Triggered by plan-reviewer.
 ---
 
 # Adversarial Plan Review
@@ -45,6 +45,13 @@ Tag every finding, group findings by axis in the output.
 - `[TRACEABILITY_GAP]` — a spec delta with no implementing task, or a task that implements nothing in scope.
 - `[TASK_GRANULARITY]` — a task too large to verify as one unit, or a parallelization claim two "independent" tasks actually violate.
 
+### Design Depth — does the plan manage complexity well? (per `/speq-design-philosophy`)
+
+- `[SHALLOW_DESIGN]` — a planned module/interface is shallow relative to the complexity it should hide.
+- `[INFORMATION_LEAKAGE]` — a design decision (format, protocol, temporal split) reflected across multiple planned modules.
+- `[TACTICAL_SHORTCUT]` — the plan takes a tactical shortcut with no scheduled strategic follow-up.
+- `[BOUNDARY_VIOLATION]` — planned business logic depends directly on a delivery mechanism, storage engine, or framework.
+
 ### Prose quality — does the writing meet `/speq-writing-guardrails`?
 
 - `[PROSE_BLOAT]` — prose not required to make the point: filler, repetition, unneeded hedging or preamble. Violates BLUF/terseness.
@@ -63,7 +70,7 @@ Prose findings default to **ADVISORY** — they're style, not correctness. Escal
 # Plan Review Findings: <plan-name> (round <N>)
 
 ## Summary
-- Axes checked: 5/5
+- Axes checked: 6/6
 - Total findings: M (Blockers: X, Advisory: Y)
 
 ## Intent Fidelity
@@ -81,6 +88,9 @@ OR
 ...
 
 ## Task Breakdown
+...
+
+## Design Depth
 ...
 
 ## Prose Quality

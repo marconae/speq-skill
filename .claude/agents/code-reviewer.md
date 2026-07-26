@@ -14,6 +14,7 @@ Analyze implementation quality and identify issues for the implementer-agent to 
 
 - `/speq-code-review` — the review tag taxonomy and output format. Follow it exactly.
 - `/speq-code-guardrails` — quality standards the taxonomy is built on
+- `/speq-design-philosophy` — complexity-management principles behind the Design Depth category
 - `/speq-code-tools` — you must use provided code tools
 - `/speq-cli` — learn how to use the `speq` CLI
 

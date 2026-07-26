@@ -51,3 +51,11 @@ For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.co
 | INCOSE GtWR | speq-writing-guardrails | Requirements clarity |
 | ISO/IEC/IEEE 29148 | speq-writing-guardrails | Requirements clarity |
 | RFC 2119 / 8174 | speq-writing-guardrails | Prose register |
+| A Philosophy of Software Design (Ousterhout) | speq-design-philosophy | Design principles |
+| Deep Modules | speq-design-philosophy | Design principles |
+| Information Hiding | speq-design-philosophy | Design principles |
+| Strategic vs Tactical Programming | speq-design-philosophy | Design principles |
+| Dependency Rule (Clean Architecture / Martin) | speq-design-philosophy | Design principles |
+| Rule of Three | speq-code-guardrails | Design principles |
+| Command-Query Separation | speq-code-guardrails | Design principles |
+| F.I.R.S.T. | speq-code-guardrails | Testing |

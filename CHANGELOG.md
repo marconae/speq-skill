@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.0
+
+- Add `speq-design-philosophy`: complexity-management design principles (deep modules, information hiding/leakage, general- vs. special-purpose modules, strategic vs. tactical programming, dependency direction), triggered by `planner-agent`, `plan-reviewer`, `implementer-agent`, `implementer-expert-agent`, and `code-reviewer`
+- `speq-code-guardrails`: add an `Errors` section and a `Tests` section; extend `Functions`/`Naming` with selector-argument, output-parameter, Command-Query Separation, and naming-convention rules; carve out an I/O/nondeterminism/third-party exception in the YAGNI Checks; sharpen the `DRY` principle to a Rule-of-Three threshold and the public-interface `Comments` rule to require design intent
+- `speq-code-review`: add `Error Handling` and `Design Depth` finding categories, rename `Obsolete Tests` to `Test Quality` with added quality tags, and require a measurement before any `Optimization Opportunities` finding
+- `speq-plan-review`: add a `Design Depth` review axis (18-tag/6-axis taxonomy, up from 14/5)
+- `speq-planning`: point the Design/ADR step at `speq-design-philosophy`'s Quick Diagnostic for new abstractions or module boundaries
+
 ## 0.14.0
 
 - Add a required `## Impact` section to `plan.md`, describing user/operator/downstream consequences (breaking changes called out, or "None"); `speq-planning` populates it right after the Features table

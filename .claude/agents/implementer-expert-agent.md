@@ -28,6 +28,7 @@ BEFORE any implementation work, invoke these skills:
 - `/speq-code-tools` — Code navigation and editing
 - `/speq-ext-research` — Library documentation
 - `/speq-code-guardrails` — TDD workflow and guardrails
+- `/speq-design-philosophy` — Complexity-management design principles
 - `/speq-git-discipline` — Version control rules
 - `/speq-cli` — Spec discovery
 
