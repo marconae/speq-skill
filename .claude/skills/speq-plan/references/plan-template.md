@@ -58,6 +58,10 @@ Status values:
 - **CHANGED** — Modifying existing feature behavior
 - **REMOVED** — Deprecating/deleting feature
 
+## Impact
+
+What changes for users, operators, or downstream systems once this ships. Call out breaking changes explicitly. Write "None" if there is no user-facing impact.
+
 ## Requirements
 
 Optional: High-level requirements if not fully captured in feature specs

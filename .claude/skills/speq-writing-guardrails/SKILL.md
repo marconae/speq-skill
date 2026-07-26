@@ -10,14 +10,23 @@ Prose anchored in **BLUF / Inverted Pyramid**, **Strunk & White**, **INCOSE GtWR
 ## Scope
 
 **Governed (free prose — fix these):**
-- `plan.md` — Summary, Goals, Non-Goals, Migration, Testing, Dead-Code prose
+- `plan.md` — Summary, Goals, Non-Goals, Migration, Testing, Dead-Code, Impact prose
 - `spec.md` — the Feature-description line under `# Feature:`
 - `mission.md` — Problem, Architecture, Constraints prose
 - decision-log — Rationale and Finding prose
-- verification-report — Notes and Review-Summary bullets
-- every GitHub PR, issue, and comment body and title
+- verification-report — Notes and Review-Summary bullets, and its condensed PR-comment excerpt
+- every GitHub PR, issue, and comment body and title, including advisory/assumption PR comments
 
 **Not governed (leave alone):** Gherkin scenarios, Background bullets, tables, ASCII diagrams, delta markers, RFC-2119 keyword casing (validator-owned).
+
+## PR-facing content — invoke the `writing:*` skills
+
+For content newly composed for a PR (a verification-report comment, an open-questions/advisory comment, or a plan's `## Impact` section), the rules below are necessary but not sufficient — additionally invoke, via the Skill tool, before composing:
+- `writing:clarity-editing`
+- `writing:evidence-and-credibility`
+- `writing:revision-and-qa-checklist`
+
+Target **expert tier × Evaluator stance** per the Audience-Fit Ladder (`writing:revision-and-qa-checklist`): the reader is an architect deciding whether to approve — lead with tradeoffs and boundaries, cite the actual diff/file/test as evidence, never pad or hedge.
 
 ## Structure first — BLUF / Inverted Pyramid
 

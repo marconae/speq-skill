@@ -170,8 +170,9 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
    Delegate to git-agent — operation: create-pr
      draft: true
      title: <the derived <type>(<scope>): <slug>>
-     body: summarize the plan's Features table and task count, ending
-           "Draft pending implementation — run /speq:implement-pr <plan-name> to implement and mark ready"
+     body: summarize the plan's Features table and task count, include the
+           plan.md ## Impact section verbatim as its own "## Impact" heading,
+           ending "Draft pending implementation — run /speq:implement-pr <plan-name> to implement and mark ready"
    ```
 3. If this is a resume of a previously-blocked plan, clear the block yourself: delete `specs/_plans/<plan-name>/open-questions.md` and the `> **Status:** blocked …` banner line from `plan.md`, then:
    ```
@@ -182,6 +183,12 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
    Delegate to git-agent — operation: push
    ```
    The PR stays a draft — `speq-implement-pr` is the only skill that marks it ready.
+4. If step 5 left ADVISORY findings, or `decision-log.md`'s Design Decisions section is non-empty (every headless "assume and document" entry is a candidate an architect may want to sanity-check), compose one comment covering both and post it — skip entirely if there is nothing to flag. Compose the body per `speq-writing-guardrails`' PR-facing content rule:
+   ```
+   Delegate to git-agent — operation: comment-pr
+     body: ADVISORY findings from step 5 (if any) and the Design Decisions
+           entries from decision-log.md (if any)
+   ```
 
 **`OPEN QUESTIONS:` returned (from step 4, or unresolved BLOCKERs from step 5)** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
 
@@ -195,7 +202,7 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
    - [ ] <question 2>
    ```
 2. Insert `> **Status:** blocked — see open-questions.md` as the first line under `plan.md`'s H1 (skip if already present).
-3. Compose the questions checklist as the PR comment body.
+3. Compose the questions checklist as the PR comment body, and append any ADVISORY findings from step 5, if present — one comment, not two.
 
 Then:
 ```
@@ -208,15 +215,18 @@ Delegate to git-agent — operation: push
 Delegate to git-agent — operation: create-pr
   draft: true
   title: <the derived <type>(<scope>): <slug>>
-  body: <blocked-plan summary>
+  body: <blocked-plan summary>, including plan.md's ## Impact section
+        verbatim as its own "## Impact" heading if populated — a blocked
+        plan may have partial Impact info; include it as-is, never
+        fabricate the rest
 
 Delegate to git-agent — operation: comment-pr
-  body: <the questions checklist from step 3>
+  body: <the questions checklist and any ADVISORY findings from step 3>
 ```
 
 ### 7. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, and the PR link either way. Mention any ADVISORY findings from step 5.
+Tell the caller whether the plan is ready or blocked, and the PR link either way. Print plan.md's `## Impact` section to the terminal. Mention any ADVISORY findings from step 5 and any Design Decisions entries surfaced — these are also posted as a PR comment per step 6.
 
 ## Spec Hierarchy (reference)
 

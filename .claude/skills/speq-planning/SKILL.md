@@ -57,7 +57,7 @@ Every scenario requires two forms of external proof. No claims — only evidence
 Populate plan.md per `.claude/skills/speq-plan/references/plan-template.md`:
 
 1. **Context** — why the change is being made
-2. **Features** — table referencing spec delta files (NEVER embed spec content)
+2. **Features** — table referencing spec delta files (NEVER embed spec content); immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
 3. **Design** — ADR for new features / major changes; skip for minor fixes
 4. **Tasks** — work breakdown in implementation order
 5. **Parallelization** — groups of tasks that can run concurrently

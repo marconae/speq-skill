@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.0
+
+- Add a required `## Impact` section to `plan.md`, describing user/operator/downstream consequences (breaking changes called out, or "None"); `speq-planning` populates it right after the Features table
+- `speq:plan-pr` includes `## Impact` verbatim in the draft PR body and prints it in the orchestrator report
+- `speq:plan-pr` posts a PR comment for ADVISORY findings and Design Decisions entries when either is non-empty
+- `speq:implement-pr` posts a condensed verification-summary PR comment (Verdict table + Notes) after commit/push, alongside the full report committed to the branch
+- `speq-writing-guardrails` extends governed scope to these new PR comments and requires the `writing:*` skills (clarity, evidence, QA checklist) for newly-composed PR-facing content
+
 ## 0.13.3
 
 - Fix `install.sh` hardcoding the Linux/XDG cache-directory convention (`${XDG_CACHE_HOME:-$HOME/.cache}/speq/models`) for every platform; on macOS the `speq` binary reads its model cache from `~/Library/Caches/speq/models` (via the `dirs` crate), so the installer was silently provisioning the model into a directory the binary never looked at, and `speq search query` reported the model missing even right after a fresh install

@@ -69,7 +69,7 @@ Run the project's real test suites (per `specs/mission.md § Commands` — typic
 
 ### 6. PR
 
-Commit and push, then open or update the PR and mark it ready:
+Commit and push, then post the verification summary and open or update the PR and mark it ready. Compose the comment body per `speq-writing-guardrails`' PR-facing content rule before calling `comment-pr`:
 
 ```
 Delegate to git-agent — operation: commit
@@ -77,6 +77,13 @@ Delegate to git-agent — operation: commit
   message: feat(<scope>): implement <plan-name>
 
 Delegate to git-agent — operation: push
+
+Delegate to git-agent — operation: comment-pr
+  body: condensed verification summary — the Verdict table and Notes from
+        specs/_plans/<plan-name>/verification-report.md, plus "Full evidence:
+        specs/_plans/<plan-name>/verification-report.md (this branch)".
+        Do not duplicate the Tool Evidence / Scenario Coverage tables —
+        they are already committed in this same commit.
 
 Delegate to git-agent — operation: create-pr
   draft: false
