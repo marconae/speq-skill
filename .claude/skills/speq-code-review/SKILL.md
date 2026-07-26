@@ -98,46 +98,18 @@ Per `/speq-design-philosophy`:
 
 ## Output Format
 
-```markdown
-# Code Review Findings
+Write the findings document to `specs/_plans/<plan-name>/review-findings.md` per `references/review-findings-template.md`. Then return exactly one line and nothing else:
 
-## Summary
-- Files reviewed: N
-- Total findings: M
-- By category: Violations (X), Dead Code (Y), Tests (Z), Comments (W), Optimizations (V), YAGNI (U), Error Handling (T), Design Depth (S)
-
-## Findings
-
-### path/to/module
-
-#### [TOO_MANY_ARGUMENTS] Function has too many arguments
-- Location: line 42
-- Issue: `process_data(a, b, c, d, e, f)` has 6 arguments
-- Suggestion: Create a config struct
-
-#### [UNUSED_FUNCTION] Unused function
-- Location: line 87
-- Issue: `old_helper()` has no callers
-- Suggestion: Remove function
-
-### path/to/module_test
-
-#### [OBSOLETE_TEST] Tests removed functionality
-- Location: line 15
-- Issue: `test_old_feature` tests deleted code
-- Suggestion: Remove test
-
-#### [STANDARD_LIBRARY_DUPLICATE] Custom function reimplements a standard library operation
-- Location: line 55
-- Issue: `dedup_items(...)` reimplements the language's built-in deduplication operation
-- Suggestion: Replace with the standard library's deduplication function
-
-#### [SPECULATIVE_ABSTRACTION] Interface with a single implementation
-- Location: line 90
-- Issue: `Storage` interface has exactly one implementation, `FileStorage`
-- Suggestion: Inline `FileStorage`; reintroduce the interface if a second implementation appears
 ```
+CODE REVIEW: <n> findings — standard: <n>, expert: <n> — specs/_plans/<plan-name>/review-findings.md
+```
+
+Never return the findings themselves as response text. The implementer agents read them from the file.
+
+Each finding's `Fix:` field follows the template's rules: an imperative addressed to the consuming implementer agent — never an optional suggestion.
 
 ## Routing
 
-Every tag across all 8 categories is delegated to `implementer-agent`/`implementer-expert-agent` exactly like any other finding — no special-casing. Tag the resulting fix task `[expert]` if removing the dependency/abstraction, or fixing a dependency-direction/boundary violation, has cross-file or subtle-correctness implications.
+You partition the findings; the orchestrator never sees them individually. Place each finding under `## Standard fixes` or `## Expert fixes` in the findings document — the sections route to `implementer-agent` and `implementer-expert-agent` respectively.
+
+Every tag across all 8 categories is eligible for either section — no category is special-cased. Route a finding to `## Expert fixes` when its fix has cross-file, concurrency, or subtle-correctness implications: removing a dependency or abstraction that has several call sites, correcting a dependency-direction or boundary violation, or any change whose failure mode is a passing test over wrong behavior. Everything else goes to `## Standard fixes`. You hold the context to make this call — decide it here rather than deferring it.

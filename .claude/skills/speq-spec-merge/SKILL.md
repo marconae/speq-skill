@@ -52,7 +52,7 @@ Read `specs/_plans/<plan-name>/decision-log.md` (if it exists).
 
 For each entry where `Promotes to ADR: yes`:
 
-1. Convert to ADR format using `.claude/skills/speq-plan/references/decision-log-permanent-template.md`:
+1. Convert to ADR format using `/speq-plan`'s `references/decision-log-permanent-template.md`:
    - **Title** — from the decision entry heading
    - **ID** — a kebab-case slug derived from the title; MUST be unique across every file in `specs/_decision/`
    - **Plan** — `<plan-name>`

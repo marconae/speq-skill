@@ -55,6 +55,21 @@ setup_dirs() {
     mkdir -p "$(dirname "$CODEX_MARKETPLACE_FILE")"
 }
 
+# Rewrite slash-command invocations (`/speq-plan`) to the installed plugin's
+# namespaced form (`/speq:plan`), while leaving file-path citations
+# (`.claude/skills/speq-plan/references/...`) untouched.
+#
+# An invocation is terminated by a non-path, non-name character (backtick,
+# space, punctuation) or end of line; a path citation continues with `/`.
+# The terminator class excludes name characters as well as `/` so the greedy
+# name capture cannot backtrack and match a truncated name inside a path.
+namespace_slash_commands() {
+    local file="$1"
+
+    sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)$|/speq:\1|' "$file"
+    sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)\([^a-zA-Z0-9_/-]\)|/speq:\1\2|g' "$file"
+}
+
 transform_common_markdown() {
     local file="$1"
     local source_name="$2"
@@ -70,7 +85,7 @@ transform_common_markdown() {
     else
         sed_in_place "s/^name: $source_name$/name: $target_name/" "$file"
     fi
-    sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)|/speq:\1|g' "$file"
+    namespace_slash_commands "$file"
 }
 
 transform_codex_markdown() {
@@ -189,7 +204,7 @@ copy_agents_for_platform() {
             filename=$(basename "$agent_file")
             log_info "  [$platform] $filename"
             cp "$agent_file" "$plugin_dir/agents/$filename"
-            sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)|/speq:\1|g' "$plugin_dir/agents/$filename"
+            namespace_slash_commands "$plugin_dir/agents/$filename"
 
             if [[ "$platform" == "codex" ]]; then
                 transform_codex_markdown "$plugin_dir/agents/$filename"

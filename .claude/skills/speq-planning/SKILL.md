@@ -33,8 +33,8 @@ For each feature in scope:
 
 ```
 specs/<domain>/<feature>/spec.md exists?
-├─ Yes → DELTA markers (.claude/skills/speq-plan/references/delta-template.md)
-└─ No  → Full spec (.claude/skills/speq-plan/references/feature-template.md)
+├─ Yes → DELTA markers (/speq-plan's references/delta-template.md)
+└─ No  → Full spec (/speq-plan's references/feature-template.md)
 
 Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
@@ -54,7 +54,7 @@ Every scenario requires two forms of external proof. No claims — only evidence
 
 ### 4. Generate plan.md
 
-Populate plan.md per `.claude/skills/speq-plan/references/plan-template.md`:
+Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
 1. **Context** — why the change is being made
 2. **Features** — table referencing spec delta files (NEVER embed spec content); immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
@@ -65,7 +65,7 @@ Populate plan.md per `.claude/skills/speq-plan/references/plan-template.md`:
 
 ### 5. Generate decision-log.md
 
-Create `specs/_plans/<plan-name>/decision-log.md` from `.claude/skills/speq-plan/references/decision-log-plan-template.md`.
+Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `references/decision-log-plan-template.md`.
 
 **What to capture:**
 - **Interview section** — verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
@@ -128,9 +128,10 @@ If the orchestrator's prompt states `Interview Mode: headless` (used by `speq-pl
 
 ## Revision Mode
 
-If the orchestrator respawns `planner-agent` with a `plan-reviewer` BLOCKER list instead of a fresh planning brief:
+If the orchestrator respawns `planner-agent` with the path to a `plan-reviewer` findings file instead of a fresh planning brief:
 
-- Address only the named findings — revise the specific `plan.md` section, spec delta, or task line each one points to. Do not rewrite unrelated content.
+- Read the BLOCKER list from the path given in the prompt — `specs/_plans/<plan-name>/review/round-<N>.md`. The findings never arrive inline; the file is the only source.
+- Address only the BLOCKER findings there, executing each one's `Fix:` line — it is an imperative naming the artifact, section, and concrete change. Revise exactly what it points to; do not rewrite unrelated content, and do not act on ADVISORY findings.
 - For each blocker resolved, add a `## Review Findings` entry to `decision-log.md` titled `[plan-review] <short finding title>`, with **Finding** (what `plan-reviewer` flagged), **Direction change** (what changed), and **Promotes to ADR** (per the rule above).
 - Re-run `speq plan validate <plan-name>` before returning.
 - If resolving a blocker surfaces a genuinely irreducible new decision, escalate it exactly as during initial planning (interactive: signal back with a concrete question; headless: `OPEN QUESTIONS:` sentinel).

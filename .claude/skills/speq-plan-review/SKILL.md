@@ -13,7 +13,7 @@ Build the case against approval, not for it. A plan that survives review should 
 
 **No silent pass.** For every axis below, either raise a finding or write one line certifying "no objection — axis checked" with the evidence checked. Never skip an axis silently — that's how a defect slides through unreviewed.
 
-**Round 2 (if applicable):** re-check every round-1 BLOCKER against the reviser's diff first — confirm each is actually resolved, not reworded — before doing a fresh pass for new ones.
+**Round 2 (if applicable):** re-check every round-1 BLOCKER against the revised artifacts and the `[plan-review]` entries in `decision-log.md` first — confirm each is actually resolved, not reworded — before doing a fresh pass for new ones.
 
 **Non-goal:** do not re-litigate decisions the user already made in the clarifying interview. Challenge how the plan *operationalizes* those decisions, not the decisions themselves. If the user said "use approach X" and the plan uses approach X, that's settled — check whether X is executed soundly, not whether X was the right call. A deviation the brief notes as authorized by an active project hook is settled the same way — don't raise it as a finding.
 
@@ -66,35 +66,14 @@ Prose findings default to **ADVISORY** — they're style, not correctness. Escal
 
 ## Output Format
 
-```markdown
-# Plan Review Findings: <plan-name> (round <N>)
+Write the findings document to `specs/_plans/<plan-name>/review/round-<N>.md` per `references/review-findings-template.md`, creating the `review/` directory if absent. Then return exactly one line and nothing else:
 
-## Summary
-- Axes checked: 6/6
-- Total findings: M (Blockers: X, Advisory: Y)
-
-## Intent Fidelity
-[no objection — axis checked: <evidence>]
-OR
-#### [INTENT_DRIFT] BLOCKER
-- Location: plan.md § Summary
-- Issue: <what the user asked vs what the plan does>
-- Fix: <concrete correction>
-
-## Feasibility
-...
-
-## Requirement Quality
-...
-
-## Task Breakdown
-...
-
-## Design Depth
-...
-
-## Prose Quality
-...
+```
+PLAN REVIEW round <N>: BLOCKERS: <n>, ADVISORY: <n>, INTENT: <n> — specs/_plans/<plan-name>/review/round-<N>.md
 ```
 
-Every finding needs a location and a concrete fix suggestion — vague objections aren't actionable for the revision loop. On round 2, confirm-or-refute each round-1 BLOCKER by name before raising anything new.
+`INTENT` counts the Intent Fidelity BLOCKERs alone — a subset of `BLOCKERS`, matching the document's Summary block per the template's rules.
+
+Never return the findings themselves as response text. `planner-agent` reads them from the file.
+
+Every finding needs a location and a concrete `Fix:` imperative — vague objections aren't actionable for the revision loop. On round 2, confirm-or-refute each round-1 BLOCKER by name before raising anything new.

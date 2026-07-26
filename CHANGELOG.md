@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.0
+
+- `plan-reviewer`/`code-reviewer` now write their full findings to a file (`specs/_plans/<plan-name>/review/round-<N>.md`, `review-findings.md`) and return a one-line verdict instead of inlining the whole report into the orchestrator transcript; `speq-plan-review`'s verdict line gains an `INTENT` count (Intent Fidelity blockers)
+- `speq-git-operations` adds three composite operations (`ship-draft`, `ship-ready`, `flag-blocked`) replacing multi-step `git-agent` delegation chains in `implement-pr`/`plan-pr`
+- Compress `implementer-agent`/`implementer-expert-agent` output to `Files modified: <n>`; redirect suite/build output to log files with a `tail -n 30` cap instead of quoting raw output in reports
+- `speq-implement` gains the same open-questions gate as `speq-implement-pr`: a non-empty `specs/_plans/<plan-name>/open-questions.md` stops implementation before any task work
+- Fix `speq-implement-pr` committing evidence artifacts (`tasks.md`, `verification-report.md`) after `/speq-record`'s archive step had already moved them out of tracked space, so they silently never reached git history; it now commits them immediately after the version bump, before recording
+- Fix `build.sh`'s slash-command namespacing regex mangling file-path citations (e.g. `.claude/skills/speq-plan/references/plan-template.md` was rewritten to a nonexistent `speq:plan` path); normalize all cross-skill reference citations to a form that resolves in both the source repo and the built plugin
+
 ## 0.15.0
 
 - Add `speq-design-philosophy`: complexity-management design principles (deep modules, information hiding/leakage, general- vs. special-purpose modules, strategic vs. tactical programming, dependency direction), triggered by `planner-agent`, `plan-reviewer`, `implementer-agent`, `implementer-expert-agent`, and `code-reviewer`

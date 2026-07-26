@@ -97,3 +97,31 @@ or
 ```
 Comments found: 0
 ```
+
+## Composite operations
+
+Each composite below is one operation whose internal sequence is fixed by this skill — the caller supplies parameters, never the sequence. "Nothing to commit" at the commit step is a no-op: continue with the remaining steps (a resumed run may need only push/create-pr). Stop at the first genuinely failing step and report which steps completed and which step failed.
+
+## `ship-draft`
+Params: `paths` (files/globs to stage), `message` (exact commit message), `title`, `body`.
+Sequence: `commit`(paths, message) → `push` → `create-pr`(draft: true, title, body).
+Returns:
+```
+Committed: <sha|no-op> / Pushed: <ref> / PR: #<n> (draft) — <url>
+```
+
+## `ship-ready`
+Params: `paths` (files/globs to stage), `message` (exact commit message), `title`, `body`.
+Sequence: `commit`(paths, message) → `push` → `create-pr`(draft: true, title, body) → `ready-pr`.
+Returns:
+```
+Committed: <sha|no-op> / Pushed: <ref> / PR: #<n> (draft) — <url> / Ready: true
+```
+
+## `flag-blocked`
+Params: `paths` (files/globs to stage), `message` (exact commit message), `title`, `body`, `comment_body` (exact comment text).
+Sequence: `commit`(paths, message) → `push` → `create-pr`(draft: true, title, body) → `comment-pr`(comment_body).
+Returns:
+```
+Committed: <sha|no-op> / Pushed: <ref> / PR: #<n> (draft) — <url> / Commented: <comment-url>
+```

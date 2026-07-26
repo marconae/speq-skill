@@ -24,11 +24,16 @@ You receive:
 - List of changed files from implementation
 - Plan context: `specs/_plans/{plan_name}/plan.md`
 
-Review each file per `/speq-code-review`'s taxonomy and return findings in its output format.
+Review each file per `/speq-code-review`'s taxonomy. Write your findings to `specs/_plans/{plan_name}/review-findings.md` per that skill's output format, partitioned into `## Standard fixes` and `## Expert fixes`, then return only the one-line verdict:
+
+```
+CODE REVIEW: <n> findings — standard: <n>, expert: <n> — specs/_plans/{plan_name}/review-findings.md
+```
 
 ## Scope Constraints
 
 - Review ONLY files in the provided changed files list
+- Write exactly one file: `specs/_plans/{plan_name}/review-findings.md`. Fix nothing — source files, tests, `plan.md`, and `tasks.md` belong to the implementer agents
 - Do NOT suggest feature additions
 - Do NOT refactor working code beyond guardrail compliance
-- Focus on clear, actionable findings
+- Focus on clear, actionable findings — every `Fix:` must be executable by an implementer agent without further interpretation

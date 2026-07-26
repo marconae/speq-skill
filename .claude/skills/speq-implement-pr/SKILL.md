@@ -13,7 +13,7 @@ You are a thin orchestrator layered on top of `speq-implement`. Your goal is:
 
 You must follow this workflow:
 - Delegate implementation to `/speq-implement`, spec merge to `/speq-record`, and every git/`gh` action to `git-agent`; your own work is resolving the branch, gating, bumping the version, and sequencing those calls.
-- Run the steps in order: resolve target → blocker check → implement → bump version → test+record gate → PR.
+- Run the steps in order: resolve target → blocker check → implement → bump version → commit evidence → test+record gate → PR.
 - Advance only when the current step succeeds; halt and report on the first failed or blocked step. Reuse the one `feat/<plan-name>` branch/PR that `speq-plan-pr` created.
 
 ## Required Skills (for the orchestrator)
@@ -58,42 +58,51 @@ Invoke `/speq-implement <plan-name>` and let it run to completion — unchanged,
 
 ### 4. Bump Version (orchestrator)
 
-Bump the workspace version per the plan's `workspace/version` spec delta if it specifies one; otherwise apply the conventional next version per Conventional Commits semantics (this plan's changes are `feat` → minor bump, unless the plan is purely a `fix` → patch). Run a build to keep the lockfile in sync.
+Bump the workspace version per the plan's `workspace/version` spec delta if it specifies one; otherwise apply the conventional next version per Conventional Commits semantics (this plan's changes are `feat` → minor bump, unless the plan is purely a `fix` → patch). Run a build to keep the lockfile in sync, redirecting its output to a log: `mkdir -p target && <build-command> > target/speq-build.log 2>&1`. Branch on the exit code; if a report quotes output, quote at most `tail -n 30` of the log — raw build output never lands verbatim in the transcript.
 
-### 5. Test + Record Gate (orchestrator)
+### 5. Commit Evidence (orchestrator)
 
-Run the project's real test suites (per `specs/mission.md § Commands` — typically an integration suite and an end-to-end suite). Record **only** when every suite is fully green:
+Commit and push **before** running `/speq-record` in the next step — `/speq-record`'s archive `mv` moves the plan directory into gitignored `specs/_recorded/`, and anything not committed before that point never reaches git history.
+
+```
+Delegate to git-agent — operation: commit
+  paths: implementation files, version bump, the plan directory
+         (tasks.md, review-findings.md, verification-report.md)
+  message: <type>(<scope>): implement <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
+
+Delegate to git-agent — operation: push
+```
+
+### 6. Test + Record Gate (orchestrator)
+
+Run the project's real test suites (per `specs/mission.md § Commands` — typically an integration suite and an end-to-end suite), redirecting each suite's output to a log: `mkdir -p target && <suite-command> > target/speq-<suite>.log 2>&1`. Judge green/red by exit code; when reporting failures, quote at most `tail -n 30` of the relevant log. Record **only** when every suite is fully green:
 
 - **All green** → invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision.
 - **Any suite red** → **stop**, report the failures, and leave the plan unrecorded.
 
-### 6. PR
+### 7. PR
 
-Commit and push, then post the verification summary and open or update the PR and mark it ready. Compose the comment body per `speq-writing-guardrails`' PR-facing content rule before calling `comment-pr`:
+Ship with one composite call, then post the verification summary. Compose the comment body per `speq-writing-guardrails`' PR-facing content rule before calling `comment-pr`. Step 5 already committed the implementation and evidence artifacts, so this commit covers only what `/speq-record` produced — the merge results and the archive's removal of the plan directory:
 
 ```
-Delegate to git-agent — operation: commit
-  paths: implementation files, version bump, verification-report.md
-  message: feat(<scope>): implement <plan-name>
-
-Delegate to git-agent — operation: push
-
-Delegate to git-agent — operation: comment-pr
-  body: condensed verification summary — the Verdict table and Notes from
-        specs/_plans/<plan-name>/verification-report.md, plus "Full evidence:
-        specs/_plans/<plan-name>/verification-report.md (this branch)".
-        Do not duplicate the Tool Evidence / Scenario Coverage tables —
-        they are already committed in this same commit.
-
-Delegate to git-agent — operation: create-pr
-  draft: false
+Delegate to git-agent — operation: ship-ready
+  paths: permanent-spec merges (specs/<domain>/...), specs/_decision/ additions,
+         deletion of specs/_plans/<plan-name>/
+  message: <type>(<scope>): record <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
   title: <type>(<scope>): <slug>    # same derivation rule as speq-plan-pr
   body: summary of the implementation diff, both test-suite results (integration + e2e), and the /speq:record outcome
 
-Delegate to git-agent — operation: ready-pr
+Delegate to git-agent — operation: comment-pr
+  body: condensed verification summary — the Verdict table and Notes from
+        <archive-path>/verification-report.md (the specs/_recorded/NNN-<plan-name>
+        path /speq-record reported), plus "Full evidence:
+        specs/_plans/<plan-name>/verification-report.md (committed in this
+        branch's implementation commit)".
+        Do not duplicate the Tool Evidence / Scenario Coverage tables —
+        they are already in the branch's history.
 ```
 
-`create-pr` returns the draft PR `speq-plan-pr` opened (or opens one ready if the plan was only implemented locally), and `ready-pr` marks it ready. Leave the PR for human review.
+`ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready. Leave the PR for human review.
 
 ## Spec Hierarchy (reference)
 
@@ -102,8 +111,9 @@ specs/
 ├── <domain>/<feature>/spec.md            # Permanent (after record)
 ├── _plans/<plan-name>/                   # Active until recorded
 │   ├── tasks.md                          # Created by speq-implement
+│   ├── review-findings.md                # Created by code-reviewer
 │   └── verification-report.md            # Created by speq-implement
-└── _recorded/<plan-name>/                # Archived by speq-record
+└── _recorded/NNN-<plan-name>/            # Archived by speq-record (gitignored)
 ```
 
 ## Work Split (reference)
@@ -121,5 +131,6 @@ specs/
 |---------|-----------|
 | Proceeding past a non-empty open-questions.md | The human-in-the-loop gate lives at step 2 |
 | Recording with any suite red | `/speq-record` runs only on fully green suites |
+| Skipping the step 5 commit | Evidence artifacts silently never reach git history once `/speq-record`'s archive `mv` moves them out of tracked space |
 | Running git/gh directly | `git-agent` performs every git and GitHub operation |
 | Merging the PR | The pipeline ends at a ready PR; a human merges |

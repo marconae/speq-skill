@@ -121,21 +121,25 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
 <if active: note ".speq/plan-hook.md — read it and apply it" — otherwise omit this section>
 ```
 
-**If BLOCKER findings exist:**
+It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and returns only `PLAN REVIEW round 1: BLOCKERS: <n>, ADVISORY: <n>, INTENT: <n> — <path>`. `INTENT` counts the BLOCKERs on the Intent Fidelity axis alone.
 
-1. Respawn `planner-agent` with only the BLOCKER list, instructing it to revise the specific plan/spec-delta content addressing each one, log each resolved blocker as a `## Review Findings` entry in `decision-log.md` (`[plan-review]` title prefix), and re-run `speq plan validate`.
-2. Respawn `plan-reviewer` for **round 2**, passing the round-1 BLOCKER list so it confirms each is actually resolved before checking for new ones.
+**If `INTENT > 0`:** the reviewer's case is that the plan solves a different problem than the one asked for — read the Intent-Fidelity findings from the round file and use `AskUserQuestion` to present them before attempting any revision; the user accepts the plan as-is, or gives guidance and you respawn `planner-agent` manually.
+
+**If `INTENT == 0` and BLOCKER findings exist:**
+
+1. Respawn `planner-agent` with the path to `review/round-1.md`, instructing it to read the BLOCKER findings from that file and execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, and re-run `speq plan validate`.
+2. Respawn `plan-reviewer` for **round 2**, passing that same path so it confirms each round-1 BLOCKER is actually resolved before checking for new ones.
 3. Do not loop a third time, even if round 2 surfaces new BLOCKERs.
 
-**If BLOCKERs remain after round 2** — use `AskUserQuestion`: present the remaining blockers, let the user accept the risk and proceed, or give guidance and respawn `planner-agent` manually.
+**If BLOCKERs remain after round 2** — read the unresolved BLOCKER findings from `review/round-2.md` and use `AskUserQuestion`: present the remaining blockers, let the user accept the risk and proceed, or give guidance and respawn `planner-agent` manually.
 
-**ADVISORY findings** are never looped on or persisted — carry them into step 7's report so the user sees them before implementing.
+**ADVISORY findings** are never looped on or persisted — read them from the last round file and carry them into step 7's report so the user sees them before implementing.
 
 ### 7. Explain next steps (orchestrator)
 
 - Inform the user that the plan is created and ready for review
 - List all created files
-- Report any ADVISORY findings from step 6 so the user sees them before implementing
+- Report any ADVISORY findings from step 6 (read from the round file) so the user sees them before implementing
 - Inform the user to call `/speq-implement <plan-name>` to continue
 - Inform the user to call `/clear` to start implementing with a fresh context window
 - If Claude Code is in "plan mode", call `ExitPlanMode` and ask to proceed with cleared context

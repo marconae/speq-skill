@@ -5,6 +5,7 @@
 | Result | Details |
 |--------|---------|
 | **PASS / FAIL** | <one-line summary of outcome> |
+| Code review | <n> findings — <n> fixed |
 
 | Check | Status |
 |-------|--------|

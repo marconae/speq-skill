@@ -13,7 +13,7 @@ You are a thin orchestrator with no live user to interview. Your goal is:
 
 You must follow this workflow:
 - Delegate all planning judgment to `planner-agent` and all git/GitHub actions to `git-agent`; your own work is resolving the input, writing the plan's status files, briefing those agents, and interpreting their returns.
-- Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
+- Run the steps in order: resolve target → resume dispatch → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report. A resumed run enters at the step its on-disk evidence names (step 1.5), never earlier.
 - Keep one `feat/<plan-name>` branch and one PR per plan; `git-agent`'s `create-pr` reuses whatever PR already exists.
 
 ## Required Skills (for the orchestrator)
@@ -70,6 +70,31 @@ Derive the PR title deterministically from `<plan-name>` as a conventional-commi
 
 Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scope segment, emit `<type>: <slug>`.
 
+### 1.5. Resume Dispatch (orchestrator)
+
+A killed run (crash, usage-limit reset) leaves its progress on disk — plan artifacts, `review/round-<N>.md` files, `open-questions.md` — so never redo work those files prove done; re-delegating `planner-agent` over a validated plan repeats the run's most expensive step for nothing. Inspect `specs/_plans/<plan-name>/`, dispatch to the earliest step whose evidence is missing, and announce the decision in one line — `Resume: <evidence> → step <N>`:
+
+```
+specs/_plans/<plan-name>/ absent → new plan: continue at step 3
+open-questions.md exists, non-empty → blocked resume: continue at step 2
+plan.md absent, or speq plan validate fails → planning incomplete: continue at
+    step 3 (partial artifacts are planner-agent's input, not proof of completion)
+plan.md present and validate passes:
+├─ review/round-2.md exists → review done: branch on its ## Summary counts in step 6
+├─ review/round-1.md exists → resume the loop mid-flight from its ## Summary counts
+│    (Blockers / Advisory / Intent Fidelity blockers — the file holds the counts;
+│    the one-line verdict was returned to a session that no longer exists):
+│    INTENT > 0 → step 6's OPEN QUESTIONS branch (the headless Intent gate)
+│    BLOCKERS: 0 → step 6, clean branch
+│    BLOCKERS > 0 → does decision-log.md hold a [plan-review] ## Review Findings
+│        entry per round-1 BLOCKER?
+│        yes → revision done: respawn plan-reviewer for round 2 (step 5)
+│        no → respawn planner-agent in revision mode (step 5's blocker handling)
+└─ no review/ directory → plan authored, unreviewed: continue at step 5, round 1
+```
+
+Counts and finding text always come from the round files, never from memory — the files are the durable record this dispatch exists to honor. Nothing is committed before step 6, so mid-run resume presumes the same working directory.
+
 ### 2. Fetch Answers — resume only
 
 If step 1 found an unresolved `open-questions.md`, pull the human's replies:
@@ -80,6 +105,8 @@ Delegate to git-agent — operation: read-comments
 ```
 
 Forward the returned Q&A to `planner-agent` in step 4 — it stands in for the live interview `speq-plan` would otherwise run.
+
+If `read-comments` returns no replies, do not delegate to `planner-agent` with an empty Q&A. Branch on step 1's `checkout` return: PR exists → the human simply has not answered yet; report the plan as still blocked and stop. No PR → a prior run died before `flag-blocked` landed; re-run step 6's `OPEN QUESTIONS:` branch to land the block (its commit and push steps no-op where already done), then stop.
 
 ### 3. Discovery (orchestrator)
 
@@ -148,27 +175,26 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
 <if active: note ".speq/plan-pr-hook.md — read it and apply it" — otherwise omit this section>
 ```
 
-**If BLOCKER findings exist:** respawn `planner-agent` with only the BLOCKER list (revise, log each as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate), then respawn `plan-reviewer` for round 2 with the round-1 BLOCKER list to confirm resolution. Do not loop a third time.
+It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and returns only `PLAN REVIEW round 1: BLOCKERS: <n>, ADVISORY: <n>, INTENT: <n> — <path>`. `INTENT` counts the BLOCKERs on the Intent Fidelity axis alone.
 
-**If BLOCKERs remain after round 2:** treat this exactly like an `OPEN QUESTIONS:` return from `planner-agent` — fold the remaining blockers into step 6's "`OPEN QUESTIONS:` returned" branch as the questions list.
+**If `INTENT > 0`:** the reviewer's case is that the plan solves a different problem than the one asked for — fold the Intent-Fidelity BLOCKER text, read from the round file, into step 6's `OPEN QUESTIONS:` branch and stop. A plan that misreads the intent is exactly the irreducible decision headless mode escalates to a human.
 
-**ADVISORY findings:** carry into step 7's PR body/report; never block or persist.
+**If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`, instructing it to read the BLOCKER findings from that file and execute each `Fix:` line (log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate), then respawn `plan-reviewer` for round 2 with the same path to confirm resolution. Do not loop a third time.
+
+**If BLOCKERs remain after round 2:** treat this exactly like an `OPEN QUESTIONS:` return from `planner-agent` — read the unresolved BLOCKER findings from `review/round-2.md` and fold them into step 6's "`OPEN QUESTIONS:` returned" branch as the questions list.
+
+**ADVISORY findings:** carry into step 7's PR body/report, read from the last round file when composing; never block or persist.
 
 ### 6. Branch on the Result
 
 **Clean return** (no `OPEN QUESTIONS:` sentinel, and no unresolved BLOCKERs from step 5) — ship the plan as a draft:
 
 1. Confirm `speq plan validate <plan-name>` passes.
-2. Commit the plan and open the draft PR:
+2. Commit the plan and open the draft PR with one composite call:
    ```
-   Delegate to git-agent — operation: commit
+   Delegate to git-agent — operation: ship-draft
      paths: the plan directory
      message: spec(plan): <plan-name>
-
-   Delegate to git-agent — operation: push
-
-   Delegate to git-agent — operation: create-pr
-     draft: true
      title: <the derived <type>(<scope>): <slug>>
      body: summarize the plan's Features table and task count, include the
            plan.md ## Impact section verbatim as its own "## Impact" heading,
@@ -183,14 +209,14 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
    Delegate to git-agent — operation: push
    ```
    The PR stays a draft — `speq-implement-pr` is the only skill that marks it ready.
-4. If step 5 left ADVISORY findings, or `decision-log.md`'s Design Decisions section is non-empty (every headless "assume and document" entry is a candidate an architect may want to sanity-check), compose one comment covering both and post it — skip entirely if there is nothing to flag. Compose the body per `speq-writing-guardrails`' PR-facing content rule:
+4. If step 5's verdict reported a non-zero `ADVISORY` count, or `decision-log.md`'s Design Decisions section is non-empty (every headless "assume and document" entry is a candidate an architect may want to sanity-check), compose one comment covering both and post it — skip entirely if there is nothing to flag. Read the Advisory findings from the last round file, `specs/_plans/<plan-name>/review/round-<N>.md`. Compose the body per `speq-writing-guardrails`' PR-facing content rule:
    ```
    Delegate to git-agent — operation: comment-pr
-     body: ADVISORY findings from step 5 (if any) and the Design Decisions
-           entries from decision-log.md (if any)
+     body: the ADVISORY findings excerpted from the step 5 round file (if any)
+           and the Design Decisions entries from decision-log.md (if any)
    ```
 
-**`OPEN QUESTIONS:` returned (from step 4, or unresolved BLOCKERs from step 5)** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
+**`OPEN QUESTIONS:` returned (from step 4, or from step 5's round-1 Intent gate or unresolved round-2 BLOCKERs)** — persist the partial plan and ask the human async. Author the status files yourself, then delegate only git operations:
 
 1. Write `specs/_plans/<plan-name>/open-questions.md`:
    ```markdown
@@ -198,35 +224,29 @@ plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
 
    speq-plan-pr could not complete this plan without human input. What's done so far is committed on this branch. Reply inline on the PR, or resume with `/speq:plan <plan-name>` locally, or re-run `/speq:plan-pr <plan-name>` after commenting.
 
-   - [ ] <question 1, or the round-2 BLOCKER text from step 5>
+   - [ ] <question 1, or a BLOCKER folded in from step 5 — round-1 Intent-Fidelity, or unresolved after round 2>
    - [ ] <question 2>
    ```
 2. Insert `> **Status:** blocked — see open-questions.md` as the first line under `plan.md`'s H1 (skip if already present).
-3. Compose the questions checklist as the PR comment body, and append any ADVISORY findings from step 5, if present — one comment, not two.
+3. Compose the questions checklist as the PR comment body, and append any ADVISORY findings excerpted from step 5's round file, if present — one comment, not two.
 
-Then:
+Then, with one composite call:
 ```
-Delegate to git-agent — operation: commit
+Delegate to git-agent — operation: flag-blocked
   paths: the plan directory
   message: spec(plan): flag open questions for <plan-name>
-
-Delegate to git-agent — operation: push
-
-Delegate to git-agent — operation: create-pr
-  draft: true
   title: <the derived <type>(<scope>): <slug>>
   body: <blocked-plan summary>, including plan.md's ## Impact section
         verbatim as its own "## Impact" heading if populated — a blocked
         plan may have partial Impact info; include it as-is, never
         fabricate the rest
-
-Delegate to git-agent — operation: comment-pr
-  body: <the questions checklist and any ADVISORY findings from step 3>
+  comment_body: <the questions checklist and any ADVISORY findings excerpted
+        from step 5's round file>
 ```
 
 ### 7. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, and the PR link either way. Print plan.md's `## Impact` section to the terminal. Mention any ADVISORY findings from step 5 and any Design Decisions entries surfaced — these are also posted as a PR comment per step 6.
+Tell the caller whether the plan is ready or blocked, and the PR link either way. Print plan.md's `## Impact` section to the terminal. Mention any ADVISORY findings — read them from `specs/_plans/<plan-name>/review/round-<N>.md`, not from memory — and any Design Decisions entries surfaced. Both are also posted as a PR comment per step 6.
 
 ## Spec Hierarchy (reference)
 
@@ -255,3 +275,4 @@ specs/
 | Running git/gh directly | `git-agent` performs every git and GitHub operation |
 | Marking the PR ready | `speq-implement-pr` owns `ready-pr`; plans stay draft |
 | A third review round | Bounded to 2 — leftover BLOCKERs become open questions |
+| Re-delegating `planner-agent` over a validated plan | Step 1.5 resumes from on-disk evidence; re-planning repeats the run's most expensive step |

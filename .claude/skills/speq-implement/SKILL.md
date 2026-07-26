@@ -50,6 +50,8 @@ Note it (not its full content) as a `Project Hook:` line in every sub-agent brie
 
 ### Phase 1: Load Plan
 
+**Open-questions gate:** read `specs/_plans/<plan-name>/open-questions.md`. If it exists and is non-empty → **stop** and report that the plan has unresolved open questions pending human answers (resolve with `/speq-plan <plan-name>`, or via PR comments and `/speq-plan-pr <plan-name>` for a headless plan). The human-in-the-loop point lives exactly here — same gate as `speq-implement-pr`'s blocker check.
+
 ```
 Read: specs/_plans/<plan-name>/plan.md
 ```
@@ -151,7 +153,7 @@ Delegate to implementer-expert-agent — Implement <group-name> expert tasks
 
 After implementation completes, review all changed files. Code review runs ONCE per implementation — after fix tasks complete, proceed to Phase 5 (its checks verify the fixes); do not respawn `code-reviewer` for a second round.
 
-1. **Collect changed files** — `git diff --name-only <base>...HEAD`
+1. **Collect changed files** — `git diff --name-only <base>` for tracked changes plus `git ls-files --others --exclude-standard` for new files. Implementation work is uncommitted at this point, so diff against the working tree — a commit-range diff (`<base>...HEAD`) would miss all of it.
 2. **Spawn code-reviewer agent:**
    ```
    Delegate to code-reviewer — Review implementation quality
@@ -163,21 +165,37 @@ After implementation completes, review all changed files. Code review runs ONCE 
    ## Context
 
    - Plan: specs/_plans/{plan_name}/plan.md
-   - Review for: guardrail violations, dead code, obsolete tests, bad comments, optimizations, YAGNI/over-engineering
-   - Structure findings using the **Pyramid Principle**: group by theme, lead each group with the key finding, support with evidence.
+   - Review for: guardrail violations, dead code, test quality, bad comments, optimizations, YAGNI/over-engineering, error handling, design depth
+   - Write findings to specs/_plans/{plan_name}/review-findings.md per your output format, partitioned into `## Standard fixes` and `## Expert fixes`; return only the one-line verdict.
    - Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
    ```
-3. **Process findings** — If findings exist:
-   - Create fix tasks in `tasks.md` for every finding
-   - Tag a fix task `[expert]` when the finding involves subtle correctness, concurrency, or cross-file reasoning
-   - Route fix tasks by tag: `implementer-agent` for untagged, `implementer-expert-agent` for `[expert]`
+   It returns one line: `CODE REVIEW: <n> findings — standard: <n>, expert: <n> — <path>`. You never see the findings themselves.
+3. **Process findings** — Branch on the two counts in the verdict. Skip a section whose count is 0; if both are 0, go to Phase 5.
+   - **standard > 0** — spawn `implementer-agent`:
+     ```
+     Delegate to implementer-agent — Apply standard review fixes
+
+     ## Your Assignment (fix-task mode)
+
+     Read specs/_plans/{plan_name}/review-findings.md, section `## Standard fixes`.
+     Append one fix task per finding to specs/_plans/{plan_name}/tasks.md under a
+     `## Phase 4: Review Fixes` group, deriving each task line from the finding's
+     `Fix:` field, then execute them.
+
+     ## Context
+
+     - Plan: specs/_plans/{plan_name}/plan.md
+     - Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
+     ```
+   - **expert > 0** — spawn `implementer-expert-agent` with the same brief, section `## Expert fixes`, noting it tags its appended tasks `[expert]`.
+   - Spawn both in parallel only when they touch disjoint files; otherwise run the expert agent first.
 4. **Proceed to verification** — Phase 5 verifies all tests pass
 
 ### Phase 5: Verification
 
 #### 5a. Automated Checks
 
-Execute commands from plan's `## Verification > Checklist`:
+Execute commands from plan's `## Verification > Checklist`, redirecting each command's output to a log: `mkdir -p target && <command> > target/speq-<suite>.log 2>&1`, then branch on the exit code. If a report quotes output, quote at most `tail -n 30` of the log — raw build/test output never lands verbatim in the transcript.
 
 - Build → exit 0
 - Test → 0 failures
@@ -203,7 +221,7 @@ Update tasks.md verification tasks as completed.
 
 ### Phase 6: Verification Report
 
-Generate using `references/verification-template.md`. Structure the report **BLUF (Bottom Line Up Front)**: lead with pass/fail verdict and summary before evidence details.
+Generate using `references/verification-template.md`. Structure the report **BLUF (Bottom Line Up Front)**: lead with pass/fail verdict and summary before evidence details. Fill the Verdict table's `Code review` row from Phase 4's verdict line — that row is how the counts survive into a later session's condensed PR comment, which quotes the Verdict table.
 
 Save to: `specs/_plans/<plan-name>/verification-report.md`
 
@@ -215,8 +233,13 @@ Save to: `specs/_plans/<plan-name>/verification-report.md`
 ✓ Verification passed
 ✓ Report generated
 
+Code review: <n> findings — <n> fixed
+Verification report: specs/_plans/<plan-name>/verification-report.md
+
 Ready for: /speq-record <plan-name>
 ```
+
+The two report lines are the run's machine-readable handoff: a headless caller folds the code-review line into its condensed PR comment, and the report path is what `/speq-record` gates on.
 
 ## Context Recovery
 
@@ -240,6 +263,7 @@ If context is lost or compacted:
 | Pattern | Why Wrong |
 |---------|-----------|
 | Orchestrator writes code directly | All coding is delegated to sub-agents |
+| Proceeding past a non-empty open-questions.md | The plan is blocked on human answers — implement only after they're resolved |
 | Dropping the `[expert]` tag on a status flip | The tag must survive `[ ]` → `[~]` → `[x]` |
 | Marking `[x]` without a sub-agent completion return | Only verified completions are done |
 | A second code-review round | Review runs once; Phase 5 verifies the fixes |

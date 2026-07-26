@@ -32,7 +32,7 @@ From the orchestrator:
 - Any research already conducted
 - Reference to `references/` templates
 
-Author the plan per `/speq-planning`'s workflow. If the orchestrator's prompt states `Interview Mode: headless`, or respawns you with a `plan-reviewer` BLOCKER list, follow that skill's Headless Mode / Revision Mode sections respectively.
+Author the plan per `/speq-planning`'s workflow. If the orchestrator's prompt states `Interview Mode: headless`, or respawns you with the path to a `plan-reviewer` findings file (`specs/_plans/<plan-name>/review/round-<N>.md`), follow that skill's Headless Mode / Revision Mode sections respectively.
 
 ## Output Format
 
