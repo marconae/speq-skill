@@ -2,6 +2,7 @@
 
 ## 0.19.0
 
+- Polish `docs/` prose (shorter sentences, active voice, no normative content lost)
 - Retire `git-agent`: `speq-plan-pr` and `speq-implement-pr` now run every git/`gh` operation directly, per `/speq-git-operations` (a shared reference skill both orchestrators invoke, instead of a sole sub-agent) — removes a fixed per-spawn agent-boot cost from every plan/implement pipeline run
 - `plan-reviewer`'s round 2 shrinks to a blocker-recheck-only pass for small/routine plans (`fix`-verb, no `## Design` section, empty Design Decisions) — model and effort stay `opus`/`xhigh` unconditionally; only round 2's scope narrows
 - `planner-agent` gains an explicit spawn-policy section: prefer direct `/speq-code-tools` lookups, delegate exploration only when it would flood synthesis context, spawn read-only agents in parallel, never sequentially, when delegation is warranted

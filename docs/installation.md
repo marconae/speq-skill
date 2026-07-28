@@ -11,17 +11,17 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 ```
 
 > [!NOTE]
-> The installer downloads a pre-built `speq` binary for your platform when one is available (Linux x86_64/ARM64, macOS Apple Silicon). Otherwise it builds from source with the Rust toolchain, offering to install [rustup](https://rustup.rs/) for you if Rust is missing.
+> When a pre-built `speq` binary is available for your platform (Linux x86_64/ARM64, macOS Apple Silicon), the installer downloads it. If no binary is available, the installer builds from source with the Rust toolchain. If Rust is missing, the installer offers to install [rustup](https://rustup.rs/) for you.
 
-Open Claude Code or Codex and start with the matching trigger: `/speq:mission` in Claude Code, or `$` in Codex.
+Open Claude Code or Codex. Start with the matching trigger: `/speq:mission` in Claude Code, or `$` in Codex.
 
 ## Prerequisites
 
 - macOS or Linux (Windows via WSL)
 - Claude Code CLI or Codex CLI/App, installed and configured
-- Rust toolchain — only needed if no pre-built binary matches your platform; the installer installs it for you if missing, or get it via [rustup](https://rustup.rs/)
+- Rust toolchain, needed only if your platform has no pre-built binary. If Rust is missing, the installer installs it for you. You can also get Rust from [rustup](https://rustup.rs/).
 
-## What gets installed
+## What the installer installs
 
 | Component | Location |
 |-----------|----------|
@@ -36,17 +36,17 @@ Open Claude Code or Codex and start with the matching trigger: `/speq:mission` i
 | Embeddings model | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
 
 The installer also:
-- Copies the pre-built `speq` binary to your PATH, or, on platforms without one (e.g. Intel Mac), downloads the release source and builds it with the Rust toolchain
+- Copies the pre-built `speq` binary to your PATH. On platforms without one, for example Intel Mac, it downloads the release source instead and builds `speq` with the Rust toolchain.
 - Installs the speq-skill plugin for Claude Code and Codex
-- Registers the local Codex marketplace via `codex plugin marketplace add`, when Codex is installed
-- Registers Serena and Context7 via `codex mcp add`, when Codex is installed
+- When Codex is installed, registers the local Codex marketplace via `codex plugin marketplace add`
+- When Codex is installed, registers Serena and Context7 via `codex mcp add`
 - Installs Codex skills into `$CODEX_HOME/skills` so Codex can load the `$`-triggered `speq:*` skills
 - Installs plugin MCP configuration for Serena and Context7
-- Downloads the `snowflake-arctic-embed-xs` embedding model (~23 MB) into `~/.cache/speq/models/`
+- Downloads the `snowflake-arctic-embed-xs` embeddings model (~23 MB) into `~/.cache/speq/models/`
 
 ## Install from source
 
-To build manually instead of using the pre-built binary — or if your platform has none:
+If your platform has no pre-built binary, or you want to build manually, follow these steps:
 
 ```bash
 # Clone the repository
@@ -57,7 +57,7 @@ git clone https://github.com/marconae/speq-skill && cd speq-skill
 ```
 
 > [!NOTE]
-> Requires the Rust toolchain (install via [rustup](https://rustup.rs/)).
+> This build requires the Rust toolchain. Install it via [rustup](https://rustup.rs/).
 
 ## Verify installation
 
@@ -117,7 +117,7 @@ Add `~/.local/bin` to your PATH.
 
 ### Rust build errors
 
-If the installer fell back to a source build (no pre-built binary for your platform), or you ran `./scripts/local-install.sh` directly, update your Rust toolchain:
+If your platform has no pre-built binary, or you ran `./scripts/local-install.sh` directly, update your Rust toolchain:
 
 ```bash
 # Install Rust
@@ -139,7 +139,7 @@ rustup update
    claude
    ```
 
-3. Check the plugin loads:
+3. Verify the plugin loads:
    ```
    /speq:mission
    ```
@@ -177,7 +177,7 @@ rustup update
    ls ~/.codex/skills/speq-mission/SKILL.md
    ```
 
-7. Restart Codex and invoke:
+7. Restart Codex. Then invoke:
    ```
    # In Codex, type $ and select the speq:mission skill
    ```
@@ -186,7 +186,7 @@ rustup update
 
 The plugin depends on the Serena and Context7 MCP servers. If you see connection errors:
 
-1. Check the servers are installed:
+1. Verify the servers are installed:
    ```bash
    ls ~/.speq-skill/plugins/speq-skill/.mcp.json
    ls ~/.speq-skill/codex/plugins/speq-skill/.mcp.json
@@ -194,7 +194,7 @@ The plugin depends on the Serena and Context7 MCP servers. If you see connection
 
 2. Verify the server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude, or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex.
 
-3. If you use Codex, ensure the marketplace and MCP servers are registered:
+3. If you use Codex, verify that the marketplace and MCP servers are registered:
    ```bash
    codex plugin marketplace add ~/.speq-skill/codex
    codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
@@ -212,4 +212,4 @@ The plugin depends on the Serena and Context7 MCP servers. If you see connection
 | [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~23MB) | Apache 2.0 |
 
 > [!NOTE]
-> The embeddings model is downloaded during installation into `~/.cache/speq/models/`.
+> The installer downloads the embeddings model into `~/.cache/speq/models/` during installation.

@@ -4,7 +4,7 @@
 
 # Spec Library
 
-The permanent spec format: BDD/Gherkin scenarios expressing requirements in RFC 2119 keywords, organized under `specs/`.
+The permanent spec format: BDD/Gherkin scenarios that express requirements in RFC 2119 keywords, organized under `specs/`.
 
 ---
 
@@ -68,7 +68,7 @@ The system SHALL enforce minimum password strength requirements during account c
 
 ## BDD and Gherkin
 
-Specs use a Markdown adaptation of Gherkin's [Given-When-Then](https://cucumber.io/docs/gherkin/reference/) pattern:
+Specs use a Markdown adaptation of the Gherkin [Given-When-Then](https://cucumber.io/docs/gherkin/reference/) pattern:
 
 | Keyword | Purpose |
 |-------|---------|
@@ -87,7 +87,7 @@ Each step is a Markdown bullet with the keyword in italic:
 * *AND* the system SHALL log the deletion event
 ```
 
-*AND* inherits the type of the step before it. In the example above, the first AND is another GIVEN; the last AND is another THEN.
+*AND* inherits the type of the step before it. In the example above, the first AND is another GIVEN. The last AND is another THEN.
 
 ## RFC 2119 keywords
 
@@ -95,23 +95,23 @@ Specs use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords to express
 
 | Keyword | Meaning |
 |---------|---------|
-| **MUST** / **SHALL** | Mandatory. The implementation is required to satisfy this. |
-| **MUST NOT** / **SHALL NOT** | Prohibited. The implementation is required to *not* do this. |
-| **SHOULD** / **SHOULD NOT** | Recommended (or discouraged). Follow unless there is a compelling reason not to. |
-| **MAY** | Optional. The implementation can include or omit this at its discretion. |
+| **MUST** / **SHALL** | Mandatory. The implementation must satisfy this. |
+| **MUST NOT** / **SHALL NOT** | Prohibited. The implementation must not do this. |
+| **SHOULD** / **SHOULD NOT** | Recommended (or discouraged). Follow it unless there is a good reason not to. |
+| **MAY** | Optional. The implementation can include or omit this. |
 
 Rules for keyword usage:
 
-- *THEN* steps must contain at least one RFC 2119 keyword — they define what the system is required to do.
-- *GIVEN* and *WHEN* steps may omit keywords — they describe context and actions, not requirements.
-- Keywords must appear in UPPERCASE to be recognized by the validator.
+- *THEN* steps must contain at least one RFC 2119 keyword. These steps define what the system must do.
+- *GIVEN* and *WHEN* steps can omit keywords. These steps describe context and actions, not requirements.
+- Keywords must appear in UPPERCASE so that the validator recognizes them.
 
 ## Structure and AI coding agents
 
-- GIVEN/WHEN/THEN sets up state, action, and expected outcome explicitly, instead of leaving intent to prose the agent must interpret.
-- SHALL / SHALL NOT mark what's mandatory and prohibited — including negative requirements agents otherwise default to adding, such as retries or fallback logic.
-- SHOULD / MAY mark what's recommended or optional, so the agent doesn't over-implement.
-- Edge cases (empty input, null values, timeouts) need their own scenario; an agent won't infer behavior for cases the spec omits.
+- GIVEN/WHEN/THEN explicitly establishes state, action, and expected outcome, instead of leaving intent to prose that the agent must interpret.
+- SHALL and SHALL NOT mark what is mandatory and what is prohibited. This includes negative requirements that an agent otherwise adds by default, for example retries or fallback logic.
+- SHOULD and MAY mark what is recommended or optional, so that the agent does not over-implement.
+- Edge cases, for example empty input, null values, or timeouts, need their own scenario. An agent will not infer behavior for cases that the spec omits.
 
 ## Fine-grained context via the speq CLI
 
@@ -121,11 +121,11 @@ The `speq` CLI retrieves specs at three levels of granularity:
 - **Feature** — `speq feature get <domain>/<feature>` retrieves a single feature spec
 - **Scenario** — `speq search query "..."` returns matching scenarios, not whole files
 
-Agents operate within a context window; loading the full library wastes tokens.
+Agents operate within a context window. Loading the full library wastes tokens.
 
 ## Validation
 
-The `speq` CLI enforces all structural rules described on this page:
+The `speq` CLI enforces all the structural rules that this page describes:
 
 ```
 speq feature validate

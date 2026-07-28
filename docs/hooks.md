@@ -4,17 +4,17 @@
 
 # Project Hooks
 
-Repo-local customization for `speq-skill`'s entry-point skills.
+Repository-specific instructions for the entry-point skills of `speq-skill`.
 
 ---
 
 ## Mechanism
 
-Create `.speq/<name>-hook.md` in the project root. The matching entry-point skill reads it as its first workflow step, announces `Loaded project hook: .speq/<name>-hook.md`, and treats its content as authoritative instructions for that run.
+Create `.speq/<name>-hook.md` in the project root. The matching entry-point skill reads the hook file as its first workflow step. Then the skill announces `Loaded project hook: .speq/<name>-hook.md`. The skill treats the hook content as authoritative instructions for that run.
 
 ## File naming
 
-`<name>` is the skill's public command name without the `speq-`/`speq:` prefix:
+`<name>` is the public command name of the skill, without the `speq-`/`speq:` prefix:
 
 | Skill | Hook file |
 |---|---|
@@ -26,16 +26,16 @@ Create `.speq/<name>-hook.md` in the project root. The matching entry-point skil
 | `/speq:record` | `.speq/record-hook.md` |
 | `/speq:audit` | `.speq/audit-hook.md` |
 
-Only the 7 entry-point skills read hooks directly. A skill that spawns sub-agents (e.g. `planner-agent`, `plan-reviewer`, `code-reviewer`) passes each one the hook's file path; the sub-agent reads it itself when relevant to its task.
+Only the 7 entry-point skills read hooks directly. A skill that spawns sub-agents, for example `planner-agent`, `plan-reviewer`, or `code-reviewer`, passes the hook file path to each sub-agent. When the file is relevant to the task of the sub-agent, the sub-agent reads the file itself.
 
-Commit `.speq/` to the repo — hooks are project-level configuration. No frontmatter required.
+Commit `.speq/` to the repository. Hook files are project-level configuration and need no frontmatter.
 
 ## Behavior
 
-- Hook content is authoritative: it can override any step of a skill's workflow, including the clarifying interview, the `plan-reviewer` loop, and TDD.
-- Loading is always announced in the skill's output.
+- Hook content is authoritative. It can override any step of a skill workflow: the clarifying interview, the `plan-reviewer` loop, or TDD.
+- The skill always announces when it loads a hook file.
 - `/speq:audit` lists active hook files as an informational check.
-- `/speq:plan-pr` and `/speq:implement-pr` delegate whole steps to `/speq:plan`, `/speq:implement`, and `/speq:record`; each loads its own hook independently.
+- `/speq:plan-pr` and `/speq:implement-pr` delegate whole steps to `/speq:plan`, `/speq:implement`, and `/speq:record`. Each of these skills loads its own hook file independently.
 
 ## Example
 
@@ -46,4 +46,4 @@ Skip the Manual Testing section in Verification for internal tooling plans —
 this team only ships internal CLIs, there's no external user to manually verify for.
 ```
 
-`/speq:plan` announces `Loaded project hook: .speq/plan-hook.md`; `planner-agent` applies both instructions when authoring the plan.
+`/speq:plan` announces `Loaded project hook: .speq/plan-hook.md`. When `planner-agent` authors the plan, it applies both instructions.

@@ -4,7 +4,7 @@
 
 # Model Routing
 
-speq-skill routes work between a main session, workflow skills, and specialist sub-agents. Routing is hardcoded in the generated Claude and Codex plugin artifacts.
+speq-skill routes work between a main session, workflow skills, and specialist sub-agents. The generated Claude and Codex plugin artifacts fix this routing.
 
 ---
 
@@ -12,7 +12,7 @@ speq-skill routes work between a main session, workflow skills, and specialist s
 
 > Orchestration is cheap. Reasoning is expensive.
 
-Workflow skills coordinate the work — gather context, ask clarifying questions, verify preconditions, dispatch specialist roles. Planning, expert implementation, and review use the heavier reasoning tier because mistakes there compound downstream.
+Workflow skills coordinate the work. They gather context, ask clarifying questions, confirm preconditions, and dispatch specialist roles. Planning, expert implementation, and review use the heavier reasoning tier. An error in these steps compounds in later steps.
 
 ---
 
@@ -24,9 +24,9 @@ Workflow skills coordinate the work — gather context, ask clarifying questions
 | `/speq:implement` | `sonnet` | inherited | Thin orchestration |
 | `/speq:record` | `sonnet` | inherited | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
-| `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration — headless |
-| `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration — headless |
-| `/speq:audit` | `sonnet` | inherited | Thin orchestration — health check |
+| `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration (headless) |
+| `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration (headless) |
+| `/speq:audit` | `sonnet` | inherited | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `opus` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `plan-reviewer` | `opus` | `xhigh` | Adversarial plan review |
@@ -48,9 +48,9 @@ Workflow skills coordinate the work — gather context, ask clarifying questions
 | `/speq:implement` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:record` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
-| `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
-| `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration — headless |
-| `/speq:audit` | `gpt-5.4` | `medium` | Thin orchestration — health check |
+| `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration (headless) |
+| `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration (headless) |
+| `/speq:audit` | `gpt-5.4` | `medium` | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, ADRs, task decomposition |
 | `plan-reviewer` | `gpt-5.5` | `xhigh` | Adversarial plan review |
@@ -66,7 +66,7 @@ Workflow skills coordinate the work — gather context, ask clarifying questions
 
 ## Expert task tagging
 
-`planner-agent` marks tasks requiring deep reasoning with `[expert]`:
+`planner-agent` marks tasks that need deep reasoning with the tag `[expert]`:
 
 ```markdown
 - [ ] 2.1 Add CLI flag parsing
@@ -77,7 +77,7 @@ When `/speq:implement` processes a task group:
 
 - Untagged tasks route to `implementer-agent`
 - `[expert]` tasks route to `implementer-expert-agent`
-- Expert tasks run first when they establish invariants that standard tasks depend on
+- When expert tasks establish invariants that standard tasks depend on, they run first
 
 Use `[expert]` for concurrency, subtle correctness, cross-file refactors, novel algorithms, and security-sensitive work. Avoid it for routine CLI plumbing, fixtures, docs, or straightforward use of existing patterns.
 
@@ -91,4 +91,4 @@ The checked-in source currently lives in `.claude/skills` and `.claude/agents`. 
 - Codex artifacts under `dist/marketplace/codex/plugins/speq-skill`
 - Codex marketplace manifest under `dist/marketplace/codex/.agents/plugins/marketplace.json`
 
-Claude-generated output exposes `/speq:*` skills. Codex-generated output exposes the same workflows behind the `$` trigger, and Codex-specific prompt text is rewritten during generation.
+Claude-generated output exposes `/speq:*` skills. Codex-generated output exposes the same workflows behind the `$` trigger. Generation also rewrites Codex-specific prompt text.

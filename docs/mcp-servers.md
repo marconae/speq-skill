@@ -4,7 +4,7 @@
 
 # MCP Servers
 
-speq-skill integrates with popular MCP (Model Context Protocol) servers for enhanced code comprehension and research capabilities.
+speq-skill integrates with two MCP (Model Context Protocol) servers. These servers improve code comprehension and research.
 
 ---
 
@@ -15,7 +15,7 @@ speq-skill integrates with popular MCP (Model Context Protocol) servers for enha
 | [Serena](https://github.com/oraios/serena) | Semantic code navigation and editing |
 | [Context7](https://github.com/upstash/context7) | Library documentation lookup |
 
-Both servers are declared in the generated plugin's MCP configuration and launched from their upstream packages. See their own documentation for behavior, limitations, and licensing.
+The generated plugin declares both servers in its MCP configuration. The plugin launches both servers from their upstream packages. See the documentation of each server for its behavior, limits, and license terms.
 
 ---
 
@@ -25,10 +25,10 @@ Both servers are declared in the generated plugin's MCP configuration and launch
 
 The `/speq:code-tools` skill uses Serena for semantic code operations:
 
-- **Explore** — Navigate codebase structure at the symbol level (classes, functions, methods)
-- **Understand** — Find where symbols are defined and referenced
-- **Edit** — Make precise changes to specific symbols without touching surrounding code
-- **Verify** — Confirm changes haven't broken references
+- **Explore** — Navigates the codebase structure at the symbol level: classes, functions, and methods
+- **Understand** — Finds where symbols are defined and referenced
+- **Edit** — Makes precise changes to specific symbols, with no changes to the surrounding code
+- **Verify** — Confirms that changes do not break existing references
 
 ### External research (Context7 + WebSearch)
 
@@ -53,32 +53,32 @@ Need library API details?
 
 During implementation, the skills work together:
 
-1. **Explore codebase** (Serena) — Understand existing structure
-2. **Research APIs** (Context7) — Get correct library usage
-3. **Research patterns** (WebSearch) — Inform design decisions
-4. **Edit code** (Serena) — Make precise, semantic changes
+1. **Explore codebase** (Serena) — Examines the existing structure
+2. **Research APIs** (Context7) — Gets the correct library usage
+3. **Research patterns** (WebSearch) — Informs design decisions
+4. **Edit code** (Serena) — Makes precise, semantic changes
 
 ---
 
 ## Configuration
 
-MCP servers are configured in each generated plugin's `.mcp.json` file:
+Each generated plugin configures its MCP servers in a `.mcp.json` file:
 
 ```
 ~/.speq-skill/plugins/speq-skill/.mcp.json
 ~/.speq-skill/codex/plugins/speq-skill/.mcp.json
 ```
 
-The Claude plugin starts Serena with the Claude Code context. The Codex plugin starts Serena with the Codex context and `--project-from-cwd`, matching Serena's [Codex client guidance](https://oraios.github.io/serena/02-usage/030_clients.html#codex-cli-and-app).
+The Claude plugin starts Serena with the Claude Code context. The Codex plugin starts Serena with the Codex context and the `--project-from-cwd` flag. This setup follows the [Codex client guidance](https://oraios.github.io/serena/02-usage/030_clients.html#codex-cli-and-app) from Serena.
 
-When the Codex CLI is available, the installer registers the local Codex marketplace with `codex plugin marketplace add`, keeps the MCP declarations in the generated plugin payload, and registers the Codex MCP servers with:
+When the Codex CLI is available, the installer takes three steps. It registers the local Codex marketplace with `codex plugin marketplace add`. It keeps the MCP declarations in the generated plugin payload. Then it registers the Codex MCP servers with these commands:
 
 ```bash
 codex mcp add serena -- uvx --from git+https://github.com/oraios/serena serena start-mcp-server --project-from-cwd --context=codex
 codex mcp add context7 -- npx -y @upstash/context7-mcp
 ```
 
-See the respective project documentation for advanced configuration:
+See the documentation of each project for advanced configuration:
 
 - [Serena documentation](https://github.com/oraios/serena)
 - [Context7 documentation](https://github.com/upstash/context7)

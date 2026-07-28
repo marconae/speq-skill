@@ -29,7 +29,7 @@ speq <command> [subcommand] [options]
 
 ### `speq domain list`
 
-List all domains in the spec library.
+This command lists all domains in the spec library.
 
 ```bash
 speq domain list
@@ -49,7 +49,7 @@ search
 
 ### `speq feature list`
 
-Display all features in a tree view.
+This command displays all features in a tree view.
 
 ```bash
 speq feature list [domain]
@@ -70,7 +70,7 @@ specs/
 
 ### `speq feature get`
 
-Print a full feature spec, or a single scenario if a scenario name is appended to the path. Quote the path if the scenario name contains spaces.
+This command prints a full feature spec. If you append a scenario name to the path, the command prints only that scenario. If the scenario name contains spaces, quote the path.
 
 ```bash
 speq feature get <domain>/<feature>
@@ -85,7 +85,7 @@ $ speq feature get "cli/validate/Validation fails on missing field"
 
 ### `speq feature validate`
 
-Validate spec structure and syntax. Omit the target to validate every spec, or narrow it to a domain or a single feature.
+This command validates spec structure and syntax. If you omit the target, the command validates every spec. If you name a domain or a single feature, the command validates only that target.
 
 ```bash
 speq feature validate [domain]
@@ -110,7 +110,7 @@ Checks:
 
 ### `speq plan list`
 
-List all active plans in `specs/_plans/`, alphabetically, one per line.
+This command lists all active plans in `specs/_plans/`, in alphabetical order, one plan per line.
 
 ```bash
 speq plan list
@@ -123,11 +123,11 @@ add-auth
 fix-validation
 ```
 
-Prints `No active plans.` if none exist.
+If no plans exist, the command prints `No active plans.`
 
 ### `speq plan validate`
 
-Validate a plan directory's structure and contents.
+This command validates the structure and contents of a plan directory.
 
 ```bash
 speq plan validate <plan-name>
@@ -152,7 +152,7 @@ Checks:
 
 ### `speq decision-log validate`
 
-Validate every fragment under `specs/_decision/`.
+This command validates every fragment under `specs/_decision/`.
 
 ```bash
 speq decision-log validate
@@ -165,18 +165,18 @@ Permanent decision log validation passed.
 ```
 
 Checks:
-- Each fragment's H1 is `# Decisions: <plan-name>`
+- The H1 of each fragment is `# Decisions: <plan-name>`
 - ADR headings follow `## ADR: <Title>`
 - Each ADR contains all required fields: `**ID:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`
 - `**ID:**` is a kebab-case slug, unique across every fragment
 - `**Status:**` is one of: `Accepted`, `Deprecated`, `Superseded by <slug>`
 - Every `**Supersedes:**` and `Superseded by <slug>` reference resolves to a slug defined somewhere in `specs/_decision/`
-- `### Options Considered` and `### Consequences` are optional; their absence does not trigger errors
+- `### Options Considered` and `### Consequences` are optional. Their absence does not trigger errors
 - An absent or empty `specs/_decision/` directory passes
 
 ### `speq decision-log show`
 
-Assemble every fragment under `specs/_decision/` into one `# Architecture Decision Records` view and print it to stdout. Writes nothing to disk.
+This command assembles every fragment under `specs/_decision/` into one `# Architecture Decision Records` view. It prints the view to stdout. It writes nothing to disk.
 
 ```bash
 speq decision-log show
@@ -195,7 +195,7 @@ $ speq decision-log show
 ...
 ```
 
-Orders fragments by their numeric `NNN-` prefix, breaking ties by filename; ADRs within a fragment print in authoring order.
+The command orders fragments by their numeric `NNN-` prefix. It breaks ties by filename. It prints ADRs within a fragment in the order that the fragment defines them.
 
 See [Decision Log](./decision-log.md) for the full format reference.
 
@@ -205,7 +205,7 @@ See [Decision Log](./decision-log.md) for the full format reference.
 
 ### `speq record`
 
-Merge approved plan deltas into permanent specs.
+This command merges approved plan deltas into permanent specs.
 
 ```bash
 speq record <plan-name>
@@ -229,7 +229,7 @@ This command:
 
 ### `speq search index`
 
-Build or rebuild the semantic search index. The index is built automatically on first search; run this command to rebuild it manually after spec changes.
+This command builds or rebuilds the semantic search index. The index builds automatically on the first search. Run this command to rebuild the index manually after spec changes.
 
 ```bash
 speq search index
@@ -244,7 +244,7 @@ Indexed 42 scenarios.
 
 ### `speq search query`
 
-Semantic search across all scenarios.
+This command runs a semantic search across all scenarios.
 
 ```bash
 speq search query "<query>" [--limit <n>]
@@ -266,4 +266,4 @@ Each result includes the feature path, scenario name, relevance score, and match
 
 ## Spec format and library structure
 
-See [Spec Library](./spec-library.md) for the full spec format reference, including BDD/Gherkin structure, RFC 2119 keywords, and step formatting rules.
+See [Spec Library](./spec-library.md) for the full spec format reference. It covers BDD/Gherkin structure, RFC 2119 keywords, and step formatting rules.
