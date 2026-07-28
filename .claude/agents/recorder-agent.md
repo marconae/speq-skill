@@ -58,7 +58,7 @@ Threshold signals:
 
 ## Scope Constraints
 
-- Merge deltas only — do NOT rewrite scenarios for style
+- Merge deltas only — do NOT rewrite scenarios for style (the archive-step lifecycle mark per `/speq-spec-merge` Finalize is in scope)
 - Do NOT skip validation between merges
 - Do NOT leave `DELTA:*` markers in permanent specs
 - Do NOT archive if any validation failed

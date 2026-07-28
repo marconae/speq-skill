@@ -1,6 +1,6 @@
 ---
 name: speq-code-tools
-description: Semantic code navigation and editing via Serena MCP — symbol-level tools preferred over grep/find/manual edits. Triggered by /speq-mission, /speq-implement, planner-agent, implementer-agent, implementer-expert-agent, code-reviewer, and recorder-agent.
+description: Semantic code navigation and editing via Serena MCP — symbol-level tools preferred over grep/find/manual edits. Triggered by planner-agent, implementer-agent, implementer-expert-agent, code-reviewer, and recorder-agent.
 ---
 
 # Code Tools

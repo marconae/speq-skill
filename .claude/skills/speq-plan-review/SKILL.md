@@ -44,6 +44,7 @@ Tag every finding, group findings by axis in the output.
 
 - `[TRACEABILITY_GAP]` — a spec delta with no implementing task, or a task that implements nothing in scope.
 - `[TASK_GRANULARITY]` — a task too large to verify as one unit, or a parallelization claim two "independent" tasks actually violate.
+- `[CLUSTER_INCOHERENCE]` — cluster coherence: tasks in one Parallelization group must share a spec delta or a source module, and overlapping `Knowledge` entries across groups are a consolidation signal, not a parallelism opportunity. Flag a group sliced by layer, a group whose tasks share no knowledge, or two groups the plan should have merged or sequenced.
 
 ### Design Depth — does the plan manage complexity well? (per `/speq-design-philosophy`)
 

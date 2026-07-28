@@ -12,10 +12,11 @@ You are creating a project mission file (`specs/mission.md`) through an interact
 ## Required Skills
 
 Invoke before starting:
-- `/speq-code-tools` — Codebase exploration
 - `/speq-ext-research` — Tech stack research
 - `/speq-cli` — Spec structure
 - `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
+
+Do not invoke `/speq-code-tools`: brownfield exploration (step 2) only reads manifests, directories, and docs — plain file reads cover it, and symbol-level tool guidance would sit unused in an interview session.
 
 ## Workflow
 

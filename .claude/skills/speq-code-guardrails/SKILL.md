@@ -1,6 +1,6 @@
 ---
 name: speq-code-guardrails
-description: TDD cycle and code quality guardrails — failing-test-first, evidence, dependency, error-handling, and test-quality rules. Triggered by /speq-implement, implementer-agent, implementer-expert-agent, and code-reviewer before any implementation or review work.
+description: TDD cycle and code quality guardrails — failing-test-first, evidence, dependency, error-handling, and test-quality rules. Triggered by implementer-agent, implementer-expert-agent, and code-reviewer before any implementation or review work.
 ---
 
 # Code Guardrails

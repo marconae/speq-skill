@@ -110,6 +110,6 @@ Each finding's `Fix:` field follows the template's rules: an imperative addresse
 
 ## Routing
 
-You partition the findings; the orchestrator never sees them individually. Place each finding under `## Standard fixes` or `## Expert fixes` in the findings document — the sections route to `implementer-agent` and `implementer-expert-agent` respectively.
+You partition the findings; the orchestrator never sees them individually. Place each finding under `## Standard fixes` or `## Expert fixes` in the findings document. The partition decides which single agent applies the whole fix pass: any Expert finding routes both sections to `implementer-expert-agent`; with none, `implementer-agent` applies `## Standard fixes`.
 
 Every tag across all 8 categories is eligible for either section — no category is special-cased. Route a finding to `## Expert fixes` when its fix has cross-file, concurrency, or subtle-correctness implications: removing a dependency or abstraction that has several call sites, correcting a dependency-direction or boundary violation, or any change whose failure mode is a passing test over wrong behavior. Everything else goes to `## Standard fixes`. You hold the context to make this call — decide it here rather than deferring it.

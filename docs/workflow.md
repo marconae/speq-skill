@@ -114,7 +114,7 @@ Implement approved plan deltas — orchestrate tasks, delegate to sub-agents, re
 ### What it does
 
 1. Loads the plan and creates a task breakdown
-2. Partitions tasks by tag — `[expert]`-tagged tasks route to `implementer-expert-agent`, all others to `implementer-agent` (see [Model Routing](./model-routing.md))
+2. Routes each parallelization group whole, by its hardest task — a group with any `[expert]` task goes to `implementer-expert-agent`, all-untagged groups go to `implementer-agent` (see [Model Routing](./model-routing.md))
 3. Spawns sub-agents to work through tasks (with context rotation)
 4. Loads targeted guardrails for clean code, unit testing, and integration testing
 5. Runs code review on changed files via `code-reviewer`
@@ -170,6 +170,7 @@ Merge implemented spec deltas into the permanent spec library.
 - **Blocked state**: if planning hits a decision that genuinely needs a human (irreversible, architecturally divergent, or security/compliance relevant), `specs/_plans/<plan-name>/open-questions.md` is written, `plan.md` is flagged blocked, and the PR opens as a draft with the questions posted as a comment. `/speq:implement-pr` refuses to proceed while this file exists.
 - **Resuming**: either reply on the PR and re-run `/speq:plan-pr <plan-name>` (it re-fetches new comments and reviews as answers), or check out the branch and finish interactively with `/speq:plan <plan-name>`.
 - **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question.
+- **Phased execution**: `/speq:implement-pr` runs exactly one checkpointed phase per session — A: implement + commit, B: test + record, C: ship-ready — and stops at each boundary. The checkpoint is the `## PR Lifecycle` section of the plan's `tasks.md`. One invocation no longer yields a ready PR: a driver (or a human re-invoke after `/clear`) starts a fresh session in the same working directory, and the skill resumes from the checkpoint. This caps the transcript each session re-bills.
 - **PR title & lifecycle**: the PR title uses a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
 - **Git/PR mechanics**: both skills delegate every branch, commit, push, and PR operation to `git-agent` — the one sub-agent permitted to write git history or touch a remote. See [Model Routing](./model-routing.md).
 

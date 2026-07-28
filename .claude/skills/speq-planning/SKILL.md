@@ -60,8 +60,15 @@ Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 2. **Features** — table referencing spec delta files (NEVER embed spec content); immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
 3. **Design** — ADR for new features / major changes; skip for minor fixes. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 4. **Tasks** — work breakdown in implementation order
-5. **Parallelization** — groups of tasks that can run concurrently
+5. **Parallelization** — knowledge clusters, per the rules below
 6. **Verification** — Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
+
+**Parallelization groups are knowledge clusters.** Group tasks vertically — one spec delta plus the code area it governs — never horizontally by layer. Layer slices (fixtures, then module, then CLI, then tests) all need the same mental model, so each layer's agent re-derives it from scratch; a vertical slice orients one agent once. Each group row declares a `Knowledge` column: the group's spec delta path(s) plus the source and test files they govern (the implement orchestrator hands this entry to the group's agent as its orientation pointer). Two facts govern the grouping:
+
+1. Tasks that share a spec delta or a source module default into one group.
+2. Overlapping `Knowledge` entries across groups are a consolidation signal, not a parallelism opportunity.
+
+When two clusters would contend on one shared file, either split the module per feature (often the better design — check it against `/speq-design-philosophy`) or declare a dependency and sequence the clusters. Parallelism is a side effect, not the goal.
 
 ### 5. Generate decision-log.md
 
@@ -103,7 +110,7 @@ As tasks are decomposed, identify tasks that require deep reasoning. Tag them wi
 - Copy-paste from existing patterns
 - Documentation or config changes
 
-Over-tagging wastes tokens; under-tagging risks defects. The orchestrator routes `[expert]` tasks to `implementer-expert-agent` and all others to `implementer-agent`. Most tasks should be untagged.
+Over-tagging wastes tokens; under-tagging risks defects. The orchestrator routes a whole parallelization group to `implementer-expert-agent` when any of its tasks carries the tag; all-untagged groups go to `implementer-agent`. One tag therefore prices its entire group at the expert model — one more reason to tag sparingly. Most tasks should be untagged.
 
 ### 7. Validate Plan
 

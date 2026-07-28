@@ -77,6 +77,7 @@ If `decision-log.md` is absent or has no "Promotes to ADR: yes" entries, skip si
 
 1. Final validation: `speq feature validate`
 2. Archive: `mv specs/_plans/<plan-name> specs/_recorded/NNN-<plan-name>`, where NNN = (count of existing entries in `specs/_recorded/`) + 1, zero-padded to 3 digits
+3. If `specs/_recorded/NNN-<plan-name>/tasks.md` contains a `## PR Lifecycle` section, set `- [x] recorded` there. Section absent → skip silently (the plan did not run through the headless pipeline). Writing the mark in the same step as the `mv` keeps the crash window minimal — the actor that archives records that it archived.
 
 If a threshold is exceeded, return BEFORE archiving and ask the orchestrator to clarify with the user.
 

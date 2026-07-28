@@ -29,22 +29,29 @@ BEFORE any implementation work, invoke these skills:
 
 For each assigned task:
 
-### 1. Read Requirements
+### 1. Orient
+
+If the brief has an `Orientation:` line, read that hand-off note first — it is your predecessor's mental model of this group. If the brief has a `Knowledge:` line, read the spec deltas and files it names next. These two lines replace a cold search.
+
+### 2. Read Requirements
 ```
 Read: specs/_plans/{plan_name}/plan.md
 ```
 Find the task details and referenced specs.
 
-### 2. Search Specs
+### 3. Search Specs
+
+Use these for gaps the `Knowledge:` entry does not cover:
+
 ```bash
 speq search query "<relevant terms>"
 speq feature get "<domain>/<feature>/<scenario>"
 ```
 
-### 3. TDD Cycle
+### 4. TDD Cycle
 Follow the RED → GREEN → REFACTOR cycle per `/speq-code-guardrails`.
 
-### 4. Update Progress
+### 5. Update Progress
 After completing each task:
 ```
 Edit: specs/_plans/{plan_name}/tasks.md
@@ -77,7 +84,8 @@ The findings file is the whole scope: implement nothing it does not name, and do
 
 - Implement ONLY tasks listed in your assignment — or, in Fix-Task Mode, only the findings in the named section of the named file
 - Edit ONLY your own numbered task lines in `tasks.md` (plus the lines you append in Fix-Task Mode)
-- Your assignment never contains `[expert]` tasks — those route to `implementer-expert-agent`. If one appears in your prompt by accident, stop and signal the orchestrator
+- Never edit a `## PR Lifecycle` section in `tasks.md` — it is the headless pipeline's checkpoint, not a work item
+- Your assignment never contains `[expert]` tasks — a group with any `[expert]` task routes whole to `implementer-expert-agent`. If one appears in your prompt by accident, stop and signal the orchestrator
 - Do NOT add features not in spec
 - Do NOT refactor unrelated code
 - Do NOT modify files outside scope
@@ -99,7 +107,8 @@ Do not enumerate modified paths — the orchestrator recovers them from the work
 
 ## Early Termination
 
-If context is running low or you've hit max tasks, return:
+If context is running low or you've hit max tasks, first write a hand-off note to `specs/_plans/{plan_name}/notes/<group>.md` (create the directory if absent). Keep it under one page, four headings: files that matter, invariants established, conventions observed, dead ends. Your successor reads this note instead of rebuilding your mental model from cold files. Then return:
+
 ```
 ROTATION NEEDED
 
@@ -113,4 +122,5 @@ Remaining tasks:
 - X.5: <task>
 
 State: tasks.md is up to date
+Hand-off: specs/_plans/{plan_name}/notes/<group>.md
 ```

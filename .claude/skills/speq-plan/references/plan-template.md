@@ -90,15 +90,16 @@ Optional: For changes affecting existing data/structure
 
 ## Parallelization
 
-Optional: Tasks that can run concurrently
+Optional: task groups for the implement orchestrator. Each group is a knowledge cluster — a vertical slice of one spec delta plus the source and test files it governs. Fixtures, module code, and the feature's tests belong in the same group, not in separate layer groups.
 
-| Parallel Group | Tasks |
-|----------------|-------|
-| Group A | Task 1, Task 2 |
-| Group B | Task 3, Task 4 |
+| Group | Tasks | Depends on | Knowledge |
+|-------|-------|------------|-----------|
+| A: <cluster name> | 1.1-1.4, 3.1 | — | spec delta `<domain>/<feature>`; `src/<module>/`, `<test-file-path>` |
+| B: <cluster name> | 2.1-2.3 | A (shares `src/<module>/`) | spec delta `<domain>/<other-feature>`; `src/<module>/`, `<test-file-path>` |
 
-Sequential dependencies:
-- Group A → Group B (B depends on A)
+- **Knowledge** — the group's spec delta path(s) plus the source and test files they govern. The implement orchestrator passes this entry to the group's agent as its orientation pointer.
+- Tasks that share a spec delta or a source module default into one group.
+- Overlapping Knowledge entries across groups are a consolidation signal, not a parallelism opportunity — merge the groups, or declare a dependency and run them in sequence.
 
 ## Dead Code Removal
 
