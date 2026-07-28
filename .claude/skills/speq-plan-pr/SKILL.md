@@ -8,21 +8,22 @@ model: sonnet
 
 You are a thin orchestrator with no live user to interview. Your goal:
 - Turn a feature intent, or an existing plan branch/PR, into a validated plan authored entirely by `planner-agent` in headless mode.
-- Land that plan on a `feat/<plan-name>` branch and a draft PR, using `git-agent` for every git/`gh` action.
+- Land that plan on a `feat/<plan-name>` branch and a draft PR, running every git/`gh` action yourself per `/speq-git-operations`.
 - Hand any irreducible decision to a human as a PR comment and stop there.
 
 Rules:
-- Delegate all planning judgment to `planner-agent` and all git/GitHub actions to `git-agent`. Your own work: resolve the input, write the plan's status files, brief those agents, interpret their returns.
+- Delegate all planning judgment to `planner-agent`. Run every git/GitHub action yourself, per `/speq-git-operations`. Your own work: resolve the input, write the plan's status files, brief `planner-agent`/`plan-reviewer`, interpret their returns, and execute the git/gh operations.
 - Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
-- Keep one `feat/<plan-name>` branch and one PR per plan. `git-agent`'s `create-pr` reuses an existing PR.
+- Keep one `feat/<plan-name>` branch and one PR per plan. `create-pr` (per `/speq-git-operations`) reuses an existing PR.
 
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
 - `/speq-cli`: spec discovery and search
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
+- `/speq-git-operations`: the git/gh operation-to-command mapping, safety rules, and return formats — you run every operation directly
 
-`planner-agent` and `plan-reviewer` invoke their own required skills; `git-agent` invokes `/speq-git-operations`.
+`planner-agent` and `plan-reviewer` invoke their own required skills.
 
 ## Workflow
 
@@ -37,14 +38,14 @@ Check for `.speq/plan-pr-hook.md` in the repo root.
 Resolve what to work on and land on the right branch:
 
 ```
-Delegate to git-agent — operation: checkout
+Run — operation: checkout (per /speq-git-operations)
   target: <the raw argument the caller passed>
 ```
 
 If `checkout` reports not-found, the argument is free-text feature intent for a new plan. Derive `<plan-name>` per the verb table and create its branch:
 
 ```
-Delegate to git-agent — operation: create-branch
+Run — operation: create-branch (per /speq-git-operations)
   branch: feat/<plan-name>
 ```
 
@@ -75,7 +76,7 @@ Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scop
 If step 1 found an unresolved `open-questions.md`, pull the human's replies:
 
 ```
-Delegate to git-agent — operation: read-comments
+Run — operation: read-comments (per /speq-git-operations)
   since: <timestamp of your last "flag open questions" commit>
 ```
 
@@ -111,7 +112,7 @@ headless
 <the free-text feature intent (new plan), or the Q&A text step 2 fetched (resume) — this stands in for a live interview>
 
 ## Existing Context
-<output of relevant `speq search` / `speq feature get` calls>
+<the exact `speq domain list` / `speq feature list` / `speq search query "..."` calls you ran, each followed by its output — name the query, not just the result>
 
 ## External Research
 none — agent to research as needed
@@ -152,11 +153,13 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **If `INTENT > 0`:** the plan solves a different problem than the one asked. Read the Intent-Fidelity BLOCKER text from the round file, fold it into step 6's `OPEN QUESTIONS:` branch, and stop.
 
-**If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, and re-validate. Then respawn `plan-reviewer` for round 2 with the same path to confirm resolution. Do not run a third round.
+**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all three hold — the plan-name's verb (per the verb table) is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty. Otherwise `full`.
+
+**If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, and re-validate. Then respawn `plan-reviewer` for round 2 with the same path plus the computed `Plan Size: small | full` field, to confirm resolution (or, on `small`, confirm and stop there). Do not run a third round.
 
 **If BLOCKERs remain after round 2:** treat this like an `OPEN QUESTIONS:` return. Read the unresolved BLOCKER findings from `review/round-2.md` and fold them into step 6's `OPEN QUESTIONS:` branch as the questions list.
 
-**ADVISORY findings:** carry into step 7's PR body/report, read from the last round file when composing. Never block or persist them.
+**ADVISORY findings:** carry into step 7's PR body/report, read from the last round file when composing. If round 2 ran confirm-only (`Plan Size: small`), it produced no ADVISORY findings of its own — read them from round 1's file instead. Never block or persist them.
 
 ### 6. Branch on the Result
 
@@ -165,8 +168,8 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 1. Confirm `speq plan validate <plan-name>` passes.
 2. Commit the plan and open the draft PR with one composite call:
    ```
-   Delegate to git-agent — operation: ship-draft
-     paths: the plan directory
+   Run — operation: ship-draft (per /speq-git-operations)
+     paths: the plan directory, excluding specs/_plans/<plan-name>/notes/planning.md
      message: spec(plan): <plan-name>
      title: <the derived <type>(<scope>): <slug>>
      body: summarize the plan's Features table and task count, include the
@@ -175,16 +178,16 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
    ```
 3. If this resumes a previously blocked plan, clear the block yourself: delete `specs/_plans/<plan-name>/open-questions.md` and the `> **Status:** blocked …` banner line from `plan.md`, then:
    ```
-   Delegate to git-agent — operation: commit
-     paths: the plan directory
+   Run — operation: commit (per /speq-git-operations)
+     paths: the plan directory, excluding specs/_plans/<plan-name>/notes/planning.md
      message: spec(plan): resolve open questions for <plan-name>
 
-   Delegate to git-agent — operation: push
+   Run — operation: push (per /speq-git-operations)
    ```
    The PR stays a draft. `speq-implement-pr` is the only skill that marks it ready.
-4. If step 5 reported a non-zero `ADVISORY` count, or `decision-log.md`'s Design Decisions section is non-empty, post one comment covering both. Skip if there is nothing to flag. Read the ADVISORY findings from the last round file, `specs/_plans/<plan-name>/review/round-<N>.md`. Compose the body per `/speq-writing-guardrails`' PR-facing content rule:
+4. If step 5 reported a non-zero `ADVISORY` count, or `decision-log.md`'s Design Decisions section is non-empty, post one comment covering both. Skip if there is nothing to flag. Read the ADVISORY findings from the last round file that has any — round 1's, if round 2 ran confirm-only. Compose the body per `/speq-writing-guardrails`' PR-facing content rule:
    ```
-   Delegate to git-agent — operation: comment-pr
+   Run — operation: comment-pr (per /speq-git-operations)
      body: the ADVISORY findings excerpted from the step 5 round file (if any)
            and the Design Decisions entries from decision-log.md (if any)
    ```
@@ -205,8 +208,8 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 Then, with one composite call:
 ```
-Delegate to git-agent — operation: flag-blocked
-  paths: the plan directory
+Run — operation: flag-blocked (per /speq-git-operations)
+  paths: the plan directory, excluding specs/_plans/<plan-name>/notes/planning.md
   message: spec(plan): flag open questions for <plan-name>
   title: <the derived <type>(<scope>): <slug>>
   body: <blocked-plan summary>, including plan.md's ## Impact section
@@ -238,13 +241,13 @@ specs/
 | Target resolution, discovery, status files, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Spec delta authoring, ADR, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation |
-| Branch, commit, push, PR create/comment | `git-agent` sub-agent | Generic git/GitHub operations; keeps git/gh detail out of the orchestrator |
+| Branch, commit, push, PR create/comment | This skill, directly, per `/speq-git-operations` | No separate agent hop — the orchestrator already composed the content and has full git/gh tool access |
 
 ## Anti-Patterns
 
 | Pattern | Why Wrong |
 |---------|-----------|
 | Asking the user a live question | Headless — irreducible decisions go to the PR comment |
-| Running git/gh directly | `git-agent` performs every git and GitHub operation |
+| Spawning a sub-agent for git/gh work | No agent hop needed — you already have direct tool access and composed the content; a spawn only adds latency |
 | Marking the PR ready | `speq-implement-pr` owns `ready-pr`; plans stay draft |
 | A third review round | Bounded to 2 — leftover BLOCKERs become open questions |

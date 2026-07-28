@@ -35,7 +35,6 @@ Commit `.speq/` to the repo — hooks are project-level configuration. No frontm
 - Hook content is authoritative: it can override any step of a skill's workflow, including the clarifying interview, the `plan-reviewer` loop, and TDD.
 - Loading is always announced in the skill's output.
 - `/speq:audit` lists active hook files as an informational check.
-- `git-agent` executes only the operation and parameters its caller supplies; it does not read hooks.
 - `/speq:plan-pr` and `/speq:implement-pr` delegate whole steps to `/speq:plan`, `/speq:implement`, and `/speq:record`; each loads its own hook independently.
 
 ## Example

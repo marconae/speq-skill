@@ -9,6 +9,7 @@
 3. `Fix:` is an imperative instruction addressed to `planner-agent` — name the artifact, section, and concrete change. It must be executable without re-reading `Issue`.
 4. The Summary block carries three counts: total blockers, total advisories, and `Intent Fidelity blockers` — the number of BLOCKER findings under the Intent Fidelity axis alone. The verdict line's `INTENT:` field is that third count; it must match the Summary exactly.
 5. Round 2 only: open with `## Round-1 Blocker Recheck`, listing each round-1 BLOCKER as `Resolved:` or `Not resolved:` (with evidence) before any new findings.
+6. Confirm-only round 2 (orchestrator passed `Plan Size: small`): the document holds only `## Summary` and `## Round-1 Blocker Recheck`. Omit every axis section. The verdict's `ADVISORY:` count is always `0` for this document. The orchestrator reads round 1's advisories from `review/round-1.md` instead, since this round ran no fresh pass that could surface or supersede them.
 
 ## Skeleton
 
@@ -46,6 +47,21 @@
 
 ## Prose Quality
 ...
+```
+
+## Confirm-Only Skeleton (round 2, `Plan Size: small` only)
+
+```markdown
+# Plan Review Findings: <plan-name> (round 2, confirm-only)
+
+## Summary
+- Mode: confirm-only (Plan Size: small)
+- Round-1 blockers: <T> total — <R> resolved, <U> not resolved
+- Intent Fidelity blockers not resolved: <I>
+
+## Round-1 Blocker Recheck
+- Resolved: [<TAG>] <finding title> — <evidence>
+- Not resolved: [<TAG>] <finding title> — <evidence>
 ```
 
 ## Verdict Line

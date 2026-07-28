@@ -1,11 +1,20 @@
 ---
 name: speq-git-operations
-description: The git/gh operation-to-command mapping and return formats for git-agent — the sole write-permitted actor in this system. Triggered by git-agent.
+description: The git/gh operation-to-command mapping, safety rules, and return formats — invoked directly by the headless orchestrators speq-plan-pr and speq-implement-pr, the only components permitted to write git history or touch a remote.
 ---
 
 # Git Operations
 
-This skill documents write commands for `git-agent` only, the sole component permitted to write git history or touch a remote. It applies to no other agent.
+This skill documents the git/gh write commands available to `speq-plan-pr` and `speq-implement-pr`, the only two components in this system permitted to write git history or touch a remote. Every other skill and agent stays read-only toward git, per `/speq-git-discipline`.
+
+## Rules
+
+- Run one operation at a time. The fixed composite sequences below are the exception.
+- Compose commit messages, PR and issue titles and bodies, and comment text as your own workflow step, before you run an operation. Pass that text through unchanged. Never add a `Co-Authored-By` trailer.
+- Stage only the paths you name. Touch only the refs, PRs, or issues you name.
+- Report a no-op plainly (nothing to commit, PR already exists, already ready). It is not an error.
+- Report ambiguity or a not-found target. Do not guess.
+- Never merge a PR. Never force-push. Never rewrite history (rebase, amend, `reset --hard`, filter-branch).
 
 ## `create-branch`
 Params: `branch` (exact name), `base` (optional; default: repository default branch).

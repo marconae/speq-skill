@@ -22,7 +22,7 @@ Three phases, run consecutively in this session:
 | C | `ship-ready` → verification comment → `pr-ready` mark | final report (terminal) |
 
 Workflow rules:
-- Delegate implementation to `/speq-implement`, spec merge to `/speq-record`, and every git/`gh` action to `git-agent`. Your own work: resolve the branch, gate, bump the version, write checkpoint marks, and sequence those calls.
+- Delegate implementation to `/speq-implement` and spec merge to `/speq-record`. Run every git/`gh` action yourself, per `/speq-git-operations`. Your own work: resolve the branch, gate, bump the version, write checkpoint marks, sequence those calls, and execute the git/gh operations.
 - Advance only when the current step succeeds. Halt and report on the first failed or blocked step.
 - Reuse the one `feat/<plan-name>` branch and PR that `speq-plan-pr` created.
 
@@ -31,8 +31,9 @@ Workflow rules:
 Invoke before starting:
 - `/speq-cli`: spec discovery, to resolve plan names
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
+- `/speq-git-operations`: the git/gh operation-to-command mapping, safety rules, and return formats — you run every operation directly
 
-`speq-implement`, `speq-record`, and `git-agent` invoke their own required skills.
+`speq-implement` and `speq-record` invoke their own required skills.
 
 ## Workflow
 
@@ -47,14 +48,14 @@ Check for `.speq/implement-pr-hook.md` in the repo root.
 `$1` empty → ask the caller which plan. Otherwise check out the target (for a bare plan-name, that is its `feat/<plan-name>` branch):
 
 ```
-Delegate to git-agent — operation: checkout
+Run — operation: checkout (per /speq-git-operations)
   target: <$1 — a plan-name (→ feat/<plan-name>), PR number, or branch name>
 ```
 
 If `checkout` reports not-found (the plan exists only locally and was never pushed):
 
 ```
-Delegate to git-agent — operation: create-branch
+Run — operation: create-branch (per /speq-git-operations)
   branch: feat/<plan-name>
 ```
 
@@ -73,13 +74,15 @@ Read the checkpoint and enter at the phase the entry-dispatch table in `referenc
 **A4. Commit evidence**: commit and push now, so the evidence artifacts reach git history before `/speq-record`'s archive `mv` moves the plan directory out of tracked space, and so the branch survives workspace loss:
 
 ```
-Delegate to git-agent — operation: commit
+Run — operation: commit (per /speq-git-operations)
   paths: implementation files, version bump, specs/_plans/<plan-name>/
          (the whole plan directory — not an itemized subset, so new
-         artifacts ride along automatically)
+         artifacts ride along automatically — except
+         specs/_plans/<plan-name>/notes/planning.md, which stays out of
+         every commit)
   message: <type>(<scope>): implement <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
 
-Delegate to git-agent — operation: push
+Run — operation: push (per /speq-git-operations)
 ```
 
 **A5. Continue**: proceed directly into Phase B in this same session.
@@ -102,7 +105,7 @@ Delegate to git-agent — operation: push
 **C1. Ship**: one composite call. Phase A already committed the implementation and evidence artifacts, so this commit covers only what `/speq-record` produced: the merge results and the archive's removal of the plan directory:
 
 ```
-Delegate to git-agent — operation: ship-ready
+Run — operation: ship-ready (per /speq-git-operations)
   paths: permanent-spec merges (specs/<domain>/...), specs/_decision/ additions,
          deletion of specs/_plans/<plan-name>/
   message: <type>(<scope>): record <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
@@ -115,7 +118,7 @@ Delegate to git-agent — operation: ship-ready
 **C2. Comment**: post the verification summary. Compose the comment body per `speq-writing-guardrails`' PR-facing content rule before calling `comment-pr`:
 
 ```
-Delegate to git-agent — operation: comment-pr
+Run — operation: comment-pr (per /speq-git-operations)
   body: condensed verification summary — the Verdict table and Notes from
         <archive-path>/verification-report.md (the specs/_recorded/NNN-<plan-name>
         path /speq-record reported), plus "Full evidence:
@@ -148,7 +151,7 @@ specs/
 | Target resolution, gating, checkpoint marks, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
 | Task breakdown, coding, review | `speq-implement` (unchanged) | Already the right split |
 | Spec merge, archive, `recorded` mark | `speq-record` (unchanged) | Already the right split |
-| Branch, commit, push, PR create/update | `git-agent` sub-agent | Keeps git/gh detail out of the orchestrator |
+| Branch, commit, push, PR create/update | This skill, directly, per `/speq-git-operations` | No separate agent hop — you already have direct git/gh tool access |
 
 ## Anti-Patterns
 
@@ -160,5 +163,5 @@ specs/
 | Recording with any suite red | `/speq-record` runs only on fully green suites |
 | Skipping the A4 commit | Evidence artifacts silently never reach git history once `/speq-record`'s archive `mv` moves them out of tracked space |
 | Re-entering `/speq-implement` on the red path | The red path re-runs suites only; new implementation work is an explicit, separate invocation |
-| Running git/gh directly | `git-agent` performs every git and GitHub operation |
+| Spawning a sub-agent for git/gh work | No agent hop needed — you already have direct tool access and composed the content; a spawn only adds latency |
 | Merging the PR | The pipeline ends at a ready PR; a human merges |

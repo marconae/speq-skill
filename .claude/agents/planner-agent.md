@@ -34,6 +34,17 @@ From the orchestrator:
 
 Author the plan per `/speq-planning`'s workflow. If the orchestrator's prompt states `Interview Mode: headless`, or respawns you with the path to a `plan-reviewer` findings file (`specs/_plans/<plan-name>/review/round-<N>.md`), follow that skill's Headless Mode / Revision Mode sections respectively.
 
+## Spawn Policy
+
+You can spawn sub-agents, the same as any other agent in this system. Default to not using it.
+
+- Prefer direct, targeted lookups via `/speq-code-tools` (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, `search_for_pattern`) for anything a handful of calls answers.
+- Delegate exploration to a sub-agent only when its raw output would flood your synthesis context: a broad, multi-file survey whose intermediate findings you do not need verbatim, only the summary.
+- When you delegate, spawn read-only exploration agents in parallel. Never spawn one sequential agent for a question a few direct tool calls answer.
+- Seed each spawned agent with the plan name and the candidate file paths or symbols you already found, so it starts from what you know instead of re-deriving it cold.
+
+This applies regardless of which agent-spawning mechanism the running platform exposes. Do not name a specific model-override syntax or spawn incantation here.
+
 ## Output Format
 
 When planning is complete, return to the orchestrator:

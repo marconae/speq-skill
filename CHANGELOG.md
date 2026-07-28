@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.19.0
+
+- Retire `git-agent`: `speq-plan-pr` and `speq-implement-pr` now run every git/`gh` operation directly, per `/speq-git-operations` (a shared reference skill both orchestrators invoke, instead of a sole sub-agent) — removes a fixed per-spawn agent-boot cost from every plan/implement pipeline run
+- `plan-reviewer`'s round 2 shrinks to a blocker-recheck-only pass for small/routine plans (`fix`-verb, no `## Design` section, empty Design Decisions) — model and effort stay `opus`/`xhigh` unconditionally; only round 2's scope narrows
+- `planner-agent` gains an explicit spawn-policy section: prefer direct `/speq-code-tools` lookups, delegate exploration only when it would flood synthesis context, spawn read-only agents in parallel, never sequentially, when delegation is warranted
+- `planner-agent` writes a `notes/planning.md` hand-off note (a plain checked-list, never committed) at the end of initial planning; the revision-mode respawn after a `plan-reviewer` BLOCKER reads it first
+- `planner-agent` runs a pre-return self-check against `speq-plan-review`'s taxonomy tags before handing off to `plan-reviewer`
+- `speq-planning`'s discovery step no longer re-runs `speq domain list`/`speq feature list`/`speq search query` from scratch — it treats the orchestrator's `Existing Context` brief as the baseline and re-queries only for gaps
+
+## 0.18.0
+
+- Tighten agent and skill prose (shorter sentences, fewer subordinate clauses, no normative content lost)
+
 ## 0.17.0
 
 - `speq-writing-guardrails`: reworked rules for writing guardrails grounded in BLUF/Inverted Pyramid and ASD-STE100

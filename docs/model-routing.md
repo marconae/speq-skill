@@ -35,7 +35,8 @@ Workflow skills coordinate the work — gather context, ask clarifying questions
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `opus` | `high` | Mission ↔ spec-library sync |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
-| `git-agent` | `sonnet` | `medium` | Generic git/GitHub operations — no reasoning premium |
+
+`/speq:plan-pr` and `/speq:implement-pr` run every git/`gh` operation directly, per `/speq:git-operations`, at their own orchestrator row above. No separate agent tier exists for git/GitHub operations.
 
 ---
 
@@ -58,7 +59,8 @@ Workflow skills coordinate the work — gather context, ask clarifying questions
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `gpt-5.5` | `high` | Mission ↔ spec-library sync |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
-| `git-agent` | `gpt-5.4` | `medium` | Generic git/GitHub operations — no reasoning premium |
+
+`/speq:plan-pr` and `/speq:implement-pr` run every git/`gh` operation directly, per `/speq:git-operations`, at their own orchestrator row above. No separate agent tier exists for git/GitHub operations.
 
 ---
 

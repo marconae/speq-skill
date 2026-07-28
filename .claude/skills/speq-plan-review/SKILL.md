@@ -13,7 +13,10 @@ Build the case against approval, not for it.
 
 **No silent pass.** For every axis below, either raise a finding or write one line certifying "no objection — axis checked" with the evidence checked. Never skip an axis.
 
-**Round 2 (if applicable):** first re-check every round-1 BLOCKER against the revised artifacts and the `[plan-review]` entries in `decision-log.md`. Confirm each is resolved, not reworded. Then do a fresh pass for new findings.
+**Round 2 (if applicable):** first re-check every round-1 BLOCKER against the revised artifacts and the `[plan-review]` entries in `decision-log.md`. Confirm each is resolved, not reworded, listing each as `Resolved:` or `Not resolved:` per the output template.
+
+- **`Plan Size: full`** (the orchestrator's default when it omits the field): then do a fresh pass for new findings, across all six axes, same as round 1.
+- **`Plan Size: small`**: skip the fresh pass. The findings document holds only `## Summary` and `## Round-1 Blocker Recheck` — no axis sections. The orchestrator classifies the plan as `small` from artifacts already on disk (`fix`-verb plan name, no `## Design` section in `plan.md`, empty `## Design Decisions` in `decision-log.md`) and passes it as an explicit `Plan Size:` field in the round-2 respawn prompt.
 
 **Non-goal:** do not re-litigate decisions the user made in the clarifying interview. Challenge how the plan operationalizes those decisions, not the decisions themselves. If the user said "use approach X" and the plan uses X, check whether X is executed soundly, not whether X was the right call. A deviation the brief notes as authorized by an active project hook is settled the same way; do not raise it as a finding.
 
@@ -74,6 +77,14 @@ PLAN REVIEW round <N>: BLOCKERS: <n>, ADVISORY: <n>, INTENT: <n> — specs/_plan
 ```
 
 `INTENT` counts the Intent Fidelity BLOCKERs alone: a subset of `BLOCKERS`, matching the document's Summary block per the template's rules.
+
+When round 2 ran confirm-only (`Plan Size: small`), append ` [confirm-only]` right after the round number, so the orchestrator's report can name which mode ran:
+
+```
+PLAN REVIEW round 2 [confirm-only]: BLOCKERS: <n>, ADVISORY: 0, INTENT: <n> — specs/_plans/<plan-name>/review/round-2.md
+```
+
+`ADVISORY` is always `0` on a confirm-only round: it ran no axis pass that could surface or re-surface one. The orchestrator reads ADVISORY findings from round 1's file instead. Omit the `[confirm-only]` marker for round 1 and for a full round 2.
 
 Never return the findings themselves as response text. `planner-agent` reads them from the file.
 

@@ -74,7 +74,7 @@ Delegate to planner-agent — Plan <plan-name>
 <verbatim Q&A from the AskUserQuestion exchanges>
 
 ## Existing Context
-<output of relevant `speq search` / `speq feature get` calls>
+<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq feature get` calls you ran, each followed by its output — name the query, not just the result>
 
 ## External Research
 <any research already conducted, or "none — agent to research as needed">
@@ -127,13 +127,15 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **If `INTENT == 0` and BLOCKER findings exist:**
 
+**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all three hold — the plan-name's verb (per the verb table) is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty. Otherwise `full`.
+
 1. Respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings from that file, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, and re-run `speq plan validate`.
-2. Respawn `plan-reviewer` for round 2 with the same path, so it confirms each round-1 BLOCKER is resolved before checking for new ones.
+2. Respawn `plan-reviewer` for round 2 with the same path plus the computed `Plan Size: small | full` field, so it confirms each round-1 BLOCKER is resolved before checking for new ones (or, on `small`, confirms and stops there).
 3. Do not run a third round, even if round 2 raises new BLOCKERs.
 
 **If BLOCKERs remain after round 2:** read the unresolved BLOCKER findings from `review/round-2.md` and use `AskUserQuestion`. The user accepts the risk and proceeds, or gives guidance and you respawn `planner-agent` manually.
 
-**ADVISORY findings** never loop and are never persisted. Read them from the last round file and carry them into step 7's report.
+**ADVISORY findings** never loop and are never persisted. Read them from the last round file and carry them into step 7's report. If round 2 ran confirm-only (`Plan Size: small`), it produced no ADVISORY findings of its own — read them from round 1's file instead.
 
 ### 7. Explain next steps (orchestrator)
 

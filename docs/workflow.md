@@ -172,7 +172,7 @@ Merge implemented spec deltas into the permanent spec library.
 - **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to `/speq:record`'s library-split question.
 - **End-to-end with a resumable checkpoint**: one `/speq:implement-pr` invocation runs all three phases in sequence — A: implement + commit, B: test + record, C: ship-ready — and normally ends at a ready PR. Each phase writes a mark to the `## PR Lifecycle` section of the plan's `tasks.md`; if a run is cut off involuntarily (usage-limit reset, crash), a fresh invocation in the same working directory reads the marks and resumes from the correct phase. The checkpoint is interruption resilience, not a multi-invocation contract.
 - **PR title & lifecycle**: the PR title uses a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name (`add-search-candle` ⇒ `feat(search): add search candle`), not the `spec(plan):` commit prefix. `/speq:plan-pr` opens it as a **draft**; `/speq:implement-pr` marks it **ready** once the implementation is pushed.
-- **Git/PR mechanics**: both skills delegate every branch, commit, push, and PR operation to `git-agent` — the one sub-agent permitted to write git history or touch a remote. See [Model Routing](./model-routing.md).
+- **Git/PR mechanics**: both skills run every branch, commit, push, and PR operation directly, per `/speq:git-operations` — they are the only components permitted to write git history or touch a remote. See [Model Routing](./model-routing.md).
 
 ---
 

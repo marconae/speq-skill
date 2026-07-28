@@ -8,7 +8,7 @@ You are building `speq-skill` while using it: the skills in `.claude/skills/` ar
 - **Skill names are context-specific**: `/speq-*` in this repo, `/speq:*` in the installed plugin. `build.sh` performs the `speq-*` → `speq:*` rename, drops the `speq-` folder prefix, and stamps version + author from `Cargo.toml`.
 - **Version**: `Cargo.toml` is the single source of truth. `scripts/lib/version.sh` (`get_version`) feeds `build.sh` and the docker tests — never hard-code the version anywhere else.
 - **Tests**: integration tests SHALL use fixtures under `tests/fixtures/`, not inline spec strings.
-- **Git**: `git-agent` is the only agent permitted to write git history or touch a remote; every other agent is read-only.
+- **Git**: only the headless orchestrators `speq-plan-pr`/`speq-implement-pr` write git history or touch the remote, running the operations directly per `/speq-git-operations`. Every sub-agent and every interactive skill stays read-only toward git (`/speq-git-discipline`).
 - **Commits** follow Conventional Commits — `<type>[scope]: <description>` (+ optional body/footer). Types: `feat` (MINOR), `fix` (PATCH), `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Breaking change = `!` after type/scope or a `BREAKING CHANGE:` footer (MAJOR).
 - **Expert tasks**: `planner-agent` marks reasoning-heavy `tasks.md` lines `[expert]`; `speq-implement` routes those to `implementer-expert-agent`, the rest to `implementer-agent`. Tag sparingly.
 - **Model routing** is hardcoded in each skill/agent frontmatter and stamped by `build.sh` — see `docs/model-routing.md`.
