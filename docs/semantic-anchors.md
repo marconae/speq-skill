@@ -43,13 +43,8 @@ For more background, explore the [LLM-Coding/Semantic-Anchors](https://github.co
 | Devil's Advocate (diabolus advocatus) | plan-reviewer (agent) | Adversarial review |
 | BLUF (Bottom Line Up Front) | speq-audit | Reporting |
 | London School TDD | speq-implement (template) | Testing |
+| ASD-STE100 (Simplified Technical English) | speq-writing-guardrails | Plain-language rules |
 | BLUF / Inverted Pyramid | speq-writing-guardrails | Structure |
-| NN/g F-Pattern | speq-writing-guardrails | Readability |
-| Anthropic context-engineering | speq-writing-guardrails | Agent readability |
-| Strunk & White | speq-writing-guardrails | Concision |
-| Zinsser | speq-writing-guardrails | Concision |
-| INCOSE GtWR | speq-writing-guardrails | Requirements clarity |
-| ISO/IEC/IEEE 29148 | speq-writing-guardrails | Requirements clarity |
 | RFC 2119 / 8174 | speq-writing-guardrails | Prose register |
 | A Philosophy of Software Design (Ousterhout) | speq-design-philosophy | Design principles |
 | Deep Modules | speq-design-philosophy | Design principles |

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.17.0
+
+- `speq-writing-guardrails`: reworked rules for writing guardrails grounded in BLUF/Inverted Pyramid and ASD-STE100
+
 ## 0.16.0
 
 - `plan-reviewer`/`code-reviewer` now write their full findings to a file (`specs/_plans/<plan-name>/review/round-<N>.md`, `review-findings.md`) and return a one-line verdict instead of inlining the whole report into the orchestrator transcript; `speq-plan-review`'s verdict line gains an `INTENT` count (Intent Fidelity blockers)
@@ -23,7 +27,6 @@
 - `speq:plan-pr` includes `## Impact` verbatim in the draft PR body and prints it in the orchestrator report
 - `speq:plan-pr` posts a PR comment for ADVISORY findings and Design Decisions entries when either is non-empty
 - `speq:implement-pr` posts a condensed verification-summary PR comment (Verdict table + Notes) after commit/push, alongside the full report committed to the branch
-- `speq-writing-guardrails` extends governed scope to these new PR comments and requires the `writing:*` skills (clarity, evidence, QA checklist) for newly-composed PR-facing content
 
 ## 0.13.3
 

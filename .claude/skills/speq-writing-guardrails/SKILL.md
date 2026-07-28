@@ -1,75 +1,51 @@
 ---
 name: speq-writing-guardrails
-description: Prose guardrails for speq artifacts and GitHub PRs, issues, and comments — front-loaded (BLUF), terse, unambiguous writing anchored in established style and requirements standards. Triggered by /speq-mission, /speq-audit, /speq-implement, /speq-plan-pr, /speq-implement-pr, planner-agent, plan-reviewer, and recorder-agent.
+description: Dense prose rules for speq artifacts and GitHub text: sentence caps, BLUF, consistent vocabulary, evidence, and no em dashes. Triggered by /speq-mission, /speq-audit, /speq-implement, /speq-plan-pr, /speq-implement-pr, planner-agent, plan-reviewer, and recorder-agent.
 ---
 
 # Writing Guardrails
 
-Prose anchored in **BLUF / Inverted Pyramid**, **Strunk & White**, **INCOSE GtWR**, **ISO/IEC/IEEE 29148**, and **RFC 2119 / 8174**.
+Prose anchored in **BLUF / Inverted Pyramid** structure and **ASD-STE100** controlled-language discipline. Follow these concepts for governed prose. Write for readers with varied English proficiency. Make each sentence clear on the first reading.
 
 ## Scope
 
-**Governed (free prose — fix these):**
-- `plan.md` — Summary, Goals, Non-Goals, Migration, Testing, Dead-Code, Impact prose
-- `spec.md` — the Feature-description line under `# Feature:`
-- `mission.md` — Problem, Architecture, Constraints prose
-- decision-log — Rationale and Finding prose
-- verification-report — Notes and Review-Summary bullets, and its condensed PR-comment excerpt
-- every GitHub PR, issue, and comment body and title, including advisory/assumption PR comments
+- Govern: prose in `plan.md`, `spec.md`, `mission.md`, decision logs, verification reports, GitHub PRs, issues, and comments.
+- Leave unchanged: Gherkin, Background bullets, tables, ASCII diagrams, delta markers, and validator-owned RFC keyword casing.
+- PR text: lead with tradeoffs and boundaries; tie claims to diffs, files, tests, or command output.
 
-**Not governed (leave alone):** Gherkin scenarios, Background bullets, tables, ASCII diagrams, delta markers, RFC-2119 keyword casing (validator-owned).
+## Rules
 
-## PR-facing content — invoke the `writing:*` skills
+- Classify each passage as procedural or descriptive.
+- One sentence states one idea. Split a sentence joined by `and`, `which`, or `while` into two.
+- Procedural: imperative, one instruction per sentence, maximum 20 words.
+- Descriptive: simple tense, one fact per sentence, one topic per paragraph, maximum 25 words and six sentences per paragraph.
+- Put the conclusion first. Make headings summarize their sections. Make each section stand alone.
+- Use active voice and name the actor. Use verbs, not nominalizations.
+- Put conditions before commands: `If the build fails, read the log.`
+- Use complete grammar. Keep articles and `that`. Use no perfect or progressive forms.
+- Use no semicolons or contractions.
+- Replace weak requirements: `should` → `MUST` or a fact. Replace hypothetical modals with conditions. Keep uncertainty when evidence requires it.
+- Use `MUST`, `SHOULD`, and `MAY` only as RFC 2119 / 8174 normative keywords.
+- Label destructive instructions: `WARNING` for injury, `CAUTION` for data or equipment damage. State the consequence after the instruction.
+- Use one term, meaning, word class, and verb for each concept. Repeat nouns when pronouns lose the referent.
+- Remove filler, hype, vague claims, hedges, escape hatches, and `and/or`. Quantify vague terms.
+- Use one verb per concept: `check`, `run`, and `show`, or another chosen set.
+- Replace: `utilize` → `use`; `in order to` → `to`; `prior to` → `before`; `ensure` → `make sure that`; `facilitate` → `help`; `e.g.` → `for example`; `i.e.` → `that is`; `etc.` → named items; `functionality` → `function` or `feature`; `out of the box` → `by default`; `under the hood` → `internally`.
+- Keep technical names, product names, identifiers, commands, flags, paths, config keys, code, quoted errors, and numbers with units unchanged. Count each as one word.
+- Do not claim project behavior without evidence. Scope unsupported claims, label inferences, and name untested areas.
+- Ban em dashes. Use a comma, period, colon, parentheses, or a new sentence.
 
-For content newly composed for a PR (a verification-report comment, an open-questions/advisory comment, or a plan's `## Impact` section), the rules below are necessary but not sufficient — additionally invoke, via the Skill tool, before composing:
-- `writing:clarity-editing`
-- `writing:evidence-and-credibility`
-- `writing:revision-and-qa-checklist`
+## Delivery Check
 
-Target **expert tier × Evaluator stance** per the Audience-Fit Ladder (`writing:revision-and-qa-checklist`): the reader is an architect deciding whether to approve — lead with tradeoffs and boundaries, cite the actual diff/file/test as evidence, never pad or hedge.
+- Count procedural and descriptive sentences against their caps.
+- Scan for weak modals, contractions, semicolons, and em dashes.
+- Move each condition before its command.
+- Check vocabulary consistency, active voice, actors, filler, and unsupported claims.
+- Rerun the checks after every correction.
 
-## Structure first — BLUF / Inverted Pyramid
+## External Boundaries
 
-Anchored in **NN/g F-pattern** and **Anthropic context-engineering**.
-
-- **Lead with the conclusion.** State the decision or outcome in the first sentence.
-- **One idea per paragraph.** Split a paragraph that carries two.
-- **Write statement headings that form a scan path.** Prefer `## Rebuild the index` over `## Migration`.
-- **Make each section self-contained.** Agents retrieve sections out of order.
-
-## Cut verbosity — "Omit needless words"
-
-Anchored in **Strunk & White** and **Zinsser**.
-
-- **Cap sentences at 25 words; paragraphs at 3–7 lines.** The Summary two-sentence cap is hard.
-- **Start statements with a verb.** Delete `you can`, `there is`, `it is worth noting`.
-- **Cut adverbs, qualifiers, and hedges.** Delete `very`, `for now`, and non-committal time hedges.
-- **Ban filler:** `basically`, `simply`, `obviously`, `just`, `actually`.
-
-## Kill ambiguity — INCOSE GtWR + ISO/IEC/IEEE 29148
-
-Target: unambiguous, singular, verifiable, complete.
-
-- **Quantify vague terms.** Write `within 2.0 s`, not `fast`.
-- **Delete escape clauses:** `as appropriate`, `where possible`, `etc.`, and the `/` in `and/or`.
-- **Use one term per concept.** Do not alternate names for one thing.
-- **Use active voice and name the actor.** Write `speq record merges the delta`.
-- **Repeat the noun over a distant `it` or `this`.** Pronouns lose their referent across sentences.
-
-## Word swaps
-
-| Write | Not |
-|-------|-----|
-| use | utilize |
-| to | in order to |
-| because | due to the fact that |
-| now | at this point in time |
-| can | has the ability to |
-| some | a number of |
-| if | in the event that |
-
-## Register: descriptive vs normative — RFC 2119 / 8174
-
-- **Descriptive prose** — warm, concise, present tense.
-- **Normative statements** — ALL-CAPS `MUST` / `SHOULD` / `MAY`, used sparingly.
-- **Lowercase `should` is non-binding.** Only the ALL-CAPS keyword carries obligation.
+- These rules are informed by ASD-STE100 Simplified Technical English. They do not claim ASD-STE100 compliance.
+- Do not reproduce the ASD-STE100 standard, controlled dictionary, official examples, logos, or branding.
+- ASD-STE100 is a registered trademark of ASD. This skill is not affiliated with or endorsed by ASD or STEMG.
+- RFC 2119 and RFC 8174 identify normative-keyword conventions. This skill reproduces no RFC text.
