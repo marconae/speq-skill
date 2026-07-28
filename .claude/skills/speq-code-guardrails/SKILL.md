@@ -111,3 +111,7 @@ Run ONLY the test you created/changed — not the full suite.
 | Fragility | One change breaks unrelated code |
 | Immobility | Can't reuse code elsewhere |
 | Opacity | Hard to understand at a glance |
+
+## Attribution
+
+Concepts from Robert C. Martin's *Clean Code: A Handbook of Agile Software Craftsmanship*, adapted here.
