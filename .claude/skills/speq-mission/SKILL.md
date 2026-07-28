@@ -12,19 +12,19 @@ You are creating a project mission file (`specs/mission.md`) through an interact
 ## Required Skills
 
 Invoke before starting:
-- `/speq-ext-research` — Tech stack research
-- `/speq-cli` — Spec structure
-- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
+- `/speq-ext-research`: tech stack research
+- `/speq-cli`: spec structure
+- `/speq-writing-guardrails`: prose style for artifacts and GitHub text
 
-Do not invoke `/speq-code-tools`: brownfield exploration (step 2) only reads manifests, directories, and docs — plain file reads cover it, and symbol-level tool guidance would sit unused in an interview session.
+Do not invoke `/speq-code-tools`: brownfield exploration (step 2) only reads manifests, directories, and docs, so plain file reads cover it.
 
 ## Workflow
 
 ### 0. Load Project Hook
 
 Check for `.speq/mission-hook.md` in the repo root.
-- **Present:** read it. Announce "Loaded project hook: .speq/mission-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
-- **Absent:** continue normally, no mention.
+- **Present:** read it. Announce "Loaded project hook: .speq/mission-hook.md". Its content is authoritative: it can add to, change, or override any part of this workflow. If the hook conflicts with this workflow, the hook wins.
+- **Absent:** continue without mention.
 
 ### 1. Project Detection
 
@@ -44,23 +44,23 @@ specs/ or similar directory exists?
 
 For existing projects, gather context BEFORE interviewing:
 
-1. **Tech stack** — read the manifest(s): `Cargo.toml`, `package.json`, `go.mod`, `pyproject.toml`/`requirements.txt`, `pom.xml`/`build.gradle`. This is an exemplary list — the project may use other languages, and may use several technologies at once.
-2. **Commands** — look for existing scripts: `package.json` scripts, Makefile targets, `Cargo.toml` aliases, `pyproject.toml` scripts.
-3. **Structure** — list top-level directories; find the main source directories (`src`, `lib`, `app`).
-4. **Docs** — read `README.md`, `docs/`, and any existing `specs/`.
+1. **Tech stack**: read the manifest(s): `Cargo.toml`, `package.json`, `go.mod`, `pyproject.toml`/`requirements.txt`, `pom.xml`/`build.gradle`. The list is not exhaustive; a project can use other languages and several technologies at once.
+2. **Commands**: look for existing scripts: `package.json` scripts, Makefile targets, `Cargo.toml` aliases, `pyproject.toml` scripts.
+3. **Structure**: list top-level directories; find the main source directories (`src`, `lib`, `app`).
+4. **Docs**: read `README.md`, `docs/`, and any existing `specs/`.
 
 ### 3. Research Phase
 
 For technologies discovered or mentioned:
 
-- **Context7 MCP** — query library documentation for correct API usage
-- **WebSearch** — research best practices, alternatives, common patterns
+- **Context7 MCP**: query library documentation for correct API usage
+- **WebSearch**: research best practices, alternatives, common patterns
 
 Use research to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
-Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section below. Never fill in content without asking. Each question should reveal assumptions, surface contradictions, or narrow scope. Brownfield: present what step 2 discovered and ask the user to confirm or correct it ("I found [X]. Is this accurate? What would you add or change?") instead of asking cold.
+Conduct a Socratic interview via `AskUserQuestion` for EVERY section below. Never fill in content without asking. Each question reveals assumptions, surfaces contradictions, or narrows scope. Brownfield: present what step 2 discovered and ask the user to confirm or correct it ("I found [X]. Is this accurate? What would you add or change?") instead of asking cold.
 
 #### 4.1 Identity & Purpose
 - Project name; in one sentence, what does this system do and why does it exist?
@@ -73,7 +73,7 @@ Conduct a **Socratic interview** via `AskUserQuestion` for EVERY section below. 
 - Brownfield: "Based on the code, it seems targeted at [X]. Is this correct?"
 
 #### 4.3 Core Capabilities
-Apply **User Story Mapping** (Patton) — identify activities, then decompose into capabilities.
+Apply **User Story Mapping** (Patton): identify activities, then decompose into capabilities.
 - What are the 3-5 core capabilities this system provides? (What it does, not how.)
 - Brownfield: "I found these main modules: [X, Y, Z]. What capabilities do they represent?"
 
@@ -86,14 +86,14 @@ Apply **User Story Mapping** (Patton) — identify activities, then decompose in
 - Brownfield: "I noticed these terms in the code: [X, Y]. What do they mean in this context?"
 
 #### 4.6 Tech Stack
-- Language/runtime, framework, database, testing framework — greenfield: ask each; brownfield: confirm the discovered stack ("I found: Rust with tokio, clap for CLI, no database. Correct?").
+- Language/runtime, framework, database, testing framework. Greenfield: ask each. Brownfield: confirm the discovered stack ("I found: Rust with tokio, clap for CLI, no database. Correct?").
 - Use Context7 to research mentioned technologies.
 
 #### 4.7 Commands
-- Build, test, lint/format, and coverage commands — greenfield: ask each; brownfield: confirm discovered commands and ask for any missing ones ("No coverage command found. What should it be?").
+- Build, test, lint/format, and coverage commands. Greenfield: ask each. Brownfield: confirm discovered commands and ask for any missing ones ("No coverage command found. What should it be?").
 
 #### 4.8 Project Structure
-- Planned directory structure and the purpose of each main directory — brownfield: present the discovered structure and ask for clarification on purpose.
+- Planned directory structure and the purpose of each main directory. Brownfield: present the discovered structure and ask for clarification on purpose.
 
 #### 4.9 Architecture
 - High-level architecture pattern (layered, hexagonal, event-driven, etc.)? Key components and their responsibilities? How does data flow through the system?
@@ -121,7 +121,7 @@ Present the generated mission.md and ask: "Does this accurately capture your pro
 
 ### Question Batching
 
-Group questions into **MECE partitions** (max 3-4 per `AskUserQuestion` call) — each group covers one dimension without overlap:
+Group questions into MECE partitions (max 3-4 per `AskUserQuestion` call). Each group covers one dimension without overlap:
 
 | Phase | Questions to Group |
 |-------|-------------------|

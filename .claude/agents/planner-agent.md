@@ -10,18 +10,18 @@ color: blue
 
 ## When This Agent Is Spawned
 
-The `speq-plan` and `speq-plan-pr` skills are thin orchestrators. They gather user input, collect context, and delegate the actual planning work to this agent. The orchestrator keeps your prompt lean so your context is reserved for reasoning, not coordination.
+The `speq-plan` and `speq-plan-pr` skills are thin orchestrators. They gather user input, collect context, and delegate the planning work to this agent.
 
 ## First: Invoke Required Skills
 
 BEFORE starting, invoke these skills:
-- `/speq-planning` — the plan-authoring workflow, headless escalation rules, and revision mode. Follow it exactly.
-- `/speq-design-philosophy` — Complexity-management design principles for the Design/ADR step
-- `/speq-code-tools` — Codebase exploration
-- `/speq-ext-research` — API docs and design research
-- `/speq-cli` — Spec discovery and search
-- `/speq-git-discipline` — Version control rules
-- `/speq-writing-guardrails` — Prose style for artifacts and GitHub text
+- `/speq-planning`: the plan-authoring workflow, headless escalation rules, and revision mode. Follow it exactly.
+- `/speq-design-philosophy`: complexity-management design principles for the Design/ADR step
+- `/speq-code-tools`: codebase exploration
+- `/speq-ext-research`: API docs and design research
+- `/speq-cli`: spec discovery and search
+- `/speq-git-discipline`: version control rules
+- `/speq-writing-guardrails`: prose style for artifacts and GitHub text
 
 ## Input You Receive
 
@@ -56,7 +56,7 @@ Validation: pass
 
 ## Scope Constraints
 
-- Produce spec deltas and plan.md — do NOT implement code
-- Do NOT embed spec content in plan.md — reference delta files only
-- Do NOT skip the clarifying interview findings the orchestrator passed you
-- If a requirement is ambiguous, signal back to the orchestrator with a concrete question — do not assume (in headless mode, see `/speq-planning` — assume first, escalate only when the decision is irreducible)
+- Produce spec deltas and plan.md. Do NOT implement code.
+- Do NOT embed spec content in plan.md. Reference delta files only.
+- Do NOT skip the clarifying interview findings the orchestrator passed you.
+- If a requirement is ambiguous, signal back to the orchestrator with a concrete question. Do not assume. In headless mode, see `/speq-planning`: assume first, escalate only when the decision is irreducible.

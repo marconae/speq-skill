@@ -33,18 +33,18 @@ specs/<domain>/<feature>/spec.md exists?
 After each merge:
 1. Strip all `<!-- DELTA:* -->` markers
 2. Validate: `speq feature validate <domain>/<feature>`
-3. If validation fails, stop and report — do not guess fixes
+3. If validation fails, stop and report. Do not guess fixes
 
 ## Check Library Thresholds
 
-After merges, check for organization signals:
+After all merges:
 
 | Metric | Threshold | Action |
 |--------|-----------|--------|
 | Scenarios per spec | >10 | Return to orchestrator for user decision |
 | Domain features | >8 | Return to orchestrator for user decision |
 
-**Never assume** — library reorganization is a user decision. Signal back to the orchestrator with a concrete question.
+**Never assume:** library reorganization is a user decision. Return a concrete question to the orchestrator.
 
 ## Promote ADRs to Permanent Decision Log
 

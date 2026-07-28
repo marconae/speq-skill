@@ -35,16 +35,14 @@ git diff     # Review actual changes
 
 ## Tracked vs Gitignored Spec Paths
 
-Everything under `specs/_plans/<plan-name>/` is tracked and committed with the plan directory — never gitignored. That includes the run's evidence artifacts alongside the plan itself:
-
-- `open-questions.md` — present only while the plan is blocked
-- `review/` — plan-review findings (`round-<N>.md`)
-- `review-findings.md` — code-review findings
-- `tasks.md` and `verification-report.md`
-
-Committing these puts the plan's evidence trail into the PR's history before `/speq-record`'s archive `mv specs/_plans/<plan-name> specs/_recorded/NNN-<plan-name>` removes the directory from tracked space. By default, `specs/_recorded/` is itself gitignored — its contents then live only in the local workspace, with the evidence trail already preserved in history by the earlier plan-directory commits rather than by tracking the archive. That's a default, not a rule this workflow enforces: a project may choose to track `_recorded/` too, in which case the archived plan simply lands in history a second time at the archive step.
-
-`/speq-audit`'s gitignore-hygiene checks default to this split (`_plans`/`_decision` tracked, `_recorded` ignored) and, like every other audit finding, only offer to align a project that's drifted from it — never force it.
+- Everything under `specs/_plans/<plan-name>/` is tracked and committed with the plan directory, never gitignored. This includes the evidence artifacts:
+  - `open-questions.md` (present only while the plan is blocked)
+  - `review/` (plan-review findings, `round-<N>.md`)
+  - `review-findings.md` (code-review findings)
+  - `tasks.md` and `verification-report.md`
+- These commits put the evidence trail into history before `/speq-record` archives the plan (`mv specs/_plans/<plan-name> specs/_recorded/NNN-<plan-name>`).
+- `specs/_recorded/` is gitignored by default. This is a default, not an enforced rule: a project can track `_recorded/`, and the archived plan then lands in history a second time.
+- `/speq-audit`'s gitignore-hygiene checks default to this split (`_plans`/`_decision` tracked, `_recorded` ignored). They only offer to align a drifted project, never force it.
 
 ## Security
 

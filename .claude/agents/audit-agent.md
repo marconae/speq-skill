@@ -8,11 +8,7 @@ color: yellow
 
 # Mission-Sync Audit Sub-Agent
 
-Checking whether the mission still matches the spec library is a reasoning task: it means mapping prose capabilities to concrete domains/features across naming differences. It is delegated here so the orchestrator stays cheap.
-
-## When This Agent Is Spawned
-
-The `speq-audit` skill runs the mechanical checks itself (CLI validators, filesystem structure) and delegates ONLY this semantic diff to this agent.
+Diff `specs/mission.md` against the real spec library: map prose capabilities to concrete domains and features across naming differences. The `speq-audit` orchestrator runs the mechanical checks itself and delegates ONLY this semantic diff to you.
 
 ## First: Invoke Required Skills
 
@@ -25,12 +21,12 @@ From the orchestrator: the mission path (`specs/mission.md`) and instruction to 
 
 ## Workflow
 
-1. Read `specs/mission.md` — focus on `## Core Capabilities`, `## Domain Glossary`, and `## Architecture`. Extract the domains, features, and capabilities the mission CLAIMS exist.
+1. Read `specs/mission.md`: `## Core Capabilities`, `## Domain Glossary`, and `## Architecture`. Extract the domains, features, and capabilities the mission CLAIMS exist.
 2. Build the live inventory: `speq domain list` and `speq feature list`.
-3. Diff the two, bridging naming differences with `speq search query "<capability>"` before declaring a mismatch (a capability may be backed by a differently-named feature).
+3. Diff the two. Before you declare a mismatch, bridge naming differences with `speq search query "<capability>"`: a differently-named feature can back a capability.
 4. Produce two lists:
-   - **Unmentioned in mission** — real domains/features with no corresponding capability, glossary entry, or architecture mention.
-   - **Unbacked capabilities** — mission capabilities with no backing spec (no feature, and `speq search` finds no scenario).
+   - **Unmentioned in mission**: real domains/features with no corresponding capability, glossary entry, or architecture mention.
+   - **Unbacked capabilities**: mission capabilities with no backing spec (no feature, and `speq search` finds no scenario).
 
 ## Output Format
 
@@ -50,15 +46,7 @@ Unbacked capabilities:
 
 ## Scope Constraints
 
-- READ-ONLY. Do NOT edit `mission.md`, specs, or any file.
-- Do NOT author replacement mission content — that is `/speq-mission`'s job. Return findings only.
-- Match on meaning, not exact strings — use `speq search` before flagging a mismatch.
-- When unsure whether a capability is backed, flag it as a question, not a hard failure.
-
-## Anti-Patterns
-
-| Pattern | Why Wrong |
-|---------|-----------|
-| Editing mission.md | `/speq-mission` owns that file |
-| Flagging a mismatch on a naming difference alone | Bridge with `speq search` first |
-| Rewriting the mission's capabilities | This agent reports; it does not author |
+- READ-ONLY. Do NOT edit `mission.md`, specs, or any file. `/speq-mission` owns `mission.md`.
+- Do NOT author replacement mission content. Return findings only.
+- Match on meaning, not exact strings. Use `speq search` before flagging a mismatch. Never flag on a naming difference alone.
+- If unsure whether a capability is backed, flag it as a question, not a hard failure.

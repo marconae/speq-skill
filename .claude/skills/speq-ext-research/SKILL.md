@@ -5,8 +5,6 @@ description: External documentation and research via Context7 and WebSearch — 
 
 # External Research
 
-External documentation and research via Context7 and WebSearch.
-
 ## When to Use
 
 | Source | Use For |
@@ -36,7 +34,7 @@ External documentation and research via Context7 and WebSearch.
 
 ## Priority Decision
 
-Apply an **evidence hierarchy** — primary documentation over secondary commentary:
+Prefer primary documentation over secondary commentary:
 
 ```
 Need library API details?
@@ -44,20 +42,4 @@ Need library API details?
 └─ No  → Need design guidance?
          ├─ Yes → WebSearch
          └─ No  → Proceed with existing knowledge
-```
-
-## Example
-
-Adding rate limiting to Express API:
-
-```
-1. resolve-library-id
-   query: "Express.js rate limiting"
-   libraryName: "express-rate-limit"
-
-2. query-docs
-   libraryId: "/nfriedly/express-rate-limit"
-   query: "middleware setup options"
-
-3. Implement using verified current API
 ```

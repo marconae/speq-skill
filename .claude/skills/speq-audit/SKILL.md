@@ -6,7 +6,7 @@ model: sonnet
 
 # Spec Auditor (Orchestrator)
 
-This skill is a **thin orchestrator**. It runs read-only health checks over a speq project, delegates the one reasoning-heavy check (mission ↔ spec-library sync) to the `audit-agent`, prints a BLUF summary, and offers to fix each finding — **always asking first**. Auditing is mostly mechanical (CLI validators + filesystem checks); only mission sync needs reasoning.
+Thin orchestrator. It runs read-only health checks over a speq project, delegates the mission ↔ spec-library sync check to `audit-agent`, prints a BLUF summary, and offers to fix each finding. **Always ask before a fix.**
 
 ## Required Skills (for the orchestrator)
 
@@ -14,14 +14,14 @@ Invoke before starting:
 - `/speq-cli` — spec discovery and the `validate` commands
 - `/speq-writing-guardrails` — prose style for the summary
 
-The `audit-agent` sub-agent invokes `/speq-cli` itself. **Read `references/checks.md`** for the per-check detection recipes, thresholds, and remediation procedures — the workflow below is the skeleton; the recipes live there.
+The `audit-agent` sub-agent invokes `/speq-cli` itself. **Read `references/checks.md`** for the per-check detection recipes, thresholds, and remediation procedures.
 
 ## Workflow
 
 ### Phase 0: Load Project Hook (orchestrator)
 
 Check for `.speq/audit-hook.md` in the repo root.
-- **Present:** read it. Announce "Loaded project hook: .speq/audit-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Present:** read it. Announce "Loaded project hook: .speq/audit-hook.md". Its content is authoritative: it can add to, change, or override any part of this workflow. If the hook conflicts with this workflow, the hook wins.
 - **Absent:** continue normally, no mention.
 
 Note it (not its full content) as a `Project Hook:` line in the `audit-agent` brief below.
@@ -75,7 +75,7 @@ If `specs/mission.md` is absent, skip the delegation and mark the check `✗ (no
 
 ### Phase 4: Print the summary (orchestrator)
 
-Lead with the verdict (BLUF), then the checks table, then numbered remediations each ending in the concrete next-step command. Tables are exempt from prose guardrails; the Summary line is terse. Use this format:
+Lead with the verdict (BLUF), then the checks table, then numbered remediations. End each remediation with the concrete next-step command. Tables are exempt from prose guardrails. Keep the Summary line terse. Use this format:
 
 ```
 # speq:audit — <project>

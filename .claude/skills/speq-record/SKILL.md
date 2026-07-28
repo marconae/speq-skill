@@ -6,7 +6,7 @@ model: sonnet
 
 # Spec Recorder (Orchestrator)
 
-This skill is a **thin orchestrator**. It verifies preconditions and delegates the deterministic merge work to the `recorder-agent` sub-agent. Recording is mechanical file surgery and does not need deep reasoning.
+Thin orchestrator. It verifies preconditions and delegates the merge work to the `recorder-agent` sub-agent.
 
 ## Required Skills (for the orchestrator)
 
@@ -20,14 +20,14 @@ The `recorder-agent` sub-agent invokes its own required skills.
 ### Phase 0: Load Project Hook (orchestrator)
 
 Check for `.speq/record-hook.md` in the repo root.
-- **Present:** read it. Announce "Loaded project hook: .speq/record-hook.md". Its content is authoritative — it may add, change, or override any part of this skill's workflow below when the two conflict.
+- **Present:** read it. Announce "Loaded project hook: .speq/record-hook.md". Its content is authoritative: it can add to, change, or override any part of this workflow. If the hook conflicts with this workflow, the hook wins.
 - **Absent:** continue normally, no mention.
 
 Note it (not its full content) as a `Project Hook:` line in the `recorder-agent` brief below.
 
 ### Phase 1: Resolve Plan Name (orchestrator)
 
-Get plan name from user prompt. If none specified, use `AskUserQuestion` to present a list of plans under `specs/_plans/`.
+Get the plan name from the user prompt. If none is given, use `AskUserQuestion` to present the plans under `specs/_plans/`.
 
 ### Phase 2: Verify Preconditions (orchestrator)
 
@@ -64,9 +64,9 @@ Return a summary of merged features and the archive path.
 
 If the sub-agent returns threshold signals:
 
-1. Use `AskUserQuestion` to gather user's organizational decision
-2. Respawn `recorder-agent` with the decision, OR apply a small edit directly if the action is trivial (e.g., rename a file)
-3. Only archive once all decisions are resolved
+1. Use `AskUserQuestion` to get the user's organizational decision
+2. Respawn `recorder-agent` with the decision, OR apply a trivial edit (for example, a file rename) directly
+3. Archive only after all decisions are resolved
 
 ### Phase 5: Confirm Completion (orchestrator)
 
@@ -86,7 +86,7 @@ Report to user:
 | Precondition checks, user questions | This skill (pins Sonnet) | Lightweight orchestration |
 | Delta merge, validation, archive | `recorder-agent` sub-agent | Mechanical file surgery |
 
-Keeping orchestrator and sub-agent separate preserves the rotation discipline: if the spec library is very large, the sub-agent can be re-spawned with a fresh context without losing orchestration state.
+The split preserves rotation discipline: the orchestrator can respawn the sub-agent with a fresh context and keep its own state.
 
 ## Anti-Patterns
 

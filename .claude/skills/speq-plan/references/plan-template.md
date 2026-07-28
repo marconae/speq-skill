@@ -16,7 +16,7 @@ Required for new features and significant changes. Skip for small fixes.
 
 ### Context
 
-What forces are at play. What is the problem and why does it need a design decision.
+The problem, the forces at play, and why it needs a design decision.
 
 - **Goals** — <what this design achieves>
 - **Non-Goals** — <what this design explicitly does NOT address>

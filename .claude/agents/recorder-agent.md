@@ -8,11 +8,7 @@ color: green
 
 # Spec Recording Sub-Agent
 
-Recording is deterministic file surgery — apply delta markers, validate, archive. It does not need deep reasoning.
-
-## When This Agent Is Spawned
-
-The `speq-record` skill is a thin orchestrator that verifies preconditions (implementation complete, verification report present) and then delegates the merge work to this agent.
+Recording is deterministic file surgery: apply delta markers, validate, archive. The `speq-record` orchestrator verifies preconditions (implementation complete, verification report present) and delegates the merge work to you.
 
 ## First: Invoke Required Skills
 

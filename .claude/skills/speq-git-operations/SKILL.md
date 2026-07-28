@@ -5,7 +5,7 @@ description: The git/gh operation-to-command mapping and return formats for git-
 
 # Git Operations
 
-Unlike other skills in this system, this one documents *write* commands — that's intentional. `git-agent` is the sole component permitted to write git history or touch a remote; this skill is its exclusive execution reference and does not apply to any other agent.
+This skill documents write commands for `git-agent` only, the sole component permitted to write git history or touch a remote. It applies to no other agent.
 
 ## `create-branch`
 Params: `branch` (exact name), `base` (optional; default: repository default branch).
@@ -17,7 +17,7 @@ Branch: <branch> (created off <base>)
 
 ## `checkout`
 Params: `target` (a branch name, a PR number, `#N`, or a PR URL).
-Resolve and check out: PR number/URL → `gh pr checkout <target>`; a branch that exists locally or remotely → check it out (`git fetch` first if remote-only). If `target` matches nothing, report not-found — create nothing.
+Resolve and check out: PR number/URL → `gh pr checkout <target>`; a branch that exists locally or remotely → check it out (`git fetch` first if remote-only). If `target` matches nothing, report not-found. Create nothing.
 Returns:
 ```
 Branch: <branch> (checked out)
@@ -37,7 +37,7 @@ Nothing to commit
 ```
 
 ## `push`
-Params: none — pushes the current branch (`-u origin <branch>` on first push).
+Params: none. Pushes the current branch (`-u origin <branch>` on first push).
 Returns:
 ```
 Pushed: <branch>
@@ -45,7 +45,7 @@ Pushed: <branch>
 
 ## `create-pr`
 Params: `title`, `body`, `draft` (bool), `base` (optional; default: default branch), `head` (optional; default: current branch).
-If a PR already exists for `head`, do not recreate it — return it unchanged. Otherwise `gh pr create` with the given title and body, adding `--draft` when `draft` is true.
+If a PR already exists for `head`, do not recreate it. Return it unchanged. Otherwise `gh pr create` with the given title and body, adding `--draft` when `draft` is true.
 Returns:
 ```
 PR: #N (draft|ready) — <url> (created | already existed)
@@ -84,7 +84,7 @@ Comment: <url>
 ```
 
 ## `read-comments`
-Params: `target` (PR or issue number/URL; default: PR for current branch), `since` (optional ISO timestamp — return only comments and reviews posted at or after it).
+Params: `target` (PR or issue number/URL; default: PR for current branch), `since` (optional ISO timestamp: return only comments and reviews posted at or after it).
 `gh pr view --json comments,reviews` or `gh issue view --json comments` (or `gh api`). Concatenate each body as plain text with author and timestamp. An empty result is valid.
 Returns:
 ```
@@ -100,7 +100,7 @@ Comments found: 0
 
 ## Composite operations
 
-Each composite below is one operation whose internal sequence is fixed by this skill — the caller supplies parameters, never the sequence. "Nothing to commit" at the commit step is a no-op: continue with the remaining steps (a resumed run may need only push/create-pr). Stop at the first genuinely failing step and report which steps completed and which step failed.
+Each composite is one operation with a sequence fixed by this skill. The caller supplies parameters, never the sequence. "Nothing to commit" at the commit step is a no-op: continue with the remaining steps. Stop at the first failing step. Report which steps completed and which step failed.
 
 ## `ship-draft`
 Params: `paths` (files/globs to stage), `message` (exact commit message), `title`, `body`.

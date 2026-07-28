@@ -5,13 +5,11 @@ description: Query specs via the speq CLI — semantic search, feature listing, 
 
 # speq CLI
 
-Spec-driven development via the speq CLI. The spec CLI is installed locally and available in the path. Invoke via `speq`.
+The CLI is installed locally and on the path. Invoke via `speq`.
 
 ## Search-First Rule
 
-**Never read full spec files without searching first.**
-
-Apply **information foraging** — search narrows the scent trail before committing context window budget.
+**Never read full spec files without searching first.** Search narrows the target before you spend context budget.
 
 ## Command Reference
 
@@ -37,21 +35,6 @@ Apply **information foraging** — search narrows the scent trail before committ
 
 3. Validate after changes
    speq feature validate
-```
-
-## Example
-
-Finding error handling scenarios:
-
-```bash
-# Search for related scenarios
-speq search query "error handling validation"
-
-# Get specific scenario
-speq feature get "cli/validate/Validation fails on missing field"
-
-# Validate structure
-speq feature validate cli/validate
 ```
 
 ## Anti-Pattern

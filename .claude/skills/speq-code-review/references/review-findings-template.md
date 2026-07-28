@@ -1,13 +1,13 @@
 # Code Review Findings Template
 
-`code-reviewer` writes this document to `specs/_plans/<plan-name>/review-findings.md` and returns only a one-line verdict. Primary consumer: one implementer agent, routed by the hardest finding — `implementer-expert-agent` reads both sections when any Expert finding exists, `implementer-agent` reads § Standard fixes otherwise. The agent derives fix tasks directly from the `Fix:` lines — no human or orchestrator summarizes this file first.
+`code-reviewer` writes this document to `specs/_plans/<plan-name>/review-findings.md` and returns only a one-line verdict. Primary consumer: one implementer agent, routed by the hardest finding. `implementer-expert-agent` reads both sections when any Expert finding exists, `implementer-agent` reads § Standard fixes otherwise. The agent derives fix tasks directly from the `Fix:` lines. No human or orchestrator summarizes this file first.
 
 ## Rules
 
 1. Two top-level sections partition every finding: `## Standard fixes` and `## Expert fixes`, routed per `/speq-code-review` § Routing. An empty section keeps its heading with a single `[none]` line.
 2. Within a section, group findings by file (`### <path>`). Every finding: `#### [TAG] <short title>` plus `Location`, `Issue`, `Fix`.
-3. `Fix:` is an imperative instruction addressed to the consuming implementer agent — file path, symbol, concrete change — phrased so the agent can append it to `tasks.md` near-verbatim as a fix task and execute it without re-reading `Issue`.
-4. Use the tag taxonomy from `/speq-code-review`; the category travels with the tag, not the section structure.
+3. `Fix:` is an imperative instruction to the consuming implementer agent (file path, symbol, concrete change), phrased so the agent can append it to `tasks.md` near-verbatim as a fix task and execute it without re-reading `Issue`.
+4. Use the tag taxonomy from `/speq-code-review`. The category travels with the tag, not the section structure.
 
 ## Skeleton
 

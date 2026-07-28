@@ -55,7 +55,7 @@ TaskTools: pending → in_progress → completed
 
 ## Parallelization
 
-From plan's `## Parallelization` section. Each group is a knowledge cluster; one agent takes the whole group, routed by its hardest task (any `[expert]` task → `implementer-expert-agent`):
+From plan's `## Parallelization` section. Each group is a knowledge cluster. One agent takes the whole group, routed by its hardest task (any `[expert]` task → `implementer-expert-agent`):
 
 ```markdown
 ## Parallelization
@@ -71,7 +71,7 @@ From plan's `## Parallelization` section. Each group is a knowledge cluster; one
 1. Group A (one agent for the whole group)
 2. Groups B and C (can run after A completes)
 
-Plans from before the `Knowledge` column may lack it — routing and execution order do not depend on it; only the agent's orientation line does.
+Older plans may lack the `Knowledge` column. Routing and execution order do not depend on it. Only the agent's orientation line does.
 
 ## Context Recovery
 

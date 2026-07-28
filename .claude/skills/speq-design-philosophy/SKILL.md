@@ -9,11 +9,11 @@ description: Complexity-management design principles — deep modules, informati
 
 ## Core Principle
 
-Complexity is what erodes a system's understandability over time. Weigh every design decision by whether it adds to that erosion or reduces it — not by line count, module count, or whether it follows a named pattern.
+Complexity is what erodes a system's understandability over time. Judge every design decision by whether it adds or removes complexity. Do not judge by line count, module count, or named patterns.
 
 ## Deep Modules
 
-Weigh a module by how much it does for callers relative to what it costs them to learn. A deep one earns that cost back many times over — its interface is far easier to use than its internals would be to rebuild from scratch. A shallow one barely earns it back at all: learning the interface takes almost as much effort as writing the equivalent code yourself.
+Weigh a module by what it does for callers relative to what its interface costs them to learn. Deep: the interface is far easier to use than the internals would be to rebuild. Shallow: learning the interface costs almost as much as writing the code yourself.
 
 | Signal | Fix |
 |--------|-----|
@@ -21,30 +21,30 @@ Weigh a module by how much it does for callers relative to what it costs them to
 | Many small modules named for a role, not a responsibility (`-Manager`, `-Handler`, `-Processor`) | "Classitis" — merge related shallow modules into one deeper one |
 | A function whose entire body is a call to another function with the same arguments | Merge it into whichever side actually holds logic |
 
-Small is not automatically good. Depth, not size, decides whether an abstraction earns its place.
+Depth, not size, decides whether an abstraction earns its place.
 
 ## Information Hiding & Leakage
 
-A module is well-designed when the rest of the system stays ignorant of one particular decision it makes internally. Trouble starts when that same decision surfaces again somewhere else in the codebase — among every kind of defect, this recurrence deserves the closest attention.
+A module is well designed when the rest of the system stays ignorant of a decision it makes internally. Leakage: the same decision surfaces in more than one module. Treat leakage as the defect class that deserves the closest attention.
 
-- **Temporal leakage** — organizing modules around execution order (read, then parse, then write) rather than around what each stage actually knows means every stage ends up carrying the same format knowledge.
-- **Back-door leakage** — two modules independently assume the same data format, protocol, or convention with nothing enforcing agreement between them.
+- **Temporal leakage**: modules organized around execution order (read, then parse, then write) instead of around what each stage knows. Every stage then carries the same format knowledge.
+- **Back-door leakage**: two modules independently assume the same data format, protocol, or convention, with nothing enforcing agreement.
 
-Fix: combine the modules that share the decision, or give the decision its own home and have both existing modules depend on it.
+Fix: combine the modules that share the decision, or give the decision its own module and make both depend on it.
 
 ## General- vs Special-Purpose Modules
 
-The governing test: an interface should handle every need the code has *today* (see `/speq-code-guardrails`' YAGNI Checks for the "not tomorrow's" half) without forcing a pile of narrow, special-case methods onto callers.
+Test: an interface handles every need the code has *today* (see `/speq-code-guardrails`' YAGNI Checks for the "not tomorrow's" half) without forcing narrow, special-case methods onto callers.
 
-A configuration parameter is a decision the module declined to make. Prefer a sensible default, auto-detection, or elimination over adding one.
+A configuration parameter is a decision the module declined to make. Prefer a sensible default, auto-detection, or elimination.
 
 ## Strategic vs Tactical Programming
 
-Tactical: ship the feature, leave the module harder to work with next time. Strategic: invest roughly 10-20% of the time in design quality as part of every change, not as a separate cleanup phase. A pattern of shipping fastest by leaving every touched module harder to work with is a risk to flag, not a contribution to emulate.
+Tactical: ship the feature, leave the module harder to work with. Strategic: invest 10-20% of every change in design quality, not a separate cleanup phase. Flag a pattern of tactical shipping as a risk. Do not emulate it.
 
 ## Comments as Design Intent
 
-Per `/speq-code-guardrails`' Comments rule — a public/interface doc comment states design intent, not just purpose. Struggling to write that comment is itself a signal: usually the abstraction underneath doesn't have a coherent shape yet. This doesn't relax the ban on inline or private-method comments.
+Per `/speq-code-guardrails`' Comments rule: a public/interface doc comment states design intent, not just purpose. If the comment is hard to write, the abstraction usually has no coherent shape yet. This does not relax the ban on inline or private-method comments.
 
 ## Dependencies & Boundaries
 
@@ -60,7 +60,7 @@ Per Martin's *Clean Architecture*:
 
 ## Quick Diagnostic
 
-No silent pass when reviewing a design — a new module, interface, or boundary. A change that introduces none of these may skip this table; answer every question for anything that does, and a "no" names the fix.
+If a change introduces a new module, interface, or boundary, answer every question. No silent pass. A "no" names the fix. A change that introduces none of these can skip the table.
 
 | Question | If no |
 |----------|-------|
