@@ -13,7 +13,7 @@ You are a thin orchestrator with no live user to interview. Your goal is:
 
 You must follow this workflow:
 - Delegate all planning judgment to `planner-agent` and all git/GitHub actions to `git-agent`; your own work is resolving the input, writing the plan's status files, briefing those agents, and interpreting their returns.
-- Run the steps in order: resolve target → resume dispatch → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report. A resumed run enters at the step its on-disk evidence names (step 1.5), never earlier.
+- Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
 - Keep one `feat/<plan-name>` branch and one PR per plan; `git-agent`'s `create-pr` reuses whatever PR already exists.
 
 ## Required Skills (for the orchestrator)
@@ -70,31 +70,6 @@ Derive the PR title deterministically from `<plan-name>` as a conventional-commi
 
 Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scope segment, emit `<type>: <slug>`.
 
-### 1.5. Resume Dispatch (orchestrator)
-
-A killed run (crash, usage-limit reset) leaves its progress on disk — plan artifacts, `review/round-<N>.md` files, `open-questions.md` — so never redo work those files prove done; re-delegating `planner-agent` over a validated plan repeats the run's most expensive step for nothing. Inspect `specs/_plans/<plan-name>/`, dispatch to the earliest step whose evidence is missing, and announce the decision in one line — `Resume: <evidence> → step <N>`:
-
-```
-specs/_plans/<plan-name>/ absent → new plan: continue at step 3
-open-questions.md exists, non-empty → blocked resume: continue at step 2
-plan.md absent, or speq plan validate fails → planning incomplete: continue at
-    step 3 (partial artifacts are planner-agent's input, not proof of completion)
-plan.md present and validate passes:
-├─ review/round-2.md exists → review done: branch on its ## Summary counts in step 6
-├─ review/round-1.md exists → resume the loop mid-flight from its ## Summary counts
-│    (Blockers / Advisory / Intent Fidelity blockers — the file holds the counts;
-│    the one-line verdict was returned to a session that no longer exists):
-│    INTENT > 0 → step 6's OPEN QUESTIONS branch (the headless Intent gate)
-│    BLOCKERS: 0 → step 6, clean branch
-│    BLOCKERS > 0 → does decision-log.md hold a [plan-review] ## Review Findings
-│        entry per round-1 BLOCKER?
-│        yes → revision done: respawn plan-reviewer for round 2 (step 5)
-│        no → respawn planner-agent in revision mode (step 5's blocker handling)
-└─ no review/ directory → plan authored, unreviewed: continue at step 5, round 1
-```
-
-Counts and finding text always come from the round files, never from memory — the files are the durable record this dispatch exists to honor. Nothing is committed before step 6, so mid-run resume presumes the same working directory.
-
 ### 2. Fetch Answers — resume only
 
 If step 1 found an unresolved `open-questions.md`, pull the human's replies:
@@ -105,8 +80,6 @@ Delegate to git-agent — operation: read-comments
 ```
 
 Forward the returned Q&A to `planner-agent` in step 4 — it stands in for the live interview `speq-plan` would otherwise run.
-
-If `read-comments` returns no replies, do not delegate to `planner-agent` with an empty Q&A. Branch on step 1's `checkout` return: PR exists → the human simply has not answered yet; report the plan as still blocked and stop. No PR → a prior run died before `flag-blocked` landed; re-run step 6's `OPEN QUESTIONS:` branch to land the block (its commit and push steps no-op where already done), then stop.
 
 ### 3. Discovery (orchestrator)
 
@@ -275,4 +248,3 @@ specs/
 | Running git/gh directly | `git-agent` performs every git and GitHub operation |
 | Marking the PR ready | `speq-implement-pr` owns `ready-pr`; plans stay draft |
 | A third review round | Bounded to 2 — leftover BLOCKERs become open questions |
-| Re-delegating `planner-agent` over a validated plan | Step 1.5 resumes from on-disk evidence; re-planning repeats the run's most expensive step |

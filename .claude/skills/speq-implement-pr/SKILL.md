@@ -62,7 +62,7 @@ Bump the workspace version per the plan's `workspace/version` spec delta if it s
 
 ### 5. Commit Evidence (orchestrator)
 
-Commit and push **before** running `/speq-record` in the next step — `/speq-record`'s archive `mv` moves the plan directory into gitignored `specs/_recorded/`, and anything not committed before that point never reaches git history.
+Commit and push **before** running `/speq-record` in the next step — `/speq-record`'s archive `mv` moves the plan directory to `specs/_recorded/`.
 
 ```
 Delegate to git-agent — operation: commit
@@ -113,7 +113,7 @@ specs/
 │   ├── tasks.md                          # Created by speq-implement
 │   ├── review-findings.md                # Created by code-reviewer
 │   └── verification-report.md            # Created by speq-implement
-└── _recorded/NNN-<plan-name>/            # Archived by speq-record (gitignored)
+└── _recorded/NNN-<plan-name>/            # Archived by speq-record (gitignored by default)
 ```
 
 ## Work Split (reference)

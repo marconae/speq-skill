@@ -42,9 +42,9 @@ Everything under `specs/_plans/<plan-name>/` is tracked and committed with the p
 - `review-findings.md` — code-review findings
 - `tasks.md` and `verification-report.md`
 
-Committing these puts the plan's evidence trail into the PR's history before `/speq-record`'s archive `mv specs/_plans/<plan-name> specs/_recorded/NNN-<plan-name>` removes the directory from tracked space. `specs/_recorded/` itself stays gitignored — its contents are local-workspace state, preserved in history by the earlier plan-directory commits, not by tracking the archive.
+Committing these puts the plan's evidence trail into the PR's history before `/speq-record`'s archive `mv specs/_plans/<plan-name> specs/_recorded/NNN-<plan-name>` removes the directory from tracked space. By default, `specs/_recorded/` is itself gitignored — its contents then live only in the local workspace, with the evidence trail already preserved in history by the earlier plan-directory commits rather than by tracking the archive. That's a default, not a rule this workflow enforces: a project may choose to track `_recorded/` too, in which case the archived plan simply lands in history a second time at the archive step.
 
-`/speq-audit`'s gitignore-hygiene checks verify exactly this split: `_plans` and `_decision` tracked, only `_recorded` ignored.
+`/speq-audit`'s gitignore-hygiene checks default to this split (`_plans`/`_decision` tracked, `_recorded` ignored) and, like every other audit finding, only offer to align a project that's drifted from it — never force it.
 
 ## Security
 
