@@ -133,9 +133,22 @@ else
 fi
 
 if grep -q '^name: speq:plan$' "$CODEX_PLUGIN_DIR/skills/plan/SKILL.md"; then
-    echo "OK Codex /speq:plan skill name"
+    echo "OK Codex skill name"
 else
     echo "ERROR: Codex skill name is not speq:plan"
+    exit 1
+fi
+
+if grep -R -E '/speq:' "$CODEX_PLUGIN_DIR" >/dev/null; then
+    echo "ERROR: Codex plugin still contains Claude-style /speq syntax"
+    grep -R -n -E '/speq:' "$CODEX_PLUGIN_DIR"
+    exit 1
+fi
+
+if grep -R -E '\$speq:' "$CODEX_PLUGIN_DIR" >/dev/null; then
+    echo "OK Codex $ trigger syntax"
+else
+    echo "ERROR: Codex plugin does not expose $ trigger syntax"
     exit 1
 fi
 

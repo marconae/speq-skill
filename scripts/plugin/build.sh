@@ -66,8 +66,7 @@ setup_dirs() {
 namespace_slash_commands() {
     local file="$1"
 
-    sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)$|/speq:\1|' "$file"
-    sed_in_place 's|/speq-\([a-zA-Z0-9_-]*\)\([^a-zA-Z0-9_/-]\)|/speq:\1\2|g' "$file"
+    perl -0pi -e 's{(?<![A-Za-z0-9_./-])/speq-([A-Za-z0-9_-]*)(?=$|[^A-Za-z0-9_/-])}{/speq:$1}g' "$file"
 }
 
 transform_common_markdown() {
@@ -92,6 +91,7 @@ transform_codex_markdown() {
     local file="$1"
 
     sed_in_place 's/Claude Code/Codex/g' "$file"
+    perl -0pi -e 's{(?<![A-Za-z0-9_./-])/speq:}{\$speq:}g' "$file"
     sed_in_place 's/AskUserQuestion/ask the user/g' "$file"
     sed_in_place 's/AskUserTool/ask the user/g' "$file"
     sed_in_place 's/ExitPlanMode/present the plan and ask the user to proceed/g' "$file"

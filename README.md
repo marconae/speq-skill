@@ -22,7 +22,7 @@
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
-Then open Claude Code or Codex and type `/speq:mission` to start.
+Then open Claude Code or Codex and start with the matching trigger: `/speq:mission` in Claude Code, or `$` in Codex.
 
 <details>
 <summary>What does the installer do?</summary>
@@ -32,7 +32,7 @@ Then open Claude Code or Codex and type `/speq:mission` to start.
 - Provisions the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
-- Registers `/speq:*` skills for Claude Code and Codex when available
+- Registers `/speq:*` skills for Claude Code and `$`-triggered skill suggestions for Codex when available
 - Registers the local Codex marketplace when the Codex CLI is available
 
 To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall).

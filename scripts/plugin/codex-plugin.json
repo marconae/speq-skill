@@ -13,15 +13,15 @@
   "interface": {
     "displayName": "speq-skill",
     "shortDescription": "Spec-driven development workflow for Codex.",
-    "longDescription": "speq-skill provides /speq:* skills, spec search, planning, implementation orchestration, and recording workflows for Codex.",
+    "longDescription": "speq-skill provides Codex-friendly $-triggered skills, spec search, planning, implementation orchestration, and recording workflows for Codex.",
     "developerName": "AUTHOR_PLACEHOLDER",
     "category": "Development",
     "capabilities": ["Interactive", "Write"],
     "websiteURL": "https://github.com/marconae/speq-skill",
     "defaultPrompt": [
-      "Run /speq:mission to bootstrap specs.",
-      "Plan a change with /speq:plan.",
-      "Implement reviewed deltas with /speq:implement."
+      "In Codex, type $ and choose speq:mission to bootstrap specs.",
+      "Plan a change with $ and speq:plan.",
+      "Implement reviewed deltas with $ and speq:implement."
     ],
     "brandColor": "#2B6CB0"
   }

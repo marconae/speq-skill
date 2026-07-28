@@ -89,4 +89,4 @@ The checked-in source currently lives in `.claude/skills` and `.claude/agents`. 
 - Codex artifacts under `dist/marketplace/codex/plugins/speq-skill`
 - Codex marketplace manifest under `dist/marketplace/codex/.agents/plugins/marketplace.json`
 
-Both generated outputs expose `/speq:*` skills. Claude-specific workflow syntax is translated out of the Codex output during generation.
+Claude-generated output exposes `/speq:*` skills. Codex-generated output exposes the same workflows behind the `$` trigger, and Codex-specific prompt text is rewritten during generation.

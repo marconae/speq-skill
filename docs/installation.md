@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh
 > [!NOTE]
 > The installer downloads a pre-built `speq` binary for your platform when one is available (Linux x86_64/ARM64, macOS Apple Silicon). Otherwise it builds from source with the Rust toolchain, offering to install [rustup](https://rustup.rs/) for you if Rust is missing.
 
-Open Claude Code or Codex and type `/speq:mission` to start.
+Open Claude Code or Codex and start with the matching trigger: `/speq:mission` in Claude Code, or `$` in Codex.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ The installer also:
 - Installs the speq-skill plugin for Claude Code and Codex
 - Registers the local Codex marketplace via `codex plugin marketplace add`, when Codex is installed
 - Registers Serena and Context7 via `codex mcp add`, when Codex is installed
-- Installs Codex skills into `$CODEX_HOME/skills` so Codex can load `/speq:*`
+- Installs Codex skills into `$CODEX_HOME/skills` so Codex can load the `$`-triggered `speq:*` skills
 - Installs plugin MCP configuration for Serena and Context7
 - Downloads the `snowflake-arctic-embed-xs` embedding model (~23 MB) into `~/.cache/speq/models/`
 
@@ -86,7 +86,7 @@ claude
 
 # Test in Codex
 codex
-/speq:mission
+# In Codex, type $ and select the speq:mission skill
 ```
 
 ## Update
@@ -179,7 +179,7 @@ rustup update
 
 7. Restart Codex and invoke:
    ```
-   /speq:mission
+   # In Codex, type $ and select the speq:mission skill
    ```
 
 ### MCP server connection errors
