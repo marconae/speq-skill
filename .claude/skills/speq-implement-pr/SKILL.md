@@ -1,24 +1,24 @@
 ---
 name: speq-implement-pr
-description: "Headless follow-up to /speq-plan-pr, phased and checkpointed. Each invocation continues a plan on its feat/plan-name branch, reads the PR Lifecycle checkpoint in the plan's tasks.md, runs exactly one phase — A: implement, bump the version, commit and push; B: run the real test suites, record only if green; C: mark the PR ready — then stops. A driver or human re-invokes it until the PR is ready. Arg: plan name, PR number, or branch name."
+description: "Headless follow-up to /speq-plan-pr. Continues a plan on its feat/plan-name branch and runs it end-to-end: implements via /speq-implement, bumps the version, commits and pushes, runs the real test suites, records only if green, then opens/updates the PR and marks it ready. Resumes from the PR Lifecycle checkpoint in the plan's tasks.md if a prior run was cut off mid-flight. Arg: plan name, PR number, or branch name."
 model: sonnet
 ---
 
 # Spec Implementer, headless (Orchestrator)
 
-You are a thin orchestrator layered on top of `speq-implement`, and you execute in checkpointed phases. Your goal is:
-- Continue a plan on its existing `feat/<plan-name>` branch and drive it toward a ready PR through the existing skills, run unchanged.
+You are a thin orchestrator layered on top of `speq-implement`, and you run the pipeline end-to-end in one session. Your goal is:
+- Continue a plan on its existing `feat/<plan-name>` branch and drive it to a ready PR through the existing skills, run unchanged.
 - Gate recording on real proof: `/speq-record` runs only after the project's actual test suites are fully green.
-- Run exactly ONE phase per session, then STOP. Session termination is the cost mechanism: the API re-bills the whole transcript every turn, and only ending the session resets that. A fresh session (human `/clear` + re-invoke, or the driver's next `claude -p`) resumes from the checkpoint.
+- Survive involuntary interruption: write a checkpoint mark after each phase, so a fresh invocation resumes from the correct phase if this session is cut off (usage-limit reset, crash). The checkpoint is crash recovery, never a reason to stop deliberately.
 
-The checkpoint schema, writer table, entry-dispatch table, red path, stop-message template, and driver contract live in `references/checkpoint-protocol.md`. Read it before step 2. The checkpoint is the `## PR Lifecycle` section of `specs/_plans/<plan-name>/tasks.md`; you write every lifecycle mark except `recorded` (written by `recorder-agent`, verified by you).
+The checkpoint schema, writer table, entry-dispatch table, red path, gate/resume messages, and driver contract live in `references/checkpoint-protocol.md`. Read it before step 2. The checkpoint is the `## PR Lifecycle` section of `specs/_plans/<plan-name>/tasks.md`; you write every lifecycle mark except `recorded` (written by `recorder-agent`, verified by you).
 
-Two stop boundaries, three phases:
+Three phases, run consecutively in this session:
 
-| Phase | Work | Ends with |
-|-------|------|-----------|
-| A | blocker check → `/speq-implement` → version bump + build → commit + push evidence | STOP |
-| B | real test suites → `/speq-record` (green only) | STOP |
+| Phase | Work | Then |
+|-------|------|------|
+| A | blocker check → `/speq-implement` → version bump + build → commit + push evidence | continue to B |
+| B | real test suites → `/speq-record` (green only) | continue to C |
 | C | `ship-ready` → verification comment → `pr-ready` mark | final report (terminal) |
 
 You must follow this workflow:
@@ -59,7 +59,7 @@ Delegate to git-agent — operation: create-branch
 
 ### 2. Checkpoint Dispatch (orchestrator)
 
-Read the checkpoint and jump to exactly one phase per the entry-dispatch table in `references/checkpoint-protocol.md`. When the table calls for it, pre-create `specs/_plans/<plan-name>/tasks.md` with only the H1 and the `## PR Lifecycle` section, and mark `[x] resolved`. Run only the phase the dispatch selects — never a later one because "the session still has room".
+Read the checkpoint and enter at the phase the entry-dispatch table in `references/checkpoint-protocol.md` selects. When the table calls for it, pre-create `specs/_plans/<plan-name>/tasks.md` with only the H1 and the `## PR Lifecycle` section, and mark `[x] resolved`. The dispatch decides where execution enters, not where it stops: from the entry phase, run each remaining phase in order in this same session. If dispatch finds marks already set (a prior run was cut off), report which marks are `[x]` and which phase this run resumes into, then continue normally.
 
 ### Phase A: Implement + Commit
 
@@ -73,27 +73,28 @@ Read the checkpoint and jump to exactly one phase per the entry-dispatch table i
 
 ```
 Delegate to git-agent — operation: commit
-  paths: implementation files, version bump, the plan directory
-         (tasks.md, review-findings.md, verification-report.md)
+  paths: implementation files, version bump, specs/_plans/<plan-name>/
+         (the whole plan directory — not an itemized subset, so new
+         artifacts ride along automatically)
   message: <type>(<scope>): implement <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
 
 Delegate to git-agent — operation: push
 ```
 
-**A5. STOP.** Do not begin Phase B in this session. Report per the protocol's stop-message template (checkpoint: `version-bumped`).
+**A5. Continue** — proceed directly into Phase B in this same session.
 
 ### Phase B: Test + Record
 
 **B1. Run suites** — run the project's real test suites (per `specs/mission.md § Commands` — typically an integration suite and an end-to-end suite), redirecting each suite's output to a log: `mkdir -p target && <suite-command> > target/speq-<suite>.log 2>&1`. Judge green/red by exit code; when reporting failures, quote at most `tail -n 30` of the relevant log.
 - **All green** → mark `[x] tested-green`, continue with B2.
-- **Any suite red** → mark `- [~] tested-green — red: <failed suites> (logs: target/speq-<suite>.log)`, report the failures, and **stop** — leave the plan unrecorded.
-- On red-path re-entry (`[~]` at dispatch), re-run the suites only, per the protocol — never re-enter `/speq-implement` from here.
+- **Any suite red** → mark `- [!] tested-green — red: <failed suites> (logs: target/speq-<suite>.log)`, report the failures, and **stop** — leave the plan unrecorded.
+- On red-path re-entry (`[!]` at dispatch), re-run the suites only, per the protocol — never re-enter `/speq-implement` from here.
 
 **B2. Record** — invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision.
 
 **B3. Verify the recorded mark** — parse the `Archive:` path from `/speq-record`'s return. Check that `<archive-path>/tasks.md` has `- [x] recorded`; write the mark yourself if it is absent (covers a stale `recorder-agent`).
 
-**B4. STOP.** Do not begin Phase C in this session. Report per the protocol's stop-message template (checkpoint: `recorded`, at the archive path).
+**B4. Continue** — proceed directly into Phase C in this same session.
 
 ### Phase C: Ship
 
@@ -123,16 +124,18 @@ Delegate to git-agent — operation: comment-pr
         they are already in the branch's history.
 ```
 
-**C3. Finish** — mark `[x] pr-ready` at `specs/_recorded/*-<plan-name>/tasks.md`, then report the finished PR and leave it for human review. This is the terminal phase — no stop-to-continue. Re-entry after a crash between C1 and C3 is safe: `ship-ready`'s commit no-ops on nothing-to-commit, and its create-pr/ready-pr steps reuse the existing PR.
+**C3. Finish** — mark `[x] pr-ready` at `specs/_recorded/*-<plan-name>/tasks.md`, then report the finished PR and leave it for human review. Re-entry after a crash between C1 and C3 is safe: `ship-ready`'s commit no-ops on nothing-to-commit, and its create-pr/ready-pr steps reuse the existing PR.
 
 ## Spec Hierarchy (reference)
 
 ```
 specs/
 ├── <domain>/<feature>/spec.md            # Permanent (after record)
-├── _plans/<plan-name>/                   # Active until recorded
+├── _plans/<plan-name>/                   # Active until recorded — committed whole at Phase A, not as an itemized subset
 │   ├── tasks.md                          # Pre-created here (§ PR Lifecycle checkpoint); WBS filled by speq-implement
 │   ├── review-findings.md                # Created by code-reviewer
+│   ├── review/round-N.md                 # Created by plan-reviewer
+│   ├── notes/<group-letter>.md           # Rotation hand-off notes, created by implementer agents
 │   └── verification-report.md            # Created by speq-implement
 └── _recorded/NNN-<plan-name>/            # Archived by speq-record (gitignored by default)
 ```
@@ -150,7 +153,6 @@ specs/
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Running a second phase in the same session | The STOP is the mechanism — only session termination resets the transcript cost the phases exist to cap |
 | Treating `## PR Lifecycle` entries as work items | They are checkpoints; they are unnumbered exactly so task dispatch skips them |
 | Letting a sub-agent write lifecycle marks | Marks are orchestrator-written, except `recorded` (recorder-agent, per the writer table) |
 | Proceeding past a non-empty open-questions.md | The human-in-the-loop gate lives at A1 |

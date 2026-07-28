@@ -35,7 +35,7 @@ The main agent acts as **orchestrator**:
 
 **Rotation rule:** sub-agents checkpoint after every 2-3 tasks (expert: 1-2). When a sub-agent has completed `max_tasks_per_agent` (default 5) tasks, or returns `ROTATION NEEDED`, read tasks.md for current state, note the completed tasks from the sub-agent's return, and spawn a fresh agent of the SAME type with the remaining tasks. Continue until the group is complete.
 
-**Rotation hand-off:** the outgoing agent leaves a hand-off note at `specs/_plans/<plan-name>/notes/<group>.md` (its own duty, per its Early Termination section). Add one line to the fresh agent's brief: `Orientation: read specs/_plans/<plan-name>/notes/<group>.md first`. If the note is absent, omit the line. The note transfers the outgoing agent's mental model — without it, the fresh agent rebuilds the same orientation from cold files. The note lives inside the plan directory, so `/speq-record`'s archive step removes it with the rest of the plan; it is working state, never committed evidence.
+**Rotation hand-off:** the outgoing agent leaves a hand-off note at `specs/_plans/<plan-name>/notes/<group-letter>.md`, where `<group-letter>` is the group's letter only — the token before the `:` in its Parallelization-table `Group` entry (group `A: plan-log validation` → `notes/A.md`), never the full group name and never a slug of it (its own duty, per its Early Termination section). Add one line to the fresh agent's brief: `Orientation: read specs/_plans/<plan-name>/notes/<group-letter>.md first`. If the note is absent, omit the line. The note transfers the outgoing agent's mental model — without it, the fresh agent rebuilds the same orientation from cold files. The note lives inside the plan directory, so `/speq-record`'s archive step removes it with the rest of the plan; it is working state, never committed evidence.
 
 ## Workflow
 
@@ -105,7 +105,7 @@ For each parallel group in plan's `## Parallelization`:
 2. **Mark started** — Update tasks.md: `[ ]` → `[~]`
 3. **Spawn one subagent for the group** — use the matching invocation template below. If the plan's Parallelization table has a `Knowledge` column, copy the group's entry into the brief's `Knowledge:` line — it names the spec deltas and files the agent reads first, replacing a cold search
 4. **Await completion** — The sub-agent returns with results or a rotation signal
-5. **Handle rotation** — Apply the Rotation rule and Rotation hand-off above: fresh agent of the SAME type, remaining group tasks, orientation line pointing at `notes/<group>.md`
+5. **Handle rotation** — Apply the Rotation rule and Rotation hand-off above: fresh agent of the SAME type, remaining group tasks, orientation line pointing at `notes/<group-letter>.md` (the group's letter only, per the hand-off rule)
 6. **Mark completed** — Update tasks.md: `[~]` → `[x]` (preserve `[expert]` tag)
 7. **Update TaskTools** — `TaskUpdate(taskId, status: "completed")`
 8. **Next group** — Proceed to next parallel group once its dependencies are complete
@@ -124,7 +124,7 @@ Delegate to implementer-agent — Implement <group-name>
 - Plan: specs/_plans/{plan_name}/plan.md
 - Tasks file: specs/_plans/{plan_name}/tasks.md
 - Knowledge: <the group's Knowledge entry from the plan's Parallelization table — read these spec deltas and files first; omit this line if the plan has no Knowledge column>
-- Orientation: read specs/_plans/{plan_name}/notes/<group>.md first <rotation respawns only; omit otherwise>
+- Orientation: read specs/_plans/{plan_name}/notes/<group-letter>.md first <rotation respawns only; <group-letter> is the group's letter only, the token before ":" in its Group entry — e.g. notes/A.md; omit otherwise>
 - Update tasks.md after each task completion (preserve task numbering)
 - Report checkpoint after every 2-3 tasks
 - Project Hook: <if active, ".speq/implement-hook.md — read it and apply it"; otherwise omit this line>
@@ -144,7 +144,7 @@ Delegate to implementer-expert-agent — Implement <group-name>
 - Plan: specs/_plans/{plan_name}/plan.md
 - Tasks file: specs/_plans/{plan_name}/tasks.md
 - Knowledge: <the group's Knowledge entry from the plan's Parallelization table — read these spec deltas and files first; omit this line if the plan has no Knowledge column>
-- Orientation: read specs/_plans/{plan_name}/notes/<group>.md first <rotation respawns only; omit otherwise>
+- Orientation: read specs/_plans/{plan_name}/notes/<group-letter>.md first <rotation respawns only; <group-letter> is the group's letter only, the token before ":" in its Group entry — e.g. notes/A.md; omit otherwise>
 - The untagged tasks in the list are yours too — the group routes as one unit
 - Preserve the [expert] tag when updating status markers
 - Checkpoint after every 1-2 tasks (expert tasks are heavier)

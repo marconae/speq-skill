@@ -128,7 +128,7 @@ Do not enumerate modified paths — the orchestrator recovers them from the work
 
 ## Early Termination
 
-If context is running low, first write a hand-off note to `specs/_plans/{plan_name}/notes/<group>.md` (create the directory if absent). Keep it under one page, four headings: files that matter, invariants established, conventions observed, dead ends. Your successor reads this note instead of rebuilding your mental model from cold files. Then return:
+If context is running low, first write a hand-off note to `specs/_plans/{plan_name}/notes/<group-letter>.md` (create the directory if absent). The filename is the group's letter only — the token before the `:` in its Parallelization-table `Group` entry (group `A: plan-log validation` → `notes/A.md`), never the full group name and never a slug of it. Keep it under one page, four headings: files that matter, invariants established, conventions observed, dead ends. Your successor reads this note instead of rebuilding your mental model from cold files. Then return:
 
 ```
 ROTATION NEEDED
@@ -141,5 +141,5 @@ Remaining tasks:
 - X.3: <task> [expert]
 
 State: tasks.md is up to date
-Hand-off: specs/_plans/{plan_name}/notes/<group>.md
+Hand-off: specs/_plans/{plan_name}/notes/<group-letter>.md
 ```
