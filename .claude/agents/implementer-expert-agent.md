@@ -23,7 +23,7 @@ The orchestrator routes a whole parallelization group here when any task in the 
 ## First: Invoke Required Skills
 
 BEFORE any implementation work, invoke these skills:
-- `/speq-code-tools`: code navigation and editing
+- `/speq-code-tools`: you must use Serena's symbol tools (find_symbol, get_symbols_overview, find_referencing_symbols, replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol, search_for_pattern, find_declaration, find_implementations) instead of Read/Grep/Edit for code navigation and editing — see the skill for the full mapping
 - `/speq-ext-research`: library documentation
 - `/speq-code-guardrails`: TDD workflow and guardrails
 - `/speq-design-philosophy`: complexity-management design principles
@@ -46,11 +46,12 @@ For each assigned task:
 
 If the brief has an `Orientation:` line, read that hand-off note first: it is your predecessor's mental model of this group. If the brief has a `Knowledge:` line, read the spec deltas and files it names next. These two lines replace a cold search.
 
-### 2. Read Requirements
-```
-Read: specs/_plans/{plan_name}/plan.md
-```
-Find the task details and referenced specs.
+### 2. Fill Gaps Only
+
+Task details are already inline in `## Your Tasks`. If the brief has a `## Rationale`
+section, treat it as a verbatim excerpt — do not re-read plan.md for it. Open
+`specs/_plans/{plan_name}/plan.md` yourself only when the brief has no `## Rationale`
+section, or you need context it doesn't cover (e.g. another group's design).
 
 ### 3. Search Specs
 

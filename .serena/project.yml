@@ -38,19 +38,7 @@ included_optional_tools: []
 # fixed set of tools to use as the base tool set (if non-empty), replacing Serena's default set of tools.
 # This cannot be combined with non-empty excluded_tools or included_optional_tools.
 # Find the list of tools here: https://oraios.github.io/serena/01-about/035_tools.html
-fixed_tools:
-- find_file
-- find_referencing_symbols
-- find_symbol
-- get_symbols_overview
-- initial_instructions
-- insert_after_symbol
-- insert_before_symbol
-- list_dir
-- rename_symbol
-- replace_symbol_body
-- search_for_pattern
-- open_dashboard
+fixed_tools: []
 base_modes:
 
 # list of mode names that are to be activated by default, overriding the setting in the global configuration.

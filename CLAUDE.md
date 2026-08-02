@@ -1,21 +1,20 @@
-# Local Development Rules
-
-You are building `speq-skill` while using it: the skills in `.claude/skills/` are simultaneously this repo's dev tooling and the source that `scripts/plugin/build.sh` compiles into the Claude and Codex plugin.
+# speq-skill: Local Development Rules
 
 ## Rules
 
-- **CLI**: always invoke the local build — `./target/debug/speq <cmd>` (or `./target/release/speq <cmd>` after a release build). Never the global `speq` or `cargo run --`.
-- **Skill names are context-specific**: `/speq-*` in this repo, `/speq:*` in the installed plugin. `build.sh` performs the `speq-*` → `speq:*` rename, drops the `speq-` folder prefix, and stamps version + author from `Cargo.toml`.
-- **Version**: `Cargo.toml` is the single source of truth. `scripts/lib/version.sh` (`get_version`) feeds `build.sh` and the docker tests — never hard-code the version anywhere else.
-- **Tests**: integration tests SHALL use fixtures under `tests/fixtures/`, not inline spec strings.
-- **Git**: only the headless orchestrators `speq-plan-pr`/`speq-implement-pr` write git history or touch the remote, running the operations directly per `/speq-git-operations`. Every sub-agent and every interactive skill stays read-only toward git (`/speq-git-discipline`).
-- **Commits** follow Conventional Commits — `<type>[scope]: <description>` (+ optional body/footer). Types: `feat` (MINOR), `fix` (PATCH), `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Breaking change = `!` after type/scope or a `BREAKING CHANGE:` footer (MAJOR).
-- **Expert tasks**: `planner-agent` marks reasoning-heavy `tasks.md` lines `[expert]`; `speq-implement` routes those to `implementer-expert-agent`, the rest to `implementer-agent`. Tag sparingly.
-- **Model routing** is hardcoded in each skill/agent frontmatter and stamped by `build.sh` — see `docs/model-routing.md`.
-- **Markdown prose**: never artificially word-wrap prose in Markdown files. Write one logical line per paragraph and list item (soft-wrap) so diffs stay line-per-thought and reflows don't churn. Do not join fenced code, tables, ASCII diagrams, YAML frontmatter, or structured `**Field:**` lines.
-- **Mission scope**: `specs/mission.md` is the mission for the `speq` CLI only — not for the skills. Skill purpose and intent live in the skill files and `docs/`.
+- **Mental model**: this repo builds speq-skill while it uses speq-skill. `.claude/skills/` is both dev tooling and the source `scripts/plugin/build.sh` compiles into the plugin.
+- **CLI**: use the local build only — `./target/debug/speq <cmd>` (`./target/release/speq <cmd>` after a release build). Do not use the global `speq` or `cargo run --`.
+- **Skill names**: use `/speq-*` in this repo. The installed plugin uses `/speq:*`. `build.sh` renames them. Do not rename by hand.
+- **Version**: `Cargo.toml` is the only source of the version number. Read it through `scripts/lib/version.sh` (`get_version`). Do not hardcode the version anywhere else.
+- **Tests**: put integration test specs in files under `tests/fixtures/`. Do not write specs as inline strings.
+- **Commits**: use Conventional Commits — `<type>[scope]: <description>`. Types: `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Mark a breaking change with `!` after the type, or a `BREAKING CHANGE:` footer.
+- **Markdown**: keep one line per paragraph and per list item in prose. Do not wrap prose to a fixed width. Fenced code, tables, diagrams, YAML frontmatter, and `**Field:**` lines keep their own line breaks.
+- **Mission**:
+    - @specs/mission.md applies and describes the `speq` CLI only.
+    - Skill purpose and intent live in the skill files and `docs/`.
 
 ## Commands
 
 - Build the plugin: `./scripts/plugin/build.sh`
-- Release artifact build / test: `./scripts/release/build.sh <vX.Y.Z>` · `./scripts/release/test.sh <vX.Y.Z>`
+- Build a release artifact: `./scripts/release/build.sh <vX.Y.Z>`
+- Test a release artifact: `./scripts/release/test.sh <vX.Y.Z>`

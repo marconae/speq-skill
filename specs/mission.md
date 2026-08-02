@@ -59,7 +59,12 @@ speq provides structural verification and exploration tools so AI agents can rel
 | Inference | tract-onnx | Pure-Rust ONNX inference for semantic search (no native runtime required) |
 | Tokenization | tokenizers | Fast tokenization for embedding inputs |
 | Errors | thiserror 2 | Ergonomic error type definitions |
+| Serialization | serde, serde_json | Serialize embedding-index and metadata structures |
+| Serialization | postcard | Compact binary format for the cached embedding index |
+| Platform paths | dirs | Resolve the platform cache directory for the embedding model and index |
+| Parallelism | rayon | Parallel iteration for search indexing and query |
 | Testing | assert_cmd, predicates, tempfile | CLI integration testing |
+| Testing | serial_test | Serialize tests that share process-global state (e.g. the cache directory) |
 
 ## Commands
 
@@ -81,13 +86,8 @@ cargo llvm-cov
 
 ```
 speq-skill/
-├── src/                  # Application source
-│   ├── main.rs           # Entry point and command handlers
-│   ├── cli.rs            # CLI structure (clap derive)
-│   ├── validate/         # Spec validation (parser, rules, report)
-│   ├── feature.rs        # Feature discovery and listing
-│   ├── tree.rs           # Tree view formatting
-│   └── record.rs         # Delta recording logic
+├── src/                  # One module per capability: CLI parsing, spec validation,
+│                         # feature discovery, search/embedding, plan management, delta recording
 ├── specs/                # Feature specifications
 │   ├── <domain>/         # Domain grouping
 │   │   └── <feature>/    # Feature directory
@@ -109,6 +109,8 @@ Simple modular CLI organized by feature. Each module handles a distinct capabili
 - `tree` — Tree view output formatting
 - `plan` — Plan discovery, listing, and delta validation
 - `record` — Delta merging and plan archiving
+- `embedding` — Embedding model loading and vector generation for semantic search
+- `search` — Semantic search over spec scenarios
 
 Data flows from CLI arguments → module handlers → formatted output.
 

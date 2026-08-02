@@ -102,7 +102,7 @@ For each parallel group in plan's `## Parallelization`:
 
 1. **Route the whole group by its hardest task.** Any `[expert]` task routes the whole group to `implementer-expert-agent`. Otherwise the whole group goes to `implementer-agent`. One agent per group. Never split a group by tag: a group is one knowledge cluster, and each extra agent rebuilds the same mental model, which costs more than the model-price difference.
 2. **Mark started**: update tasks.md, `[ ]` → `[~]`.
-3. **Spawn one sub-agent for the group** with the matching invocation template below. If the plan's Parallelization table has a `Knowledge` column, copy the group's entry into the brief's `Knowledge:` line.
+3. **Spawn one sub-agent for the group** with the matching invocation template below. If the plan's Parallelization table has a `Knowledge` column, copy the group's entry into the brief's `Knowledge:` line. If the plan has a `## Design` section with content specific to this group (Decision paragraph(s), Consequences row(s)), paste that excerpt verbatim into the brief's `## Rationale` section — the orchestrator already read the full plan once in Phase 1; don't make the sub-agent reread it for this. Omit `## Rationale` entirely when nothing in `## Design` is group-specific.
 4. **Await completion**: the sub-agent returns results or a rotation signal.
 5. **Handle rotation**: apply the Rotation rule and Rotation hand-off above.
 6. **Mark completed**: update tasks.md, `[~]` → `[x]` (preserve the `[expert]` tag).
@@ -117,6 +117,12 @@ Delegate to implementer-agent — Implement <group-name>
 ## Your Tasks (the whole group)
 
 {group_task_list}
+
+## Rationale
+
+<verbatim excerpt from plan.md's ## Design > Decision/Consequences that explains why
+this group's tasks are shaped this way. Omit this section if the plan has no
+## Design section or nothing in it is specific to this group.>
 
 ## Context
 
@@ -137,6 +143,12 @@ Delegate to implementer-expert-agent — Implement <group-name>
 ## Your Tasks (the whole group — routed to you for its [expert] tasks)
 
 {group_task_list}
+
+## Rationale
+
+<verbatim excerpt from plan.md's ## Design > Decision/Consequences that explains why
+this group's tasks are shaped this way. Omit this section if the plan has no
+## Design section or nothing in it is specific to this group.>
 
 ## Context
 
@@ -271,3 +283,4 @@ If context is lost or compacted:
 | Marking `[x]` without a sub-agent completion return | Only verified completions are done |
 | A second code-review round | Review runs once; Phase 5 verifies the fixes |
 | Skipping the verification report | `/speq-record` gates on it |
+| Pointing a sub-agent at plan.md for rationale instead of inlining the group's excerpt | Full-file reads repeat per sub-agent; the orchestrator already read the plan once in Phase 1 |
