@@ -24,11 +24,8 @@ For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/L
 | Law of Demeter | speq-code-guardrails | Design principles |
 | Boy Scout Rule | speq-code-guardrails | Code quality |
 | Five Whys | speq-code-guardrails | Root cause analysis |
-| Feynman Technique | speq-code-tools | Comprehension |
-| Evidence Hierarchy | speq-ext-research | Research |
 | Conventional Commits | speq-git-discipline | Version control |
 | Work Breakdown Structure | speq-implement | Task decomposition |
-| Pyramid Principle | speq-implement | Communication |
 | BLUF (Bottom Line Up Front) | speq-implement | Reporting |
 | Socratic Method | speq-mission | Interview |
 | User Story Mapping (Patton) | speq-mission | Requirements |
@@ -53,4 +50,3 @@ For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/L
 | Dependency Rule (Clean Architecture / Martin) | speq-design-philosophy | Design principles |
 | Rule of Three | speq-code-guardrails | Design principles |
 | Command-Query Separation | speq-code-guardrails | Design principles |
-| F.I.R.S.T. | speq-code-guardrails | Testing |
