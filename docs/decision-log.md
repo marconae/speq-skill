@@ -32,7 +32,7 @@ ADRs are rare. The `## Design` section of `plan.md` is not an ADR: it describes 
 - The default is `Promotes to ADR: no`. The expected count of `yes` entries per plan is zero. Two or more get re-judged.
 - `yes` needs one criterion: the decision affects multiple components or teams, sets a long-lived constraint, is a major technology, API, persistence, security, or deployment choice, or rejects a plausible alternative. The entry's Rationale names the criterion.
 - Search first. Run `speq decision-log show` and state the result in Rationale. To change an existing ADR, write a new one with a `Supersedes:` line.
-- Some content is never an ADR: naming, file placement, one-off fixes, scope trims, implementation detail, and plan-specific workarounds. Conventions go to `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or mission Constraints. HOW this plan builds goes to `plan.md` `## Design`.
+- Some content is never an ADR: naming, file placement, one-off fixes, scope trims, implementation detail, and plan-specific workarounds. Conventions go to `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or mission Constraints. HOW this plan builds goes to `plan.md` `## Design`. WHAT the system is goes to `specs/architecture.md`, changed through an architecture delta. An ADR records why. `specs/architecture.md` records what is.
 - One ADR records one decision. Decision holds no signatures, paths, or flags.
 - A corollary of an already-promoted decision is not its own entry. It is a bullet in that parent entry's `Consequences` line.
 

@@ -32,7 +32,7 @@ The speq-skill workflow starts with a one-time **Mission** bootstrap, then repea
 
 ## `/speq:mission`
 
-Generate `specs/mission.md` through an interactive interview. Run once per project.
+Generate `specs/mission.md` and the first `specs/architecture.md` through an interactive interview. Run once per project.
 
 **When to use:** to start a new project with speq-skill, or to add specs to an existing codebase.
 
@@ -41,7 +41,7 @@ Generate `specs/mission.md` through an interactive interview. Run once per proje
 1. **Project type** — Determines whether the project is brownfield (existing code) or greenfield (new project)
 2. **Exploration** — For brownfield projects, explores the tech stack, commands, and structure
 3. **Interview** — Asks clarifying questions about purpose, users, and capabilities
-4. **Generation** — Creates `specs/mission.md` with all gathered information
+4. **Generation** — Creates `specs/mission.md` and `specs/architecture.md` with all gathered information
 
 ### Interview topics
 
@@ -57,10 +57,11 @@ The agent covers 11 areas. It groups related questions to keep the interview foc
 | Tech Stack | Language, runtime, framework, database, and testing |
 | Commands | Build, test, lint/format, and coverage |
 | Project Structure | Directory layout and purpose of each directory |
-| Architecture | High-level pattern, key components, and data flow |
-| Constraints | Technical, business, and performance limits |
-| External Dependencies | Services or APIs that the project depends on |
+| Architecture | High-level pattern, key components, and data flow. The answer goes to `specs/architecture.md` |
+| Constraints | Technical, business, and performance limits. Business limits stay in `mission.md`. Technical and performance limits go to `specs/architecture.md` |
+| External Dependencies | Services or APIs that the project depends on. The answer goes to `specs/architecture.md` |
 
+If `specs/architecture.md` already exists, the agent skips the Architecture, technical and performance Constraints, and External Dependencies topics. Change the architecture through `/speq:plan`. If the file is missing and `mission.md` still holds the old sections, the agent runs a one-time migration interview seeded from them.
 > [!NOTE]
 > `/speq:mission` runs once per project. The next three steps form the repeating development cycle.
 
@@ -77,11 +78,14 @@ Create feature spec deltas and an implementation plan, staged in `specs/_plans/<
 ```
 specs/_plans/<plan-name>/
 ├── plan.md                           # Implementation plan
+├── architecture.md                   # Architecture delta (optional)
 ├── decision-log.md                   # Design decisions (optional)
 └── <domain>/<feature>/spec.md        # Delta specs
 ```
 
 `planner-agent` creates `decision-log.md` during the planning interview. The file records the questions, answers, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are proposed at plan time. `/speq:record` accepts them and writes each one as an ADR in a new `specs/_decision/NNN-<plan-name>.md` fragment. The default is `no`, and most plans promote nothing. Promotion needs a named criterion and a search of the existing decision log. To drop a proposed ADR, set the entry to `no` and run `/speq:plan` again. `/speq:adr-rules` holds the rules. See [Decision Log](./decision-log.md).
+
+A plan that changes the system's components, boundaries, interfaces, data flow, constraints, or external dependencies also writes `architecture.md`. It is a delta against `specs/architecture.md`, with a BASE hash of the file it was written against. An ADR that names one of the first three ADR criteria forces the delta. `plan-reviewer` raises `[ARCHITECTURE_DRIFT]` as a BLOCKER when the delta is missing or breaks its format.
 
 Before handoff, `plan-reviewer` challenges the plan on intent fidelity, feasibility, requirement quality, task breakdown, and prose. It tags each BLOCKER `HUMAN` or `MECHANICAL`. `HUMAN` means: irreversible or user-facing, a genuine architectural fork with no clear winner, security/compliance, or a fact nothing in the plan or codebase can settle. Everything else — a spec inconsistency, a stale citation, an assumption the codebase itself can verify — is `MECHANICAL`. `planner-agent` fixes every BLOCKER from round 1; a second adversarial round only runs if round 1 raised at least one `HUMAN` finding — an all-`MECHANICAL` round 1 ships after one fix-and-validate pass, no second round. A `MECHANICAL` remainder after round 2 gets one more direct fix pass (routed to you only if that pass itself can't close it); only a `HUMAN` remainder reaches you. `planner-agent` logs resolved blockers as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`, almost never promoted to an ADR, and never one ADR per resolved finding. ADVISORY findings and Design Decisions never post as a PR comment — by definition they don't need your attention, so they stay in `review/round-N.md`/`decision-log.md`, reachable through the PR body's collapsed detail section. Only an open `HUMAN` question ever reaches you as a comment.
 
@@ -149,7 +153,8 @@ Merge implemented spec deltas into the permanent spec library.
 5. **Validate** — Runs `speq feature validate`
 6. **Check thresholds** — Flags any feature with more than 10 scenarios, or any domain with more than 8 features, and asks you how to split it. It never reorganizes without your decision
 7. **Accept decisions** — Writes entries marked `Promotes to ADR: yes` in `decision-log.md` to a new `specs/_decision/NNN-<plan-name>.md` fragment with `Status: Accepted`. Recording is the acceptance
-8. **Archive** — Moves the plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
+8. **Merge architecture delta** — If the plan holds `architecture.md`, checks it and its BASE hash before any feature merge, then applies its section blocks to `specs/architecture.md` and checks the result. A stale base or a format error stops the record before archiving with `Recording failed: architecture delta: ...`. Without a delta the step reports `Architecture: no delta`
+9. **Archive** — Moves the plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
 
 ---
 
@@ -169,6 +174,8 @@ Merge implemented spec deltas into the permanent spec library.
 - **One branch per plan**: `feat/<plan-name>`, created by `/speq:plan-pr` and reused by `/speq:implement-pr`. Both push to the same PR. There is no separate plan-only branch.
 - **Blocked state**: If planning hits a decision that needs a human, the system writes `specs/_plans/<plan-name>/open-questions.md` and flags `plan.md` as blocked. This applies to irreversible decisions, decisions that diverge from the architecture, and decisions relevant to security or compliance. The PR opens as a draft, with the questions posted as a comment. `/speq:implement-pr` refuses to continue while this file exists.
 - **Resuming**: Reply on the PR, then re-run `/speq:plan-pr <plan-name>`. It re-fetches new comments and reviews as answers. Or check out the branch and finish the plan interactively with `/speq:plan <plan-name>`.
+- **Architecture delta**: `/speq:plan-pr` writes the delta when the plan changes the architecture. The PR body carries one `Architecture:` line with the changed sections. `/speq:implement-pr` stages `specs/architecture.md` after recording and rewrites the line to `Architecture: merged into specs/architecture.md: <sections>`.
+- **Record failure**: If `/speq:record` returns `Recording failed: <reason>` (for example a stale architecture delta base), `/speq:implement-pr` stops with `Blocked: record failed: <reason>` and leaves `recorded` unmarked. A re-invocation resumes at the record step.
 - **Headless defaults**: `/speq:implement-pr` auto-answers **yes** to the library-split question of `/speq:record`.
 - **End-to-end with a resumable checkpoint**: One `/speq:implement-pr` invocation runs all three phases in sequence: A (implement and commit), B (test and record), and C (ship-ready). It normally ends at a ready PR. Each phase writes a mark to the `## PR Lifecycle` section in the `tasks.md` file of the plan. If a run is interrupted — for example, by a usage-limit reset or a crash — a fresh invocation in the same working directory reads the marks. It then resumes from the correct phase. The checkpoint gives interruption resilience. It is not a contract for multiple invocations.
 - **PR title and lifecycle**: The PR title uses a conventional-commit feature title `<type>(<scope>): <slug>`, derived from the plan name — for example, `add-search-candle` becomes `feat(search): add search candle`. This differs from the `spec(plan):` commit prefix. `/speq:plan-pr` opens the PR as a **draft**. `/speq:implement-pr` marks it **ready** once the implementation is pushed.
@@ -185,7 +192,7 @@ Health-check a speq project in one read-only pass, then fix each finding after i
 - To inherit or clone a speq project, and to check its state
 - To check for spec-library drift on a regular basis
 
-**Checks:** spec-library `<domain>/<feature>` structure, `speq feature validate`, decision-log format and validity, ADR noise and accuracy (delegated to `adr-audit-agent`), sync between `mission.md` and the spec library (delegated to `audit-agent`), unrecorded plans in `_plans/`, gitignore hygiene (`_recorded` ignored, `_decision` and `_plans` tracked), recorded-folder naming, library thresholds, and git hygiene.
+**Checks:** spec-library `<domain>/<feature>` structure, `speq feature validate`, decision-log format and validity, ADR noise and accuracy (delegated to `adr-audit-agent`), sync between `mission.md` and the spec library (delegated to `audit-agent`), the architecture file (present, structurally valid, and `mission.md` free of the old architecture sections), unrecorded plans in `_plans/`, gitignore hygiene (`_recorded` ignored, `_decision` and `_plans` tracked), recorded-folder naming, library thresholds, and git hygiene.
 
 **Output:** a BLUF summary — a verdict, a `✓/✗/⚠` checks table, and numbered remediations. Structural fixes (migrate an old `decision-log.md`, restructure domains), the removal of noise ADRs, and the `/speq:mission` handoff for mission drift run only after you confirm.
 

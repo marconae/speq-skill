@@ -14,6 +14,7 @@ Specs live in a two-level hierarchy under `specs/`:
 
 ```
 specs/
+├── architecture.md
 ├── <domain>/
 │   └── <feature>/
 │       └── spec.md
@@ -26,6 +27,8 @@ specs/
     └── invoice-generation/
         └── spec.md
 ```
+
+`specs/architecture.md` holds the current architecture of the project. It is one file at the root and the library commands do not list it. Plans change it through an optional `architecture.md` delta, and `/speq:record` merges it.
 
 Every `spec.md` has five required parts:
 

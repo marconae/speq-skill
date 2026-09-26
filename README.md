@@ -77,19 +77,19 @@ It introduces a lightweight workflow for spec-driven development. It adds a CLI 
 ## How Does it Work?
 
 ```
-/speq:mission → specs/mission.md (once per project)
+/speq:mission → specs/mission.md + specs/architecture.md (once per project)
                        │
       ┌────────────────┼────────────────┐
       ▼                ▼                ▼
 /speq:plan  →  /speq:implement  →  /speq:record  (repeat)
 ```
 
-1. **Mission** — Do it once. The coding agent explores your codebase (or interviews you for a greenfield project) and generates `specs/mission.md`.
+1. **Mission** — Do it once. The coding agent explores your codebase (or interviews you for a greenfield project) and generates `specs/mission.md` and `specs/architecture.md`.
 2. **Plan** — Describe what you want. The coding agent searches existing specs, asks clarifying questions, and creates a plan with spec deltas.
 3. **Implement** — The coding agent implements the plan, guided by guardrails for code quality, testing and more.
-4. **Record** — The coding agent merges implemented spec deltas into the permanent spec library.
+4. **Record** — The coding agent merges implemented spec deltas, and the architecture delta if the plan has one, into the permanent spec library.
 
-Specs live in `specs/<domain>/<feature>/spec.md`. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
+Specs live in `specs/<domain>/<feature>/spec.md`. `specs/architecture.md` holds the current architecture. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
 
 For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the same cycle headlessly against a `feat/<plan-name>` branch and PR — see [Workflow](./docs/workflow.md#headless-pr-pipeline).
 

@@ -5,6 +5,7 @@
 - ADRs are rare by default. A new gate (`/speq:adr-rules`) admits a decision only with a named criterion. Planning lists the candidates, and recording a plan accepts them.
 - `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
 - The "project-wide process convention" ADR override is removed.
+- Skills keep the current architecture in `specs/architecture.md`. Plans change it through an architecture delta, and `/speq:record` merges it.
 
 ## 0.22.0
 
