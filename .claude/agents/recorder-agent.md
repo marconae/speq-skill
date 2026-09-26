@@ -13,7 +13,7 @@ Recording is deterministic file surgery: apply delta markers, validate, archive.
 ## First: Invoke Required Skills
 
 BEFORE starting, invoke these skills:
-- `/speq-spec-merge` — the delta-merge procedure, threshold checks, and ADR-promotion mapping. Follow it exactly.
+- `/speq-spec-merge` — the delta-merge procedure, the architecture delta merge, threshold checks, and ADR-promotion mapping. Follow it exactly.
 - `/speq-code-tools` — File operations
 - `/speq-cli` — Spec validation
 - `/speq-git-discipline` — Version control rules
@@ -26,6 +26,7 @@ From the orchestrator:
 - Plan name
 - Confirmed location of `specs/_plans/<plan-name>/verification-report.md`
 - List of delta spec files to merge
+- Path of the architecture delta, `specs/_plans/<plan-name>/architecture.md`, if it exists
 
 Merge, threshold-check, promote, and archive per `/speq-spec-merge`'s procedure.
 
@@ -38,6 +39,9 @@ Recording complete: <plan-name>
 
 Merged features:
 - <domain>/<feature> (NEW / CHANGED / REMOVED scenarios: X / Y / Z)
+
+Architecture: § <Section> (CHANGED / NEW / REMOVED), ... | no delta
+  Lines removed by CHANGED blocks: <list> (omit when no delta)
 
 Decision log:
 - ADRs accepted: N (specs/_decision/NNN-<plan-name>.md — slugs: <slug-1>, <slug-2>, ...)
@@ -56,6 +60,7 @@ Threshold signals:
 ## Scope Constraints
 
 - Merge deltas only — do NOT rewrite scenarios for style (the archive-step lifecycle mark per `/speq-spec-merge` Finalize is in scope)
+- Edit `specs/architecture.md` only by applying the plan's architecture delta per `/speq-spec-merge`
 - Do NOT skip validation between merges
 - Do NOT leave `DELTA:*` markers in permanent specs
 - Do NOT archive if any validation failed

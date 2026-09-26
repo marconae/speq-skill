@@ -51,9 +51,10 @@ Delegate to recorder-agent — Record <plan-name> into permanent specs
 - Verification report confirmed at: specs/_plans/<plan-name>/verification-report.md
 - Plan file: specs/_plans/<plan-name>/plan.md
 - Delta specs: specs/_plans/<plan-name>/**/spec.md
+- Architecture delta (optional): specs/_plans/<plan-name>/architecture.md
 
 ## Your Task
-Merge all delta specs into permanent specs per the `recorder-agent` workflow. Validate between merges. Archive the plan on success. If any library threshold is exceeded (scenarios > 10, domain features > 8), STOP before archiving and return a question for the user.
+Merge all delta specs, and the architecture delta if present, into permanent specs per the `recorder-agent` workflow. Validate between merges. Archive the plan on success. If any library threshold is exceeded (scenarios > 10, domain features > 8), STOP before archiving and return a question for the user.
 
 Project Hook: <if active, ".speq/record-hook.md — read it and apply it"; otherwise omit this line>
 
@@ -68,6 +69,8 @@ If the sub-agent returns threshold signals:
 2. Respawn `recorder-agent` with the decision, OR apply a trivial edit (for example, a file rename) directly
 3. Archive only after all decisions are resolved
 
+If the sub-agent returns `Recording failed: architecture delta: ...`, do not respawn it and do not fix the delta yourself. The plan stays unarchived. Report the message to the user and stop. The fix is a plan change: correct `architecture.md` in the plan, or refresh its BASE after a stale-base error.
+
 ### Phase 5: Confirm Completion (orchestrator)
 
 Report to user:
@@ -77,6 +80,7 @@ Report to user:
 ✓ All deltas merged
 ✓ Spec library validated
 ✓ Plan archived: specs/_recorded/NNN-<plan-name>
+✓ Architecture merged: <sections>   (omit when no delta)
 ✓ ADRs accepted: N — <slugs>   (omit when none)
 ```
 
@@ -98,3 +102,4 @@ The split preserves rotation discipline: the orchestrator can respawn the sub-ag
 | Assume split/domain decisions | User must confirm |
 | Skip validation | Broken specs may result |
 | Leave DELTA markers | Pollutes permanent specs |
+| Archive after an architecture delta failure | The delta was not merged, so the plan must stay open |
