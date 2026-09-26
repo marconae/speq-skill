@@ -1,228 +1,162 @@
 # Changelog
 
+## 0.23.0
+
+- ADRs are rare by default. A new gate (`/speq:adr-rules`) admits a decision only with a named criterion. Planning lists the candidates, and recording a plan accepts them.
+- `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
+- The "project-wide process convention" ADR override is removed.
+
 ## 0.22.0
 
-- Serena now starts via a `serena` command installed once with `uv tool install -p 3.13 serena-agent`, instead of a per-start `uvx` fetch from its git repository. The installer provisions the tool (optional, non-fatal if `uv` is absent) and replaces a stale git-sourced Codex registration on re-run.
-- `Promotes to ADR: yes` now requires a behavior, architecture, or design change; a workflow or procedural decision defaults to `no` unless it sets a binding project-wide convention. A minor decision now records as a short-form ADR (no `Options Considered`/`Consequences`). `plan-reviewer` gains `[IMPLEMENTATION_LEAKAGE]` (a spec Background states a fact no scenario depends on) and `[ADR_OVERPROMOTION]` (an entry fails the new gate).
-- Folded `specs/_decision/001-*.md`, `003-*.md`, and `005-*.md` from 19 ADRs down to 10 under the new gate, correcting a stale fact along the way (the embedding model installs from HuggingFace, not GitHub release assets)
-- `/speq:audit` gains an ADR noise check. The new `adr-audit-agent` (`fable`/`high`, `gpt-5.5` on Codex) reads every ADR under `specs/_decision/`, tags each `KEEP`, `NOISE-*`, `STALE`, or `UNSURE` against the promotion gate, and checks each remaining ADR's claims against the code. After a Yes, the orchestrator folds corollaries into their parent, removes the noise ADRs, and re-runs `speq decision-log validate`. `STALE` and `UNSURE` ADRs are report-only
-- Nine writing rules
+- Serena starts through a `serena` command that the installer sets up with `uv tool install` (optional, skipped when `uv` is missing).
+- Stricter ADR promotion: workflow decisions default to `no`, minor decisions record as short ADRs. `plan-reviewer` flags `[IMPLEMENTATION_LEAKAGE]` and `[ADR_OVERPROMOTION]`.
+- `/speq:audit` checks ADR noise through the new `adr-audit-agent` and removes noise ADRs after you confirm.
+- `speq-writing-guardrails` is cut to nine rules.
 
 ## 0.21.0
 
-- `plan-reviewer` now tags every BLOCKER `Escalation: HUMAN | MECHANICAL`. Only `HUMAN` findings (irreversible/user-facing, incompatible architecture, security/compliance, or a fact nothing in the plan or codebase can settle) reach the user after round 2; `MECHANICAL` ones (spec inconsistencies, stale citations, tooling gaps) get one direct fix pass instead. `/speq:plan`'s and `/speq:plan-pr`'s verdict line gains a `HUMAN:` count alongside `BLOCKERS`/`ADVISORY`/`INTENT` — a breaking change for anything parsing that line. PR/report comments now summarize findings and Design Decisions one line each with a file pointer, instead of pasting full text. ADR promotion for `[plan-review]`-sourced and Design Decisions entries now defaults to `no` unless the entry sets a genuinely new project-wide constraint
-- Round 2 of adversarial plan review now runs only when round 1 raised at least one `HUMAN`-tagged BLOCKER. A round 1 with `HUMAN: 0` (every BLOCKER `MECHANICAL`) goes straight from `planner-agent`'s fix pass to shipping — no second `plan-reviewer` round — unless a finding comes back `Could not resolve:` or `speq plan validate` fails, in which case it escalates same as any other unresolved finding
-- PR bodies (`/speq:plan-pr` draft/blocked, `/speq:implement-pr` ready) now follow a shared `Current State` / `What Changes` / `Impact` / `<details>` template instead of inlining `plan.md`'s full `## Impact` section — the `<details>` block points at `plan.md`/`decision-log.md`/`review/round-*.md` rather than repeating them. `ADVISORY` findings and Design Decisions no longer post as a PR comment on either path — they never need human attention by definition, so they stay silent in the files; a comment now exists for exactly one reason, an unresolved `HUMAN` finding. `/speq:implement-pr`'s post-ship comment is now a structured summary (Verdict, Requirements Implemented, Test Coverage, Verification Performed tables) instead of the report's prose Notes section
+- `plan-reviewer` tags every BLOCKER `HUMAN` or `MECHANICAL`. Only `HUMAN` findings reach you after round 2. The verdict line gains a `HUMAN:` count, which breaks anything that parses it.
+- Round 2 of plan review runs only when round 1 raised a `HUMAN` blocker.
+- PR bodies follow one template (Current State, What Changes, Impact, details). A PR comment appears only for an unresolved `HUMAN` finding. `/speq:implement-pr` posts a structured verification summary.
 
 ## 0.20.0
 
-- `DELTA:CHANGED` can now target a feature's `## Background` section or its `# Feature: <name>` description, not just `### Scenario:` blocks — `speq plan validate` and `speq record` both reject a `DELTA:NEW`/`DELTA:REMOVED` on either anchor, an unrecognized anchor, or two blocks colliding on the same anchor, closing the silent-no-op and file-corrupting failure modes those blocks used to hit
-- `speq record` writes a `notes/prose-realignment.md` audit note into the archived plan whenever a Background or Feature-description merge actually changes text
-- Recorded `cli/record` and `cli/plan-validate` spec updates; 11 design decisions promoted to `specs/_decision/005-add-prose-delta-anchors.md`
+- `DELTA:CHANGED` can target a feature's `## Background` or `# Feature:` description. `speq plan validate` and `speq record` reject invalid uses. `speq record` writes `notes/prose-realignment.md` when it changes text.
 
 ## 0.19.0
 
-- Polish `docs/` prose (shorter sentences, active voice, no normative content lost)
-- Retire `git-agent`: `speq-plan-pr` and `speq-implement-pr` now run every git/`gh` operation directly, per `/speq-git-operations` (a shared reference skill both orchestrators invoke, instead of a sole sub-agent) — removes a fixed per-spawn agent-boot cost from every plan/implement pipeline run
-- `plan-reviewer`'s round 2 shrinks to a blocker-recheck-only pass for small/routine plans (`fix`-verb, no `## Design` section, empty Design Decisions) — model and effort stay `opus`/`xhigh` unconditionally; only round 2's scope narrows
-- `planner-agent` gains an explicit spawn-policy section: prefer direct `/speq-code-tools` lookups, delegate exploration only when it would flood synthesis context, spawn read-only agents in parallel, never sequentially, when delegation is warranted
-- `planner-agent` writes a `notes/planning.md` hand-off note (a plain checked-list, never committed) at the end of initial planning; the revision-mode respawn after a `plan-reviewer` BLOCKER reads it first
-- `planner-agent` runs a pre-return self-check against `speq-plan-review`'s taxonomy tags before handing off to `plan-reviewer`
-- `speq-planning`'s discovery step no longer re-runs `speq domain list`/`speq feature list`/`speq search query` from scratch — it treats the orchestrator's `Existing Context` brief as the baseline and re-queries only for gaps
+- `speq-plan-pr` and `speq-implement-pr` run git and `gh` operations directly. `git-agent` is retired, so pipelines start faster.
+- Round 2 of plan review shrinks to a blocker recheck for small plans.
+- `planner-agent` reuses the orchestrator's context, self-checks before review, and hands off through `notes/planning.md`.
 
 ## 0.18.0
 
-- Tighten agent and skill prose (shorter sentences, fewer subordinate clauses, no normative content lost)
+- Shorter agent and skill prose.
 
 ## 0.16.0
 
-- `plan-reviewer`/`code-reviewer` now write their full findings to a file (`specs/_plans/<plan-name>/review/round-<N>.md`, `review-findings.md`) and return a one-line verdict instead of inlining the whole report into the orchestrator transcript; `speq-plan-review`'s verdict line gains an `INTENT` count (Intent Fidelity blockers)
-- `speq-git-operations` adds three composite operations (`ship-draft`, `ship-ready`, `flag-blocked`) replacing multi-step `git-agent` delegation chains in `implement-pr`/`plan-pr`
-- Compress `implementer-agent`/`implementer-expert-agent` output to `Files modified: <n>`; redirect suite/build output to log files with a `tail -n 30` cap instead of quoting raw output in reports
-- `speq-implement` gains the same open-questions gate as `speq-implement-pr`: a non-empty `specs/_plans/<plan-name>/open-questions.md` stops implementation before any task work
-- Fix `speq-implement-pr` committing evidence artifacts (`tasks.md`, `verification-report.md`) after `/speq-record`'s archive step had already moved them out of tracked space, so they silently never reached git history; it now commits them immediately after the version bump, before recording
-- Fix `build.sh`'s slash-command namespacing regex mangling file-path citations (e.g. `.claude/skills/speq-plan/references/plan-template.md` was rewritten to a nonexistent `speq:plan` path); normalize all cross-skill reference citations to a form that resolves in both the source repo and the built plugin
+- Reviewers write full findings to `review/round-<N>.md` and `review-findings.md` and return a one-line verdict, which gains an `INTENT` count.
+- `speq-implement` stops when `open-questions.md` is not empty, like `speq-implement-pr`.
+- Fix: `speq-implement-pr` now commits evidence artifacts before recording, so they reach git history.
+- Fix: `build.sh` no longer rewrites file-path citations into nonexistent paths.
 
 ## 0.15.0
 
-- Add `speq-design-philosophy`: complexity-management design principles (deep modules, information hiding/leakage, general- vs. special-purpose modules, strategic vs. tactical programming, dependency direction), triggered by `planner-agent`, `plan-reviewer`, `implementer-agent`, `implementer-expert-agent`, and `code-reviewer`
-- `speq-code-guardrails`: add an `Errors` section and a `Tests` section; extend `Functions`/`Naming` with selector-argument, output-parameter, Command-Query Separation, and naming-convention rules; carve out an I/O/nondeterminism/third-party exception in the YAGNI Checks; sharpen the `DRY` principle to a Rule-of-Three threshold and the public-interface `Comments` rule to require design intent
-- `speq-code-review`: add `Error Handling` and `Design Depth` finding categories, rename `Obsolete Tests` to `Test Quality` with added quality tags, and require a measurement before any `Optimization Opportunities` finding
-- `speq-plan-review`: add a `Design Depth` review axis (18-tag/6-axis taxonomy, up from 14/5)
-- `speq-planning`: point the Design/ADR step at `speq-design-philosophy`'s Quick Diagnostic for new abstractions or module boundaries
+- New `speq-design-philosophy` skill. Stricter `speq-code-guardrails` and `speq-code-review` (error handling, design depth, test quality). Plan review gains a Design Depth axis.
 
 ## 0.14.0
 
-- Add a required `## Impact` section to `plan.md`, describing user/operator/downstream consequences (breaking changes called out, or "None"); `speq-planning` populates it right after the Features table
-- `speq:plan-pr` includes `## Impact` verbatim in the draft PR body and prints it in the orchestrator report
-- `speq:plan-pr` posts a PR comment for ADVISORY findings and Design Decisions entries when either is non-empty
-- `speq:implement-pr` posts a condensed verification-summary PR comment (Verdict table + Notes) after commit/push, alongside the full report committed to the branch
+- `plan.md` gains a required `## Impact` section. `/speq:plan-pr` puts it in the draft PR body. Advisory findings and design decisions post as a PR comment. `/speq:implement-pr` posts a verification summary comment.
 
 ## 0.13.3
 
-- Fix `install.sh` hardcoding the Linux/XDG cache-directory convention (`${XDG_CACHE_HOME:-$HOME/.cache}/speq/models`) for every platform; on macOS the `speq` binary reads its model cache from `~/Library/Caches/speq/models` (via the `dirs` crate), so the installer was silently provisioning the model into a directory the binary never looked at, and `speq search query` reported the model missing even right after a fresh install
+- Fix: the installer provisions the embedding model into the macOS cache directory, so `speq search query` finds it.
 
 ## 0.13.2
 
-- Fix `build.sh` baking the `speq:` plugin namespace into each skill's own `name:` frontmatter, doubling up with the namespace Claude Code already applies at load time and producing `speq:speq:<skill>` everywhere; skill `name:` is now bare, matching how other plugins (e.g. `ponytail`) declare it
+- Fix: skill names no longer double the namespace (`speq:speq:<skill>`).
 
 ## 0.13.1
 
-- Parallelize `index_specs`/`search_specs` with rayon, using order-preserving collects so ranking stays byte-identical to the serial implementation; 38% faster index build on a 1,000-scenario fixture
-- Sharpen skill and agent frontmatter descriptions to name concrete triggers and callers instead of terse one-liners, for more reliable auto-invocation; DRY up orchestrator/sub-agent cross-references and collapse `speq-mission`'s duplicated question blocks
+- Search indexing is 38% faster on 1,000 scenarios, with unchanged ranking.
+- Clearer skill and agent descriptions for more reliable auto-invocation.
 
 ## 0.13.0
 
-- Add repo-local `.speq/<name>-hook.md` project hooks: entry-point skills (`speq-mission`, `speq-plan`, `speq-plan-pr`, `speq-implement`, `speq-implement-pr`, `speq-record`, `speq-audit`) load them as an authoritative first workflow step, able to override any part of the default workflow, including guardrails
-- `speq:audit` lists active `.speq/*-hook.md` files as an informational check
-- See [docs/hooks.md](./docs/hooks.md)
+- Project hooks: `.speq/<name>-hook.md` files override any step of the entry-point skills. `/speq:audit` lists active hooks. See [docs/hooks.md](./docs/hooks.md).
 
 ## 0.12.0
 
-- Add `plan-reviewer` (`opus`/`xhigh`): adversarially reviews a plan's intent fidelity, feasibility, requirement quality, task breakdown, and prose before handoff to `/speq:implement`
-- Wire it into `/speq:plan`/`/speq:plan-pr`: BLOCKER findings loop `planner-agent` back to revise (logged as `[plan-review]` `decision-log.md` entries), capped at 2 rounds; unresolved blockers escalate via `AskUserQuestion` (interactive) or `OPEN QUESTIONS:` (headless)
-- ADVISORY findings surface in the plan-ready report; never persisted or looped on
+- New `plan-reviewer` reviews plans adversarially before implementation. Blockers send the planner back for up to 2 rounds, then ask you (interactive) or list `OPEN QUESTIONS:` (headless). Advisory findings appear in the plan-ready report.
 
 ## 0.11.0
 
-- Add `speq:audit`: read-only health check running spec-library validators and filesystem checks in one pass, then offers to fix each finding with confirmation
-- Checks: `<domain>/<feature>` spec structure, `speq feature validate`, decision-log format and validity, `mission.md` ↔ spec-library sync, unrecorded plans in `_plans/`, `_recorded` gitignore hygiene, `_decision`/`_plans` tracked, recorded-folder naming, library thresholds (>10 scenarios, >8 features), and git hygiene
-- Add `audit-agent` (`opus`/`high`): verifies `mission.md` against the spec library and returns inconsistencies, seeding a `/speq:mission` handoff on reconcile
-- Remediation is user-gated: trivial fixes apply inline, structural fixes run in a spawned worker, mission drift hands off to `/speq:mission`; the audit itself never edits `mission.md` or authors specs
+- New `/speq:audit`: a read-only health check of spec structure, validators, the decision log, mission sync, unrecorded plans, gitignore hygiene, and library thresholds. It offers confirmed fixes. `audit-agent` checks `mission.md` against the specs.
 
 ## 0.10.0
 
-- Replace the single append-only `specs/decision-log.md` with one committed ADR fragment per plan: `specs/_decision/NNN-<plan-name>.md`
-- Give each ADR a stable, kebab-case `**ID:**` slug; `Supersedes:`/`Status: Superseded by <slug>` reference slugs instead of `ADR-NNN`
-- Add `speq decision-log show`: assembles `specs/_decision/*.md` fragments into one `# Architecture Decision Records` view on stdout, ordered by `NNN-` prefix; writes no merged file
-- `speq decision-log validate` now validates the `specs/_decision/` directory: per-fragment structure, required fields, status vocabulary, cross-file slug uniqueness, and reference resolution; an absent/empty directory passes
-- Archive completed plans to `specs/_recorded/NNN-<plan-name>/`, a record-time sequence number, instead of a `YYYY-MM-DD-<plan-name>` date prefix
-- Drop the `**Date:**` field from ADRs and the plan-level decision log
-- Remove the "Prose style" pointer line from the plan/feature/mission/verification/decision-log templates
-- `recorder-agent` writes only the new fragment for the plan it records, never editing another; `planner-agent` now records the superseded decision's title
-- Migrate the prior `specs/decision-log.md` (ADR-001..005) into `specs/_decision/001-refactor-search-pure-rust-inference.md` and `specs/_decision/002-refactor-embeddings-tract-onnx.md`, then delete the old file
+- ADRs move from one `specs/decision-log.md` to one fragment per plan, `specs/_decision/NNN-<plan-name>.md`, each with a kebab-case `**ID:**`. The old log was migrated.
+- New `speq decision-log show`. `speq decision-log validate` checks the whole directory.
+- Plans archive to `specs/_recorded/NNN-<plan-name>/`. ADRs drop the `**Date:**` field.
 
 ## 0.9.0
 
-- Add `speq:writing-guardrails`: prose guardrails for speq artifacts and pipeline-composed GitHub PRs/issues/comments
-- Load it into every prose-authoring component: planner-agent, recorder-agent (ADR step), speq-implement, speq-mission, speq-plan-pr, speq-implement-pr
-- Add a "Prose style" pointer to the plan/feature/mission/verification/decision-log templates
+- New `speq:writing-guardrails` for speq artifacts and PR, issue, and comment text. Every prose-writing component loads it.
 
 ## 0.8.2
 
-- Rename `git-pr-agent` → `git-agent`, generalized into a git/GitHub operations worker (branches, commit, push, PRs, issues, draft-ready); runs one caller-specified operation per invocation, authors no content
-- Move plan-pipeline semantics (open-questions.md, blocked banner, feat/<plan-name> naming, spec(plan) messages, comment text) out of the agent into `speq-plan-pr`/`speq-implement-pr`
-- `speq-plan-pr` now always leaves the PR as a draft (including the resume-after-blocked path); `speq-implement-pr` remains the only skill that marks it ready
+- `git-pr-agent` becomes the general `git-agent`. `speq-plan-pr` always leaves the PR as a draft. Only `speq-implement-pr` marks it ready.
 
 ## 0.8.1
 
-- Headless PR pipeline now titles PRs with a conventional-commit feature title `<type>(<scope>): <slug>` derived from the plan-name, instead of `spec(plan): <plan-name>`
-- `speq-plan-pr` opens the PR as a draft; `speq-implement-pr` marks it ready once the implementation is pushed
+- PR titles follow `<type>(<scope>): <slug>`. The PR stays a draft until the implementation is pushed.
 
 ## 0.8.0
 
-- Add a 6th `code-reviewer` category, "YAGNI / Over-Engineering": flags unneeded dependencies, speculative abstractions, dead flexibility, reinvented standard-library logic, and shrinkable code; findings delegate to implementer agents, `[expert]`-tagged when cross-file or subtly correctness-sensitive
-- Give all 6 `code-reviewer` categories consistent per-finding `[TAG]` markers
-- Add a `Dependency Rule` and `YAGNI Checks` to `speq-code-guardrails`
-- Keep `code-reviewer`/`speq-code-guardrails` wording technology-agnostic
+- `code-reviewer` gains a YAGNI and over-engineering category, and every category uses `[TAG]` markers. `speq-code-guardrails` gains a dependency rule and YAGNI checks.
 
 ## 0.7.0
 
-- Add `speq-plan-pr` and `speq-implement-pr`: headless, non-interactive counterparts to `speq-plan`/`speq-implement` that plan/implement against a `feat/<plan-name>` branch and open or update a PR
-- Add `git-pr-agent`, the only sub-agent permitted to write git history or touch a remote
-- `planner-agent` gains a headless escalation mode: assume-and-document conventional decisions, escalate only irreducible ones via an `OPEN QUESTIONS:` sentinel
+- New `speq-plan-pr` and `speq-implement-pr`: headless planning and implementation on a `feat/<plan-name>` branch with a PR.
+- `planner-agent` can escalate in headless mode through an `OPEN QUESTIONS:` sentinel.
 
 ## 0.6.0
 
-- Add a multi-platform release pipeline: CI cross-compiles Linux x86_64/ARM64, macOS, and Windows; the installer tries a pre-built binary download first, falling back to a source build
-- Tighten `deny.toml`/`about.toml` license allow-lists to the 5 licenses present in the dependency tree, and explicitly ban the `openssl`/`native-tls`/`boring` crate family
-- Fix stale `THIRD_PARTY_LICENSES` notices left over from the `tract-onnx` migration and update README/installation docs to describe pre-built-binary-first installation
+- Pre-built binaries for Linux x86_64 and ARM64, macOS, and Windows. The installer tries them first and falls back to a source build.
 
 ## 0.5.1
 
-- Replace `candle-core`/`candle-nn`/`candle-transformers` with `tract-onnx` for embedding inference, loading the upstream `model.onnx` graph directly; removes the vendored `gemm-common` patch
-- Simplify provisioned model files to `model.onnx` + `tokenizer.json` (drops `config.json`)
-- Fix installer: `main` was silently skipped when piped via `curl | bash`
+- Fix: the installer skipped `main` when piped through `curl | bash`.
 
 ## 0.5.0
 
-- Replace `fastembed`/ONNX Runtime with a pure-Rust `candle` inference stack
-- Add `src/embedding.rs`: `Embedder` struct backed by `candle-transformers` BERT (CPU-only); loads model files from installer-provisioned cache; fails fast with an actionable error when files are missing
-- Vendor `gemm-common` with an OOB bounds-check fix for CPUs exposing L4 cache
-- Add embedding model provisioning to `install.sh`: downloads `model.safetensors`, `tokenizer.json`, and `config.json` from HuggingFace on every install (always refreshes on update)
-- Remove Intel Mac `brew install onnxruntime` workaround from `install.sh` and `scripts/release/build.sh`
-
-## 0.4.3
-
-Security patch — no functional changes:
-- `openssl` 0.10.76 → 0.10.79: fixes 7 advisories (buffer overflows in `digest_final`, AES key-wrap, and PEM callback; undefined behavior in `X509Ref::ocsp_responders`; PSK/cookie trampoline memory leak)
-- `quinn-proto` 0.11.13 → 0.11.14: fixes unauthenticated remote DoS via panic in QUIC transport parameter parsing
-- `rand` 0.9.2 → 0.9.4: fixes unsound aliased mutable reference when using a custom logger with `rand::rng()`
-
-Transitive dependencies pulled in by `fastembed` → `hf-hub` / `tokenizers` / `rav1e`.
+- Embedding inference is pure Rust and needs no separate runtime, also on Intel Mac. The installer downloads the model on every install. Missing model files fail with a clear error.
 
 ## 0.4.2
 
-- Fix double MCP server registration: remove `mcpServers` wrapper from `mcp.json`, `mcp-codex.json`, `plugin.json`, and `codex-plugin.json`
-- Add regression tests (`mcp_json_uses_flat_format`, `mcp_codex_json_uses_flat_format`) asserting the flat structure for both Claude and Codex configs
+- Fix: MCP servers registered twice.
 
 ## 0.4.1
 
-- Fix Serena MCP server startup: replace `"--project", "${PWD}"` with `"--project-from-cwd"` in `scripts/plugin/mcp.json`
-- Add regression tests in `tests/mcp_config.rs` asserting both `mcp.json` and `mcp-codex.json` use `--project-from-cwd` and contain no static `${PWD}` path
+- Fix: Serena starts in the current project (`--project-from-cwd`).
 
 ## 0.4.0
 
-- Add Codex plugin generation alongside the existing Claude Code marketplace payload
-- Register the Codex marketplace through `codex plugin marketplace add ~/.speq-skill/codex`, keeping `~/.speq-skill` as the single install root
-- Install generated Codex skills into `$CODEX_HOME/skills`
-- Keep installed skills invocable as `/speq:*` on both Claude Code and Codex
-- Add Codex plugin MCP declarations for Serena and Context7
-- Hardcode Codex model routing for the initial platform support release; dynamic routing config is deferred
+- Codex support: the installer generates a Codex plugin next to the Claude Code one, registers a Codex marketplace, and installs skills into `$CODEX_HOME/skills`. Skills stay `/speq:*` on both. Serena and Context7 are declared for Codex.
 
 ## 0.3.1
 
-- New `speq decision-log validate` command, validating `specs/decision-log.md` against ADR/Nygard format (sequential numbering, required fields, Status values)
-- `speq plan validate` now validates optional `decision-log.md` in plan directories; absence is not an error
-- New `src/validate/decision_log.rs` module with `validate_plan_log` and `validate_permanent_log`
-- `planner-agent` generates `decision-log.md` capturing design decisions; `recorder-agent` promotes curated entries to permanent ADR log
+- New `speq decision-log validate` for the ADR format. `speq plan validate` checks an optional `decision-log.md`.
+- `planner-agent` writes the plan decision log. `recorder-agent` promotes curated entries to the permanent log.
 
 ## 0.3.0
 
-- Split `speq-plan` and `speq-record` into thin orchestrators; heavy work now runs in dedicated sub-agents (`planner-agent`, `recorder-agent`)
-- Add `implementer-expert-agent` sub-agent for reasoning-heavy tasks tagged `[expert]` in `tasks.md`; `speq-implement` partitions tasks by tag and routes accordingly
-- Pin `model` and `effort` per sub-agent in frontmatter (opus/xhigh for planning, expert implementation, and review; sonnet/high for standard implementation; sonnet/medium for recording)
-- Document model routing strategy in CLAUDE.md
+- `speq-plan` and `speq-record` become thin orchestrators over `planner-agent` and `recorder-agent`.
+- New `implementer-expert-agent` for tasks tagged `[expert]`. Model and effort are pinned per sub-agent.
 
 ## 0.2.9
 
-- Reject mismatched and unclosed delta markers during record parsing
-- Fall back to writable local cache when system cache is not writable
-- Add `SPEQ_CACHE_DIR` environment variable to override cache location
+- Record rejects mismatched or unclosed delta markers.
+- Local cache fallback when the system cache is not writable. `SPEQ_CACHE_DIR` overrides the cache location.
 
 ## 0.2.8
 
-- Support building on Intel Mac (x86_64-apple-darwin) via platform-conditional `ort-load-dynamic`
-- Add OpenSSL prerequisite check to installer
-- Add semantic anchors to skills and documentation
-- Remove broken Anthropic Cookbook link from documentation
-- Update LICENSE copyright to speq-skill contributors
+- Builds on Intel Mac. Semantic anchors in skills and docs.
 
 ## 0.2.7
 
-- Add semantic anchors to skills and documentation
+- Semantic anchors in skills and docs.
 
 ## 0.2.5
 
-- Fix word boundary matching for RFC 2119 keywords
-- Add curl-pipeable uninstaller
+- Fix: RFC 2119 keyword matching at word boundaries.
+- New curl-pipeable uninstaller.
 
 ## 0.2.4
 
-- Add `plan list` command
-- Migrate MCP config to plugin
-- Fix installer exit when Rust toolchain is missing
+- New `plan list` command. MCP config moves into the plugin.
+- Fix: the installer exited when the Rust toolchain was missing.
 
 ## 0.2.2
 
-- Initial release
+- Initial release.

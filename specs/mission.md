@@ -45,7 +45,7 @@ speq provides structural verification and exploration tools so AI agents can rel
 | Delta | A proposed change to a spec marked with `<!-- DELTA:NEW -->`, `<!-- DELTA:CHANGED -->`, or `<!-- DELTA:REMOVED -->`, targeting a `### Scenario:`, or realigning an existing feature's `## Background` or `# Feature: <name>` description to match a scenario change |
 | Plan | A set of deltas in `_plans/<plan-name>/` awaiting approval |
 | Record | The action of moving approved deltas from `_plans/` to permanent specs in `specs/` |
-| ADR | An Architecture Decision Record — a single design decision captured as a slug-identified fragment in `specs/_decision/` |
+| ADR | An Architecture Decision Record — a single durable decision captured as a slug-identified fragment in `specs/_decision/`. It is not the design section of a plan |
 
 ---
 

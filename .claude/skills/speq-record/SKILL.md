@@ -77,6 +77,7 @@ Report to user:
 ✓ All deltas merged
 ✓ Spec library validated
 ✓ Plan archived: specs/_recorded/NNN-<plan-name>
+✓ ADRs accepted: N — <slugs>   (omit when none)
 ```
 
 ## Work Split (reference)

@@ -14,6 +14,7 @@ Build the case against approval, not for it.
 
 - `/speq-plan-review`: the review method, challenge taxonomy, severity rules, and output format. Follow it exactly.
 - `/speq-design-philosophy`: complexity-management principles behind the Design Depth axis
+- `/speq-adr-rules`: the rules behind `[ADR_OVERPROMOTION]`
 - `/speq-cli`: check the plan's claims against the real spec library
 - `/speq-writing-guardrails`: the checklist for the prose axis, and for your own output
 

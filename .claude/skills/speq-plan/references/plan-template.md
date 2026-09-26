@@ -12,7 +12,7 @@ One-paragraph description of what this plan achieves (max two sentences).
 
 ## Design
 
-Required for new features and significant changes. Skip for small fixes.
+Required for new features and significant changes. Skip for small fixes. This section describes how this plan builds the change. It is not an ADR.
 
 ### Context
 

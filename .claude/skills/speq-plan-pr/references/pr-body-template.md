@@ -18,6 +18,8 @@ On a terminal print, drop the `<details>`/`<summary>` HTML — it's a GitHub fol
 ## Impact                                    <!-- omit if plan.md's ## Impact says "None" -->
 <trimmed to what a user must know to decide — not the full plan.md text>
 
+ADR candidates: <none | titles of the `Promotes to ADR: yes` entries>
+
 <details>
 <summary>Full detail — spec, decisions, test evidence</summary>
 
@@ -31,6 +33,8 @@ Test plan
 ```
 
 ## Rules
+
+- **`ADR candidates` is one line.** Write `none` when no entry promotes, which is the usual case. Otherwise list the entry titles. Each title is a proposed ADR. Running `/speq-implement-pr` accepts them. To reject one, comment on the PR and run `/speq-plan-pr` again with the entry set to `Promotes to ADR: no`. After recording, `/speq-implement-pr` replaces the line with the accepted slugs.
 
 - **`Current State` / `What Changes` replace a task-list dump.** State the problem, then the mechanism that fixes it. Never a step-by-step of what got implemented — that is `tasks.md`'s job, not the PR body's.
 - **`Impact` is plan.md's own `## Impact` section, trimmed**, not copied verbatim: keep only the bullets a user must weigh to approve. Omit the whole section when plan.md says "None".

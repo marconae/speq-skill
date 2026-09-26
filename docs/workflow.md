@@ -81,9 +81,9 @@ specs/_plans/<plan-name>/
 └── <domain>/<feature>/spec.md        # Delta specs
 ```
 
-`planner-agent` creates `decision-log.md` during the planning interview. The file records the questions, answers, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` become a new `specs/_decision/NNN-<plan-name>.md` fragment when `recorder-agent` runs `/speq:record`. Promotion requires a change in behavior, architecture, or design; a project-wide process convention promotes only when it binds every future plan, is not scoped to just this plan, and is not a corollary of another decision. See [Decision Log](./decision-log.md).
+`planner-agent` creates `decision-log.md` during the planning interview. The file records the questions, answers, design choices, and alternatives considered. Entries marked `Promotes to ADR: yes` are proposed at plan time. `/speq:record` accepts them and writes each one as an ADR in a new `specs/_decision/NNN-<plan-name>.md` fragment. The default is `no`, and most plans promote nothing. Promotion needs a named criterion and a search of the existing decision log. To drop a proposed ADR, set the entry to `no` and run `/speq:plan` again. `/speq:adr-rules` holds the rules. See [Decision Log](./decision-log.md).
 
-Before handoff, `plan-reviewer` challenges the plan on intent fidelity, feasibility, requirement quality, task breakdown, and prose. It tags each BLOCKER `HUMAN` or `MECHANICAL`. `HUMAN` means: irreversible or user-facing, a genuine architectural fork with no clear winner, security/compliance, or a fact nothing in the plan or codebase can settle. Everything else — a spec inconsistency, a stale citation, an assumption the codebase itself can verify — is `MECHANICAL`. `planner-agent` fixes every BLOCKER from round 1; a second adversarial round only runs if round 1 raised at least one `HUMAN` finding — an all-`MECHANICAL` round 1 ships after one fix-and-validate pass, no second round. A `MECHANICAL` remainder after round 2 gets one more direct fix pass (routed to you only if that pass itself can't close it); only a `HUMAN` remainder reaches you. `planner-agent` logs resolved blockers as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`, promoted to an ADR only when the fix itself changes behavior, architecture, or design project-wide (or meets the process-convention override above) — not one ADR per resolved finding. ADVISORY findings and Design Decisions never post as a PR comment — by definition they don't need your attention, so they stay in `review/round-N.md`/`decision-log.md`, reachable through the PR body's collapsed detail section. Only an open `HUMAN` question ever reaches you as a comment.
+Before handoff, `plan-reviewer` challenges the plan on intent fidelity, feasibility, requirement quality, task breakdown, and prose. It tags each BLOCKER `HUMAN` or `MECHANICAL`. `HUMAN` means: irreversible or user-facing, a genuine architectural fork with no clear winner, security/compliance, or a fact nothing in the plan or codebase can settle. Everything else — a spec inconsistency, a stale citation, an assumption the codebase itself can verify — is `MECHANICAL`. `planner-agent` fixes every BLOCKER from round 1; a second adversarial round only runs if round 1 raised at least one `HUMAN` finding — an all-`MECHANICAL` round 1 ships after one fix-and-validate pass, no second round. A `MECHANICAL` remainder after round 2 gets one more direct fix pass (routed to you only if that pass itself can't close it); only a `HUMAN` remainder reaches you. `planner-agent` logs resolved blockers as `[plan-review]`-prefixed `## Review Findings` entries in `decision-log.md`, almost never promoted to an ADR, and never one ADR per resolved finding. ADVISORY findings and Design Decisions never post as a PR comment — by definition they don't need your attention, so they stay in `review/round-N.md`/`decision-log.md`, reachable through the PR body's collapsed detail section. Only an open `HUMAN` question ever reaches you as a comment.
 
 ### Plan naming
 
@@ -148,7 +148,7 @@ Merge implemented spec deltas into the permanent spec library.
 4. **Clean** — Strips all DELTA markers
 5. **Validate** — Runs `speq feature validate`
 6. **Check thresholds** — Flags any feature with more than 10 scenarios, or any domain with more than 8 features, and asks you how to split it. It never reorganizes without your decision
-7. **Promote decisions** — Writes entries marked `Promotes to ADR: yes` in `decision-log.md` to a new `specs/_decision/NNN-<plan-name>.md` fragment
+7. **Accept decisions** — Writes entries marked `Promotes to ADR: yes` in `decision-log.md` to a new `specs/_decision/NNN-<plan-name>.md` fragment with `Status: Accepted`. Recording is the acceptance
 8. **Archive** — Moves the plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
 
 ---
@@ -203,5 +203,6 @@ Reusable guidance invoked by workflow skills:
 | `/speq:git-discipline` | Git read-only rules |
 | `/speq:cli` | speq CLI usage patterns |
 | `/speq:writing-guardrails` | Prose style rules for speq artifacts and GitHub pull requests, issues, and comments |
+| `/speq:adr-rules` | When a decision becomes an ADR, and how recording accepts a proposed ADR |
 
 See [MCP Servers](./mcp-servers.md) for details on Serena and Context7.

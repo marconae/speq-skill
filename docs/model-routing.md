@@ -28,7 +28,7 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration (headless) |
 | `/speq:audit` | `sonnet` | inherited | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
-| `planner-agent` | `opus` | `xhigh` | Spec deltas, ADRs, task decomposition |
+| `planner-agent` | `opus` | `xhigh` | Spec deltas, design section, task decomposition |
 | `plan-reviewer` | `opus` | `xhigh` | Adversarial plan review |
 | `implementer-agent` | `sonnet` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `opus` | `xhigh` | Tasks tagged `[expert]` |
@@ -53,7 +53,7 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration (headless) |
 | `/speq:audit` | `gpt-5.4` | `medium` | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
-| `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, ADRs, task decomposition |
+| `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, design section, task decomposition |
 | `plan-reviewer` | `gpt-5.5` | `xhigh` | Adversarial plan review |
 | `implementer-agent` | `gpt-5.4` | `high` | Standard implementation tasks |
 | `implementer-expert-agent` | `gpt-5.5` | `xhigh` | Tasks tagged `[expert]` |

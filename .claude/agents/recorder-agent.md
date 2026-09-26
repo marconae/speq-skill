@@ -18,6 +18,7 @@ BEFORE starting, invoke these skills:
 - `/speq-cli` — Spec validation
 - `/speq-git-discipline` — Version control rules
 - `/speq-writing-guardrails` — Prose style for ADR promotion (decision-log synthesis)
+- `/speq-adr-rules` — The ADR rules and status lifecycle. Recording is the acceptance, so you write `Accepted`
 
 ## Input You Receive
 
@@ -39,9 +40,9 @@ Merged features:
 - <domain>/<feature> (NEW / CHANGED / REMOVED scenarios: X / Y / Z)
 
 Decision log:
-- ADRs promoted: N (specs/_decision/NNN-<plan-name>.md — slugs: <slug-1>, <slug-2>, ...)
+- ADRs accepted: N (specs/_decision/NNN-<plan-name>.md — slugs: <slug-1>, <slug-2>, ...)
   OR
-- No ADRs promoted
+- No ADRs accepted
 
 Validation: pass
 Archive: specs/_recorded/NNN-<plan-name>

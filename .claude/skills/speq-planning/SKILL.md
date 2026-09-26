@@ -10,7 +10,7 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 - **BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN; integration tests by default, unit tests only for isolated pure computation
 - **EARS syntax**: spec narratives use unambiguous behavioral clauses
 - **RFC 2119 keywords**: THEN steps use MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY (uppercase)
-- **ADR (Nygard format)**: design sections capture Goals / Non-Goals / Architecture / Trade-offs / Key Interfaces
+- **Nygard-style design section**: the `plan.md` design section captures Goals / Non-Goals / Architecture / Trade-offs / Key Interfaces. It is not an ADR (see `/speq-adr-rules`)
 
 ## Workflow
 
@@ -58,7 +58,7 @@ Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
 1. **Context**: why the change is being made
 2. **Features**: table referencing spec delta files (NEVER embed spec content), immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
-3. **Design**: ADR for new features / major changes; skip for minor fixes. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
+3. **Design**: a design section for new features and major changes; skip it for minor fixes. It records HOW this plan builds the change. It is not an ADR. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 4. **Tasks**: work breakdown in implementation order
 5. **Parallelization**: knowledge clusters, per the rules below
 6. **Verification**: Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
@@ -79,13 +79,17 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `reference
 - **Design Decisions section**: one entry per significant choice made while authoring spec deltas or plan.md (architecture patterns, rejected alternatives, scope boundaries)
 - **Review Findings section**: leave empty; populated in Revision Mode after `plan-reviewer` blockers, and by `speq-implement` after code review
 
-**Promotion gate.** `Promotes to ADR: yes` requires a change in **behavior, architecture, or design**. Procedural and workflow decisions default to `no`. The only override: a project-wide process convention that (a) binds every future plan, (b) is not scoped to just this plan, and (c) is not a corollary of another decision — the entry's Rationale MUST state the override explicitly. A corollary of an already-promoted decision is not its own entry: record it as a bullet in that parent entry's `Consequences` line instead.
+**Promotion gate.** Invoke `/speq-adr-rules` first. It owns the rules. Summary for this step:
 
-Set `Promotes to ADR: no` for local design choices, scope trims, and implementation details. This applies to every decision entry, Design Decisions and Review Findings alike: one ADR per genuinely new project-wide constraint, never one per entry or per resolved finding. A plan with ten Design Decisions entries or ten resolved blockers does not owe ten ADRs — most decisions in a normal plan are local (this file's structure, this feature's naming) and stay `no`. Never promote a local file-placement or process detail (where a note lives, how a plan's own scratch state is organized) just because it was deliberate enough to write down.
+- Default `Promotes to ADR: no`. The expected count of `yes` entries per plan is zero.
+- Set `yes` only when one criterion in `/speq-adr-rules` rule 2 applies. Name that criterion in the entry's Rationale.
+- Before you set `yes`, run `speq decision-log show`. State the search result in Rationale. If an ADR already covers the decision, set `no`.
+- Never promote content on the never-an-ADR list (`/speq-adr-rules` rule 3). This applies to Design Decisions and Review Findings entries alike.
+- Keep Decision to one decision, in plain words, with no signatures, paths, or flags.
+- If the decision replaces an earlier ADR, add a `- **Supersedes:** <slug>` line to the entry. Take the slug from `speq decision-log show`. The line is optional.
+- A corollary of a promoted decision is not its own entry. Record it as a bullet in the parent entry's `Consequences` line.
 
-**Review Findings entries lean further to `no`.** A `[plan-review]`-prefixed entry (Revision Mode, below) records a mistake this plan made and then corrected, not automatically a project-wide convention. Apply the same gate: promote only when the fix itself changed behavior, architecture, or design project-wide, or meets the process-convention override above — not merely because the finding was hard to resolve. Never promote a process or tooling workaround specific to this plan's own mechanics (a spec-merge gap, a review-loop correction, a task-reordering fix), or a one-off bug fix with no bearing outside this plan.
-
-If a decision supersedes an earlier one, name the superseded decision's title in the entry. `recorder-agent` maps that title to the superseded ADR's slug at promotion.
+A `[plan-review]`-prefixed entry (Revision Mode, below) records a mistake this plan made and then corrected. Apply the same gate. It almost always stays `no`.
 
 ### 6. Expert-Task Tagging (CRITICAL)
 
@@ -151,7 +155,7 @@ Check your artifacts do not trip `/speq-plan-review`'s finding tags, across its 
 - **Feasibility**: no `[EFFORT_MISESTIMATION]` (a task line that hides more work than it states), `[HIDDEN_DEPENDENCY]` (an unmodeled prerequisite), `[UNSTATED_ASSUMPTION]` (a load-bearing belief never stated), or `[NFR_IGNORED]` (security, performance, migration, or concurrency left untouched where the change touches it).
 - **Requirement Quality**: no `[AMBIGUOUS_REQUIREMENT]` (not testable as written), `[COMPLETENESS_GAP]` (a missing edge case or error path), `[REQUIREMENT_CONFLICT]` (contradicts another delta or a recorded spec — check via `/speq-cli`), or `[IMPLEMENTATION_LEAKAGE]` (a Background or Feature description fact no scenario step depends on).
 - **Task Breakdown**: no `[TRACEABILITY_GAP]` (a delta with no implementing task, or the reverse), `[TASK_GRANULARITY]` (a task too large to verify as one unit), or `[CLUSTER_INCOHERENCE]` (a Parallelization group sliced by layer, or overlapping `Knowledge` entries across groups).
-- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), or `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry that fails the promotion gate).
+- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), or `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`).
 
 Open `/speq-plan-review` for a tag's full definition if you are unsure it applies.
 
@@ -170,7 +174,7 @@ If the orchestrator respawns `planner-agent` with the path to a `plan-reviewer` 
 - Read `specs/_plans/<plan-name>/notes/planning.md` first, if present. This is your own prior-pass hand-off note. It orients you before you re-read anything else.
 - Read the BLOCKER list from the path given in the prompt: `specs/_plans/<plan-name>/review/round-<N>.md`. The findings never arrive inline; the file is the only source.
 - Address only the BLOCKER findings. Execute each one's `Fix:` line: an imperative naming the artifact, section, and concrete change. Revise exactly what it points to. Do not rewrite unrelated content. Do not act on ADVISORY findings.
-- For each blocker resolved, add a `## Review Findings` entry to `decision-log.md` titled `[plan-review] <short finding title>`, with **Finding** (what `plan-reviewer` flagged), **Direction change** (what changed), and **Promotes to ADR** (per the rule above).
+- For each blocker resolved, add a `## Review Findings` entry to `decision-log.md` titled `[plan-review] <short finding title>`, with **Finding** (what `plan-reviewer` flagged), **Direction change** (what changed), and **Promotes to ADR** (per `/speq-adr-rules`; almost always `no`).
 - Re-run `speq plan validate <plan-name>` before returning.
 - Return one line per blocker you addressed: `Resolved: <title> — <evidence>` or `Could not resolve: <title> — <why>`. The orchestrator uses this to decide whether a further review round is needed — do not omit it, even when every finding resolved cleanly.
 - If resolving a blocker surfaces a genuinely irreducible new decision, escalate it exactly as during initial planning (interactive: signal back with a concrete question; headless: `OPEN QUESTIONS:` sentinel).

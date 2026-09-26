@@ -94,7 +94,7 @@ Run — operation: push (per /speq-git-operations)
 - **Any suite red** → mark `- [!] tested-green — red: <failed suites> (logs: target/speq-<suite>.log)`, report the failures, and **stop**. Leave the plan unrecorded.
 - On red-path re-entry (`[!]` at dispatch), re-run the suites only, per the protocol. Never re-enter `/speq-implement` from here.
 
-**B2. Record**: invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision.
+**B2. Record**: invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision. Recording accepts the ADR candidates on the plan PR. Your run is the human's go-ahead, so do not stop for an ADR question.
 
 **B3. Verify the recorded mark**: parse the `Archive:` path from `/speq-record`'s return. Check that `<archive-path>/tasks.md` has `- [x] recorded`. Write the mark yourself if it is absent (covers a stale `recorder-agent`).
 
@@ -113,7 +113,9 @@ Run — operation: ship-ready (per /speq-git-operations)
   body: per /speq-plan-pr's references/pr-body-template.md — update Current
         State/What Changes if implementation diverged from the plan, fold
         in both test-suite results (integration + e2e) and the /speq:record
-        outcome into the Test plan checklist, keep the <details> pointer
+        outcome into the Test plan checklist, keep the <details> pointer,
+        and list the accepted ADR slugs on the ADR candidates line
+        (`none` when recorder-agent wrote no ADR)
 ```
 
 `ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready.

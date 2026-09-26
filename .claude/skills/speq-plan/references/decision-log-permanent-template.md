@@ -1,6 +1,6 @@
 # Decisions: <plan-name>
 
-<!-- One fragment per plan. Add one ## ADR block per promoted decision below. -->
+<!-- One fragment per plan. Add one ## ADR block per promoted decision below. Rules: /speq-adr-rules. -->
 <!-- ID is a kebab-case slug, unique across every file in specs/_decision. -->
 <!-- Supersedes is optional — set it only when this ADR replaces an earlier one. -->
 
@@ -25,7 +25,7 @@ Consequences, or the reverse.
 
 **ID:** <kebab-case-slug>
 **Plan:** <plan-name>
-**Status:** Accepted
+**Status:** Accepted <!-- written by /speq-record; recording is the acceptance -->
 **Supersedes:** <superseded-slug> <!-- optional; only when this ADR supersedes another; value = the superseded ADR's slug -->
 
 ### Context

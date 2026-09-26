@@ -8,7 +8,7 @@ The decision log records design choices made during planning:
 
 - why the team chose a direction for the plan
 - which alternatives it considered
-- which decisions are significant enough for a permanent Architecture Decision Record (ADR)
+- which decisions are durable enough for a permanent Architecture Decision Record (ADR)
 
 There are two distinct formats:
 
@@ -16,6 +16,8 @@ There are two distinct formats:
 |--------|----------|---------|
 | Plan-level log | `specs/_plans/<plan-name>/decision-log.md` | Lightweight notes during planning |
 | Permanent log | `specs/_decision/NNN-<plan-name>.md` (one fragment per plan) | Curated ADR archive |
+
+ADRs are rare. The `## Design` section of `plan.md` is not an ADR: it describes how one plan builds its change.
 
 ---
 
@@ -25,7 +27,24 @@ There are two distinct formats:
 
 ### Promotion gate
 
-`Promotes to ADR: yes` requires a change in behavior, architecture, or design. Procedural and workflow decisions default to `no`. The only override: a project-wide process convention that (a) binds every future plan, (b) is not scoped to just this plan, and (c) is not a corollary of another decision — the entry's Rationale must state the override explicitly. A corollary of an already-promoted decision is not its own entry: it is recorded as a bullet in that parent entry's `Consequences` line.
+`/speq:adr-rules` owns the rules. In short:
+
+- The default is `Promotes to ADR: no`. The expected count of `yes` entries per plan is zero. Two or more get re-judged.
+- `yes` needs one criterion: the decision affects multiple components or teams, sets a long-lived constraint, is a major technology, API, persistence, security, or deployment choice, or rejects a plausible alternative. The entry's Rationale names the criterion.
+- Search first. Run `speq decision-log show` and state the result in Rationale. To change an existing ADR, write a new one with a `Supersedes:` line.
+- Some content is never an ADR: naming, file placement, one-off fixes, scope trims, implementation detail, and plan-specific workarounds. Conventions go to `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or mission Constraints. HOW this plan builds goes to `plan.md` `## Design`.
+- One ADR records one decision. Decision holds no signatures, paths, or flags.
+- A corollary of an already-promoted decision is not its own entry. It is a bullet in that parent entry's `Consequences` line.
+
+### Vocabulary
+
+| Term | Meaning |
+|------|---------|
+| ADR | A permanent record in `specs/_decision/` of one durable decision |
+| Design section | The `## Design` part of `plan.md`. It is not an ADR |
+| Decision-log entry | A note in a plan's `decision-log.md`. Only `Promotes to ADR: yes` entries can become ADRs |
+| ADR candidate | An entry marked `Promotes to ADR: yes`. It is the proposal, shown when the plan is ready |
+| Accepted | An ADR written by `/speq:record`. Recording the plan is the acceptance |
 
 ### Format
 
@@ -45,6 +64,7 @@ There are two distinct formats:
 - **Alternatives:** What was considered and not chosen (may read `none`)
 - **Rationale:** Why this direction
 - **Consequences:** (optional) Effects, trade-offs, or corollary decisions folded in here — omitted when there are none
+- **Supersedes:** (optional) Slug of the ADR this decision replaces
 - **Promotes to ADR:** yes / no
 
 ## Review Findings
@@ -72,7 +92,7 @@ speq plan validate <plan-name>
 
 ## Permanent decision log
 
-The permanent decision log lives at `specs/_decision/`. It stores one committed fragment file per plan: `specs/_decision/NNN-<plan-name>.md`. `recorder-agent` writes a fragment during `/speq:record` for every entry marked `Promotes to ADR: yes` in the plan log.
+The permanent decision log lives at `specs/_decision/`. It stores one committed fragment file per plan: `specs/_decision/NNN-<plan-name>.md`. `recorder-agent` writes a fragment during `/speq:record` for every entry marked `Promotes to ADR: yes` in the plan log. It writes each ADR with `Status: Accepted`.
 
 ### Why fragments and slugs
 
@@ -125,6 +145,10 @@ What was decided.
 - **Short form**: neither trigger fires (Alternatives is empty/`none` and there is no Consequences line) — the ADR is just the field block, `### Context`, and `### Decision`.
 - `recorder-agent` sets `**Supersedes:** <slug>` on the new ADR as a one-way forward pointer. A superseded ADR keeps `**Status:** Accepted`. The two-way form, `Status: Superseded by <slug>`, applies only to hand-authored or migrated entries.
 
+### Status lifecycle
+
+A decision-log entry with `Promotes to ADR: yes` is a proposal. The plan skill prints it as an ADR candidate. `/speq:record` is the acceptance and writes `Status: Accepted`. To drop a proposal, set the entry to `Promotes to ADR: no` and run `/speq:plan` again. In a headless run, comment on the draft PR and run `/speq:plan-pr` again with the PR number. Running `/speq:implement-pr` accepts the candidates on that PR.
+
 ### Validate vs. show
 
 Two commands operate on `specs/_decision/`:
@@ -161,8 +185,8 @@ speq decision-log show
   └─ code-reviewer populates ## Review Findings in decision-log.md
 
 /speq:record
-  └─ recorder-agent promotes entries marked "Promotes to ADR: yes"
-     into a new specs/_decision/NNN-<plan-name>.md fragment
+  └─ recorder-agent accepts entries marked "Promotes to ADR: yes"
+     as Status: Accepted in a new specs/_decision/NNN-<plan-name>.md fragment
 
 speq decision-log show
   └─ assembles every specs/_decision/*.md fragment into one

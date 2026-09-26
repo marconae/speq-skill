@@ -81,7 +81,7 @@ If `specs/mission.md` is absent, skip the delegation and mark the check `✗ (no
 #### 3b. ADR review to adr-audit-agent
 
 ```
-Delegate to adr-audit-agent — Review the decision record
+Delegate to adr-audit-agent — Apply the ADR gate from /speq-adr-rules to every existing ADR
 
 ## Context
 - Decision records: specs/_decision/*.md (read every fragment in full)

@@ -16,7 +16,8 @@ The `speq-plan` and `speq-plan-pr` skills are thin orchestrators. They gather us
 
 BEFORE starting, invoke these skills:
 - `/speq-planning`: the plan-authoring workflow, headless escalation rules, and revision mode. Follow it exactly.
-- `/speq-design-philosophy`: complexity-management design principles for the Design/ADR step
+- `/speq-design-philosophy`: complexity-management design principles for the design section
+- `/speq-adr-rules`: when a decision becomes an ADR. Default is no
 - `/speq-code-tools`: codebase exploration
 - `/speq-ext-research`: API docs and design research
 - `/speq-cli`: spec discovery and search

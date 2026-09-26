@@ -79,7 +79,7 @@ Delegated to `audit-agent` (see SKILL.md Phase 3). The agent returns (a) library
 **Signal:** informational only, no `✓`/`✗`/`⚠`: `N hooks active: <filenames>` or `none`. Never a finding, never remediated. It only surfaces that custom behavior is in effect.
 
 ## 13. ADR noise
-Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `specs/_decision/*.md` fragment and returns one verdict per ADR: `KEEP`, `NOISE-PROCESS`, `NOISE-LOCAL`, `NOISE-COROLLARY`, `NOISE-DUPLICATE`, `STALE`, or `UNSURE`. The agent file defines the tags and the promotion gate they apply.
+Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `specs/_decision/*.md` fragment and returns one verdict per ADR: `KEEP`, `NOISE-PROCESS`, `NOISE-LOCAL`, `NOISE-COROLLARY`, `NOISE-DUPLICATE`, `STALE`, or `UNSURE`. The agent file defines the tags. `/speq-adr-rules` defines the rules they apply.
 **Detect:** skip (`— n/a`) when `specs/_decision/` holds no fragment, or when the old `specs/decision-log.md` exists (migrate first).
 **Signal:** `✓ N ADRs, no noise`, `⚠ M of N noise · S stale · U unsure`, or `— n/a`.
 **Remediate (on Yes, `NOISE-*` only):** [ADR noise removal](#remediation-adr-noise-removal). `STALE` and `UNSURE` are report-only: the user edits the ADR or plans a change.

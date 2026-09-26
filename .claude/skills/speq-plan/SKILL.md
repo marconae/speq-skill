@@ -143,6 +143,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 Print the plan's summary per `/speq-plan-pr`'s `references/pr-body-template.md` — Current State / What Changes / Impact, composed from `plan.md`/`decision-log.md` the same way `speq-plan-pr` composes the PR body from them. This is terminal output, not a PR: print the `<details>` block's file list as a plain line, not the HTML fold, and the Test plan checklist as-is. `speq-plan-pr` and `speq-implement-pr` are the only skills that ever post this content as a PR; this step never touches git or GitHub.
 
 Then:
+- Print `ADR candidates: none`, or list the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Each one is a proposed ADR, and `/speq-record` accepts it. To drop one, set it to `Promotes to ADR: no` and run this skill again
 - Report ADVISORY findings from step 6, read from the round file
 - If step 6's round 1 was all-`MECHANICAL` (round 2 skipped) or ran a round-2 `MECHANICAL` follow-up, name it in one line ("N mechanical findings fixed") — do not restate each one
 - Tell the user to run `/speq-implement <plan-name>` to continue
@@ -163,7 +164,7 @@ specs/
 | Step | Performed by | Why |
 |------|--------------|-----|
 | Discovery, interview, coordination | This skill (pins Sonnet) | Conversational, tool-call heavy |
-| Spec delta authoring, ADR, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; a defect here compounds through implementation |
+| Spec delta authoring, design section, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; a defect here compounds through implementation |
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation |
 
 Each sub-agent pins its own model and effort in its frontmatter, so planning quality does not depend on the parent session's configuration.
