@@ -40,9 +40,11 @@ The entry's Rationale names the criterion that applies and states the result of 
 | Content | Destination |
 |---------|-------------|
 | Conventions that bind contributors or agents | `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or `specs/mission.md` Constraints |
-| WHAT the system is: components and boundaries | `specs/mission.md` Architecture |
+| WHAT the system is: components and boundaries | `specs/architecture.md`, changed through an architecture delta |
 | HOW this plan builds it | `plan.md` `## Design` |
 | Execution steps | `plan.md` `## Implementation Tasks` |
+
+An ADR records why. specs/architecture.md records what is.
 
 To change an existing ADR, write a new ADR with `Supersedes: <slug>`. Do not edit the old fragment.
 

@@ -30,6 +30,7 @@ parent entry's Consequences line instead.
 - **Rationale:** Why this choice. For `yes`, name the /speq-adr-rules criterion and the search result.
 - **Consequences:** Effects, trade-offs, or corollary decisions folded in here. Omit this line entirely when there are none. <!-- optional -->
 - **Supersedes:** <slug of the ADR this replaces> <!-- optional; only when this decision replaces an existing ADR -->
+- **Architecture:** <§ Section[, § Section] | no change: <reason>> <!-- optional; required when Promotes to ADR is yes and Rationale names /speq-adr-rules rule-2 criterion 1, 2, or 3. Each named section needs a block in architecture.md -->
 - **Promotes to ADR:** yes
 
 ### [2] <Short decision title>

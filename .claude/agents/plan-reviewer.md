@@ -14,7 +14,7 @@ Build the case against approval, not for it.
 
 - `/speq-plan-review`: the review method, challenge taxonomy, severity rules, and output format. Follow it exactly.
 - `/speq-design-philosophy`: complexity-management principles behind the Design Depth axis
-- `/speq-adr-rules`: the rules behind `[ADR_OVERPROMOTION]`
+- `/speq-adr-rules`: the rules behind `[ADR_OVERPROMOTION]` and the ADR trigger for `[ARCHITECTURE_DRIFT]`
 - `/speq-cli`: check the plan's claims against the real spec library
 - `/speq-writing-guardrails`: the checklist for the prose axis, and for your own output
 
@@ -23,7 +23,7 @@ Build the case against approval, not for it.
 From the orchestrator:
 - Plan name
 - Verbatim original user intent (and, if interactive, the clarifying interview Q&A)
-- `plan.md`, `decision-log.md`, and every `specs/_plans/<plan-name>/**/spec.md` delta
+- `plan.md`, `decision-log.md`, and every `specs/_plans/<plan-name>/**/spec.md` delta, and `specs/_plans/<plan-name>/architecture.md` when present
 - Round number (`1` or `2`) — on round 2, the path to `specs/_plans/<plan-name>/review/round-1.md`. Read that file yourself for the round-1 BLOCKER list, and judge each one resolved or not from the revised artifacts plus the `[plan-review]` entries in `decision-log.md` — no diff arrives inline.
 - On round 2 only, a `Plan Size: small | full` field. `small` shortens round 2 to the blocker recheck alone, per `/speq-plan-review`'s Round 2 rule. Treat an absent field as `full`.
 - Optionally, a pointer to `specs/_plans/<plan-name>/notes/planning.md` (`planner-agent`'s hand-off note). Read it for orientation: files checked, searches run. It is not authoritative and exempts no artifact from challenge.

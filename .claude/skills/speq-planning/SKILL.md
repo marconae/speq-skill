@@ -10,7 +10,7 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 - **BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN; integration tests by default, unit tests only for isolated pure computation
 - **EARS syntax**: spec narratives use unambiguous behavioral clauses
 - **RFC 2119 keywords**: THEN steps use MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY (uppercase)
-- **Nygard-style design section**: the `plan.md` design section captures Goals / Non-Goals / Architecture / Trade-offs / Key Interfaces. It is not an ADR (see `/speq-adr-rules`)
+- **Nygard-style design section**: the `plan.md` design section captures Goals / Non-Goals / Patterns / Trade-offs / Key Interfaces. Structural architecture changes go in the architecture delta, not in this section. It is not an ADR (see `/speq-adr-rules`)
 
 ## Workflow
 
@@ -25,6 +25,8 @@ speq search query "<narrower terms>"  # only if Existing Context's results do no
 
 **Search first** when modifying existing behavior. Check `Existing Context` before you assume a feature does not exist yet.
 
+Also read `specs/architecture.md` if it exists. It holds the current architecture. Step 2a changes it.
+
 ### 2. Author Spec Deltas
 
 For each feature in scope:
@@ -38,6 +40,14 @@ Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
 **Prose drift check**: after drafting a scenario delta for an existing feature, re-read that feature's `## Background` and `# Feature: <name>` description (`speq feature get <domain>/<feature>`). When the scenario change makes either inaccurate, author a `DELTA:CHANGED` block for that section too, per `/speq-plan`'s `references/delta-template.md`.
+
+### 2a. Author Architecture Delta
+
+Decide whether the plan changes the architecture: a component, boundary, interface, data flow, constraint, or external dependency. If it does, write `specs/_plans/<plan-name>/architecture.md` per `/speq-plan`'s `references/architecture-delta-template.md`. Copy each changed section from `specs/architecture.md`, edit it, and set the BASE hash with `git hash-object specs/architecture.md`.
+
+- If the plan changes no architecture, write no delta.
+- If `specs/architecture.md` is absent, write no delta. State `Architecture: no change: specs/architecture.md absent` in the decision log entry.
+- Never edit `specs/architecture.md` itself. `/speq-record` merges the delta.
 
 ### 3. Test Mapping and Verification
 
@@ -58,7 +68,7 @@ Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
 1. **Context**: why the change is being made
 2. **Features**: table referencing spec delta files (NEVER embed spec content), immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
-3. **Design**: a design section for new features and major changes; skip it for minor fixes. It records HOW this plan builds the change. It is not an ADR. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
+3. **Design**: a design section for new features and major changes; skip it for minor fixes. It records HOW this plan builds the change. It is not an ADR. State patterns and local interfaces only. Do not restate components, boundaries, or data flow here. Point to the architecture delta instead. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 4. **Tasks**: work breakdown in implementation order
 5. **Parallelization**: knowledge clusters, per the rules below
 6. **Verification**: Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
@@ -77,6 +87,7 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `reference
 **What to capture:**
 - **Interview section**: verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
 - **Design Decisions section**: one entry per significant choice made while authoring spec deltas or plan.md (architecture patterns, rejected alternatives, scope boundaries)
+- **Architecture field**: an entry with `Promotes to ADR: yes` whose Rationale names `/speq-adr-rules` rule-2 criterion 1, 2, or 3 needs an `- **Architecture:** <§ Section[, § Section] | no change: <reason>>` line. Every named section needs a block in the architecture delta
 - **Review Findings section**: leave empty; populated in Revision Mode after `plan-reviewer` blockers, and by `speq-implement` after code review
 
 **Promotion gate.** Invoke `/speq-adr-rules` first. It owns the rules. Summary for this step:
@@ -155,7 +166,7 @@ Check your artifacts do not trip `/speq-plan-review`'s finding tags, across its 
 - **Feasibility**: no `[EFFORT_MISESTIMATION]` (a task line that hides more work than it states), `[HIDDEN_DEPENDENCY]` (an unmodeled prerequisite), `[UNSTATED_ASSUMPTION]` (a load-bearing belief never stated), or `[NFR_IGNORED]` (security, performance, migration, or concurrency left untouched where the change touches it).
 - **Requirement Quality**: no `[AMBIGUOUS_REQUIREMENT]` (not testable as written), `[COMPLETENESS_GAP]` (a missing edge case or error path), `[REQUIREMENT_CONFLICT]` (contradicts another delta or a recorded spec — check via `/speq-cli`), or `[IMPLEMENTATION_LEAKAGE]` (a Background or Feature description fact no scenario step depends on).
 - **Task Breakdown**: no `[TRACEABILITY_GAP]` (a delta with no implementing task, or the reverse), `[TASK_GRANULARITY]` (a task too large to verify as one unit), or `[CLUSTER_INCOHERENCE]` (a Parallelization group sliced by layer, or overlapping `Knowledge` entries across groups).
-- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), or `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`).
+- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`), or `[ARCHITECTURE_DRIFT]` (a qualifying ADR entry with no `Architecture:` line, a named section the delta lacks, or `no change` with no reason; a component, boundary, interface, data flow, constraint, or external dependency in `plan.md` that the delta lacks; or a delta that breaks the delta template).
 
 Open `/speq-plan-review` for a tag's full definition if you are unsure it applies.
 

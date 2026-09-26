@@ -56,6 +56,7 @@ Plan created: <plan-name>
 Files:
 - specs/_plans/<plan-name>/plan.md
 - specs/_plans/<plan-name>/decision-log.md
+- specs/_plans/<plan-name>/architecture.md (only when the plan changes the architecture)
 - specs/_plans/<plan-name>/<domain>/<feature>/spec.md (one per feature)
 
 Task summary:
@@ -69,6 +70,7 @@ Validation: pass
 ## Scope Constraints
 
 - Produce spec deltas and plan.md. Do NOT implement code.
+- Never edit `specs/architecture.md`. Write changes as an architecture delta in the plan directory.
 - Do NOT embed spec content in plan.md. Reference delta files only.
 - Do NOT skip the clarifying interview findings the orchestrator passed you.
 - If a requirement is ambiguous, signal back to the orchestrator with a concrete question. Do not assume. In headless mode, see `/speq-planning`: assume first, escalate only when the decision is irreducible.

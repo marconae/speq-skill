@@ -23,17 +23,7 @@ The problem, the forces at play, and why it needs a design decision.
 
 ### Decision
 
-The chosen approach: architecture, patterns, and key interfaces.
-
-#### Architecture
-
-High-level system structure: components, layers, data flow
-
-```
-┌─────────────┐     ┌─────────────┐
-│ Component A │────▶│ Component B │
-└─────────────┘     └─────────────┘
-```
+The chosen approach: patterns and local interfaces. Structural changes to the system (components, boundaries, data flow, interfaces, constraints, external dependencies) go in the architecture delta, `architecture.md` in the plan directory, not here. Point to the delta from this text.
 
 #### Patterns
 
