@@ -21,11 +21,11 @@ From the orchestrator: the mission path (`specs/mission.md`) and instruction to 
 
 ## Workflow
 
-1. Read `specs/mission.md`: `## Core Capabilities`, `## Domain Glossary`, and `## Architecture`. Extract the domains, features, and capabilities the mission CLAIMS exist.
+1. Read `specs/mission.md`: `## Core Capabilities` and `## Domain Glossary`. Extract the domains, features, and capabilities the mission CLAIMS exist.
 2. Build the live inventory: `speq domain list` and `speq feature list`.
 3. Diff the two. Before you declare a mismatch, bridge naming differences with `speq search query "<capability>"`: a differently-named feature can back a capability.
 4. Produce two lists:
-   - **Unmentioned in mission**: real domains/features with no corresponding capability, glossary entry, or architecture mention.
+   - **Unmentioned in mission**: real domains/features with no corresponding capability or glossary entry.
    - **Unbacked capabilities**: mission capabilities with no backing spec (no feature, and `speq search` finds no scenario).
 
 ## Output Format

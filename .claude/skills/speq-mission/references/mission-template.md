@@ -29,6 +29,8 @@ Every placeholder MUST be replaced with real information.
 - <Explicit non-goals to prevent scope creep>
 - <Features this project intentionally does not address>
 
+Architecture: see specs/architecture.md.
+
 ## Domain Glossary
 
 | Term | Definition |
@@ -72,18 +74,6 @@ Every placeholder MUST be replaced with real information.
 └── <dir>/          # <purpose>
 ```
 
-## Architecture
-
-<High-level architecture pattern (e.g., layered, hexagonal, event-driven). Key components and their responsibilities. Data flow direction.>
-
 ## Constraints
 
-- **Technical**: <e.g., must run in browser, offline-first>
 - **Business**: <e.g., GDPR compliance, multi-tenant>
-- **Performance**: <e.g., <100ms response time, <50MB memory>
-
-## External Dependencies
-
-| Service | Purpose | Failure Impact |
-|---------|---------|----------------|
-| <API/service> | <why needed> | <what breaks if unavailable> |

@@ -16,11 +16,12 @@ Detection recipes, thresholds, and remediation procedures for each `speq-audit` 
 - [11. Active-plan validity](#11-active-plan-validity)
 - [12. Project hooks](#12-project-hooks)
 - [13. ADR noise](#13-adr-noise)
+- [14. Architecture file](#14-architecture-file)
 - [Remediation: decision-log migration](#remediation-decision-log-migration)
 - [Remediation: domain/feature restructure](#remediation-domainfeature-restructure)
 - [Remediation: ADR noise removal](#remediation-adr-noise-removal)
 
-Reserved top-level names under `specs/` (NOT domains): `_plans/`, `_recorded/`, `_decision/`, `mission.md`, `.gitignore`.
+Reserved top-level names under `specs/` (NOT domains): `_plans/`, `_recorded/`, `_decision/`, `mission.md`, `architecture.md`, `.gitignore`.
 
 ## 1. Spec structure
 **Detect:** `find specs -name spec.md`. Every result MUST match `specs/<domain>/<feature>/spec.md`: exactly two path segments between `specs/` and `spec.md`. Skip anything under `_plans/`, `_recorded/`, `_decision/`. Non-conforming: a `spec.md` at depth 1 (`specs/<x>/spec.md`) or depth 3+, a `.md` directly under a domain dir, or a feature dir with no `spec.md`.
@@ -83,6 +84,14 @@ Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `s
 **Detect:** skip (`— n/a`) when `specs/_decision/` holds no fragment, or when the old `specs/decision-log.md` exists (migrate first).
 **Signal:** `✓ N ADRs, no noise`, `⚠ M of N noise · S stale · U unsure`, or `— n/a`.
 **Remediate (on Yes, `NOISE-*` only):** [ADR noise removal](#remediation-adr-noise-removal). `STALE` and `UNSURE` are report-only: the user edits the ADR or plans a change.
+
+## 14. Architecture file
+**Detect:** check `specs/architecture.md` against the rules in `/speq-plan`'s `references/architecture-template.md`. Read-only, no CLI command exists for it.
+1. Missing: the file does not exist.
+2. Old sections: `specs/architecture.md` is missing and `specs/mission.md` still holds `## Architecture`, `## External Dependencies`, or technical or performance constraint lines.
+3. Bad structure: the first line is not `# Architecture`, a canonical `##` section (Overview, Components, Data Flow, Interfaces, Constraints, External Dependencies) is missing, duplicated, or out of order, the body has a `###` heading, a table, or a prose paragraph, or an empty canonical section lacks `- None`.
+**Signal:** `✓ present, N sections`, `✗ missing`, `✗ missing, mission.md holds the old sections`, or `✗ bad structure: <first violation with line>`.
+**Remediate (on Yes):** missing or old sections: spawn `/speq-mission`, which runs the one-time migration interview. Bad structure: report only. The user fixes the file or plans the change with `/speq-plan`. Never edit `specs/architecture.md` here.
 
 ---
 

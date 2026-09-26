@@ -1,11 +1,11 @@
 ---
 name: speq-mission
-description: "Create or update specs/mission.md through a Socratic interview; detects brownfield vs greenfield. Use when the user asks to bootstrap or initialize a speq project, write or revise the project mission, or when /speq-audit reports mission drift and seeds this skill with its findings."
+description: "Create or update specs/mission.md and the first specs/architecture.md through a Socratic interview; detects brownfield vs greenfield. Use when the user asks to bootstrap or initialize a speq project, write or revise the project mission, or when /speq-audit reports mission drift and seeds this skill with its findings."
 ---
 
 # Mission Creator
 
-You are creating a project mission file (`specs/mission.md`) through an interactive interview.
+You are creating a project mission file (`specs/mission.md`) and the first architecture file (`specs/architecture.md`) through an interactive interview.
 
 **Golden Rule:** NEVER assume. ALL content MUST come from user answers or code exploration.
 
@@ -38,7 +38,17 @@ Cargo.toml, package.json, go.mod, etc. exists?
 specs/ or similar directory exists?
 ├─ Yes → Has existing specs (read them)
 └─ No  → No specs yet
+
+specs/architecture.md exists?
+├─ Yes → Update mode: skip topics 4.9 to 4.11 (see below)
+└─ No  → mission.md still has ## Architecture, ## External Dependencies, or technical constraints?
+         ├─ Yes → Migration mode: one-time interview seeded from those sections (see below)
+         └─ No  → Create mode
 ```
+
+**Update mode.** `specs/architecture.md` exists. Skip the interview topics for Architecture, technical and performance constraints, and External Dependencies. Tell the user: "Change the architecture through /speq-plan." Interview the remaining topics as usual.
+
+**Migration mode.** `specs/architecture.md` is missing and `specs/mission.md` still holds the old sections. Run topics 4.9 to 4.11 once, seeded with the existing content ("mission.md lists [X] as the architecture. Is this still accurate?"). Write the answers to `specs/architecture.md`. Remove the old Architecture and External Dependencies sections and the technical and performance constraint lines from `specs/mission.md`. Add the line `Architecture: see specs/architecture.md.` after Out of Scope.
 
 ### 2. Brownfield Exploration
 
@@ -96,12 +106,15 @@ Apply **User Story Mapping** (Patton): identify activities, then decompose into 
 - Planned directory structure and the purpose of each main directory. Brownfield: present the discovered structure and ask for clarification on purpose.
 
 #### 4.9 Architecture
+Answers go to `specs/architecture.md`.
 - High-level architecture pattern (layered, hexagonal, event-driven, etc.)? Key components and their responsibilities? How does data flow through the system?
 
 #### 4.10 Constraints
-- Technical (browser-only, offline-first)? Business (GDPR, multi-tenant)? Performance (response time, memory limits)?
+- Technical (browser-only, offline-first) and performance (response time, memory limits): answers go to the Constraints section of `specs/architecture.md`.
+- Business (GDPR, multi-tenant): answers stay in `specs/mission.md`.
 
 #### 4.11 External Dependencies
+Answers go to `specs/architecture.md`.
 - What external services/APIs does this depend on? What happens if each dependency is unavailable?
 
 ### 5. Generate Mission
@@ -110,12 +123,13 @@ After collecting ALL information:
 
 1. Create `specs/` directory if needed
 2. Generate `specs/mission.md` using `references/mission-template.md` as structure
-3. Fill with ACTUAL collected information (no placeholders)
-4. Present to user for review
+3. Generate `specs/architecture.md` using `references/architecture-template.md` from `/speq-plan` as structure, unless it already exists (update mode)
+4. Fill both files with ACTUAL collected information (no placeholders)
+5. Present both files to user for review
 
 ### 6. Review & Iterate
 
-Present the generated mission.md and ask: "Does this accurately capture your project? Anything to add, change, or remove?" Iterate until the user approves.
+Present the generated mission.md and architecture.md and ask: "Do these accurately capture your project? Anything to add, change, or remove?" Iterate until the user approves.
 
 ## Interview Guidelines
 
@@ -129,13 +143,13 @@ Group questions into MECE partitions (max 3-4 per `AskUserQuestion` call). Each 
 | Users | Personas, goals, workflows |
 | Capabilities | Core features, out of scope |
 | Technical | Stack, commands, structure |
-| Constraints | Technical, business, performance |
+| Constraints | Technical, business, performance (technical and performance go to architecture.md) |
 
 ### Adaptive Depth
 
 | Project Complexity | Interview Depth |
 |-------------------|-----------------|
-| Simple CLI tool | Minimal (skip architecture, external deps) |
+| Simple CLI tool | Minimal (architecture.md with Overview and Components only, other sections `- None`) |
 | Web application | Standard (all sections) |
 | Distributed system | Deep (detailed architecture, failure modes) |
 

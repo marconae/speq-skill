@@ -51,6 +51,7 @@ Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and
 11. Active-plan validity — `speq plan validate <plan>` per active plan
 12. Project hooks — informational only; list any `.speq/*-hook.md` present
 13. ADR noise — delegated to `adr-audit-agent` (Phase 3)
+14. Architecture file — `specs/architecture.md` present, structurally valid, and mission.md free of the old architecture sections
 
 Reuse the CLI (no new commands): `speq feature validate`, `speq decision-log validate`, `speq plan validate`, `speq plan list`, `speq domain list`, `speq feature list`.
 
@@ -70,7 +71,7 @@ Delegate to audit-agent — Verify mission ↔ spec library
 ## Your Task
 Diff the mission against the real spec library. Return two lists: (a) domains/features
 present in the library but NOT reflected in the mission's Core Capabilities / Domain
-Glossary / Architecture; (b) mission capabilities with NO backing spec. Advisory only —
+Glossary; (b) mission capabilities with NO backing spec. Advisory only —
 do NOT edit mission.md.
 
 Project Hook: <if active, ".speq/audit-hook.md — read it and apply it"; otherwise omit this line>
@@ -116,6 +117,7 @@ Lead with the verdict (BLUF), then the checks table, then numbered remediations.
 | _recorded gitignored                  | ✗ | missing from specs/.gitignore |
 | Reserved dirs tracked                 | ✓ | _decision, _plans tracked |
 | mission.md ↔ spec library             | ⚠ | 2 features unmentioned · 1 capability unbacked |
+| Architecture file                     | ✗ | specs/architecture.md missing |
 | Unrecorded plans                      | ✗ | 1: add-export-command |
 | Recorded-folder naming                | ⚠ | 3 legacy names |
 | Library thresholds                    | ✓ | max 8 scenarios · 5 features |
@@ -136,6 +138,7 @@ Lead with the verdict (BLUF), then the checks table, then numbered remediations.
 3. Record the finished plan → /speq-record add-export-command
 4. Reconcile mission.md → /speq-mission (seeded): features `cli/export`, `cli/import` unmentioned; capability "Diff specs" unbacked
 5. Remove 2 noise ADRs (fold `retry-flag-naming` into `add-retry` first)
+6. Create specs/architecture.md → /speq-mission (migration interview seeded from the old mission.md sections)
 ```
 
 A clean project prints `✓ healthy` and omits the ADR review and actions sections. Print the ADR review table with every non-`KEEP` verdict, in the agent's own words. Do not soften or re-judge it.
@@ -152,6 +155,8 @@ For each actionable finding, ask with `AskUserQuestion` (**Yes / No / Skip**). A
 | Over-threshold domain/feature | Recommend `/speq-plan` (structural — not auto-fixed) |
 | ADR noise (`NOISE-*`) | Show the list first; the user can strike slugs. On Yes, spawn a worker to remove the rest per `references/checks.md` (fold each corollary into its parent first), then run `speq decision-log validate` |
 | Stale or unsure ADR | Report only. The user edits the ADR, or runs `/speq-plan` when the decision changed |
+| Missing architecture file · mission.md still holds the old architecture sections | On Yes, spawn `/speq-mission`. It runs the one-time migration interview. Never write `specs/architecture.md` directly |
+| Architecture file with bad structure | Report the violations. The user fixes the file, or plans the change with `/speq-plan` |
 | Mission drift | On Yes, spawn `/speq-mission` **seeded** with the audit-agent's inconsistency lists; never edit `mission.md` directly |
 
 ### Phase 6: Close (orchestrator)
