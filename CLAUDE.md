@@ -11,6 +11,7 @@
 - **Markdown**: keep one line per paragraph and per list item in prose. Do not wrap prose to a fixed width. Fenced code, tables, diagrams, YAML frontmatter, and `**Field:**` lines keep their own line breaks.
 - **Mission**:
     - @specs/mission.md applies and describes the `speq` CLI only.
+    - @specs/architecture.md describes the speq CLI architecture only.
     - Skill purpose and intent live in the skill files and `docs/`.
 
 ## Commands

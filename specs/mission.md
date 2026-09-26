@@ -34,6 +34,8 @@ speq provides structural verification and exploration tools so AI agents can rel
 - Code generation — Does not generate implementation code from specs
 - Version control — Does not manage spec history beyond archiving recorded plans
 
+Architecture: see specs/architecture.md.
+
 ## Domain Glossary
 
 | Term | Definition |
@@ -86,8 +88,7 @@ cargo llvm-cov
 
 ```
 speq-skill/
-├── src/                  # One module per capability: CLI parsing, spec validation,
-│                         # feature discovery, search/embedding, plan management, delta recording
+├── src/                  # Rust source
 ├── specs/                # Feature specifications
 │   ├── <domain>/         # Domain grouping
 │   │   └── <feature>/    # Feature directory
@@ -98,30 +99,6 @@ speq-skill/
 └── tests/                # Integration tests
 ```
 
-## Architecture
-
-Simple modular CLI organized by feature. Each module handles a distinct capability:
-
-- `cli` — Command definitions and argument parsing
-- `validate` — Markdown parsing and structural validation rules
-- `validate::decision_log` — Decision-log fragment validation and assembly
-- `feature` — Spec discovery and listing
-- `tree` — Tree view output formatting
-- `plan` — Plan discovery, listing, and delta validation
-- `record` — Delta merging and plan archiving
-- `embedding` — Embedding model loading and vector generation for semantic search
-- `search` — Semantic search over spec scenarios
-
-Data flows from CLI arguments → module handlers → formatted output.
-
 ## Constraints
 
-- **Minimal dependencies**: Keep external crate count low for maintainability
-- **No runtime dependencies**: Pure CLI tool, no services or databases required
 - **Spec format stability**: Spec structure must remain backward compatible to avoid breaking existing specs
-
-## External Dependencies
-
-| Service | Purpose | Failure Impact |
-|---------|---------|----------------|
-| HuggingFace (model download) | The installer downloads the embedding model files once into the local cache. Inference runs fully offline after that. | Search is unavailable until the model is provisioned. The binary reports a clear error naming the missing files and the cache directory. |
