@@ -96,6 +96,8 @@ Run — operation: push (per /speq-git-operations)
 
 **B2. Record**: invoke `/speq-record <plan-name>`. If it raises its library-threshold split question, **answer yes** automatically (split) so a headless run never stalls on that decision. Recording accepts the ADR candidates on the plan PR. Your run is the human's go-ahead, so do not stop for an ADR question.
 
+If `/speq-record` returns `Recording failed: <reason>` (for example a stale architecture delta base), **stop**. Leave `recorded` as `[ ]`, report `Blocked: record failed: <reason>` per the gate format in `references/checkpoint-protocol.md`, and do not continue to Phase C. Re-invoking after a human fixes the delta re-enters at B2.
+
 **B3. Verify the recorded mark**: parse the `Archive:` path from `/speq-record`'s return. Check that `<archive-path>/tasks.md` has `- [x] recorded`. Write the mark yourself if it is absent (covers a stale `recorder-agent`).
 
 **B4. Continue**: proceed directly into Phase C in this same session.
@@ -106,8 +108,8 @@ Run — operation: push (per /speq-git-operations)
 
 ```
 Run — operation: ship-ready (per /speq-git-operations)
-  paths: permanent-spec merges (specs/<domain>/...), specs/_decision/ additions,
-         deletion of specs/_plans/<plan-name>/
+  paths: permanent-spec merges (specs/<domain>/...), specs/architecture.md,
+         specs/_decision/ additions, deletion of specs/_plans/<plan-name>/
   message: <type>(<scope>): record <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
   title: <type>(<scope>): <slug>    # same derivation rule as speq-plan-pr
   body: per /speq-plan-pr's references/pr-body-template.md — update Current
@@ -115,7 +117,10 @@ Run — operation: ship-ready (per /speq-git-operations)
         in both test-suite results (integration + e2e) and the /speq:record
         outcome into the Test plan checklist, keep the <details> pointer,
         and list the accepted ADR slugs on the ADR candidates line
-        (`none` when recorder-agent wrote no ADR)
+        (`none` when recorder-agent wrote no ADR); rewrite the Architecture
+        line as `Architecture: merged into specs/architecture.md: <sections>`
+        from the recorder's Architecture report line (keep `none` when the
+        plan had no architecture delta)
 ```
 
 `ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready.
@@ -136,7 +141,9 @@ Run — operation: comment-pr (per /speq-git-operations)
 ```
 specs/
 ├── <domain>/<feature>/spec.md            # Permanent (after record)
+├── architecture.md                       # Permanent, changed by the recorder applying the plan's architecture delta
 ├── _plans/<plan-name>/                   # Active until recorded — committed whole at Phase A, not as an itemized subset
+│   ├── architecture.md                   # Architecture delta, present only when the plan changes the architecture
 │   ├── tasks.md                          # Pre-created here (§ PR Lifecycle checkpoint); WBS filled by speq-implement
 │   ├── review-findings.md                # Created by code-reviewer
 │   ├── review/round-N.md                 # Created by plan-reviewer
@@ -161,6 +168,7 @@ specs/
 | Treating `## PR Lifecycle` entries as work items | They are checkpoints; they are unnumbered exactly so task dispatch skips them |
 | Letting a sub-agent write lifecycle marks | Marks are orchestrator-written, except `recorded` (recorder-agent, per the writer table) |
 | Proceeding past a non-empty open-questions.md | The human-in-the-loop gate lives at A1 |
+| Continuing to Phase C after `Recording failed` | The merge did not happen. Stop with `Blocked: record failed: <reason>` and leave `recorded` as `[ ]` |
 | Recording with any suite red | `/speq-record` runs only on fully green suites |
 | Skipping the A4 commit | Evidence artifacts silently never reach git history once `/speq-record`'s archive `mv` moves them out of tracked space |
 | Re-entering `/speq-implement` on the red path | The red path re-runs suites only; new implementation work is an explicit, separate invocation |

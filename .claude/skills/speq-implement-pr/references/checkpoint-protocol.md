@@ -51,6 +51,7 @@ specs/_plans/<plan-name>/tasks.md exists?
 │   ├─ version-bumped not [x] → Phase A (partial [~] task groups resume via
 │   │                            /speq-implement's existing Context Recovery)
 │   ├─ version-bumped [x], tested-green [ ] → Phase B
+│   ├─ tested-green [x], recorded [ ] → Phase B2 (record; covers a record failure and a cut-off before recording)
 │   └─ tested-green [!] (red) → red path below
 ├─ No, but specs/_recorded/*-<plan-name>/tasks.md exists →
 │   ├─ recorded [x], pr-ready not [x] → Phase C
@@ -66,13 +67,15 @@ The `specs/_recorded/*-<plan-name>/` glob matches both canonical `NNN-<plan-name
 
 ## Gate and Resume Messages
 
-The pipeline halts only at genuine gates, never between phases. Two gates exist: a non-empty `open-questions.md` at Phase A entry (human answers required), and a red test suite in Phase B (`[!] tested-green`: a human fixes the code, blind retries are out of scope). A gate report states the gate, the checkpoint state, and the resume path:
+The pipeline halts only at genuine gates, never between phases. Three gates exist: a non-empty `open-questions.md` at Phase A entry (human answers required), a red test suite in Phase B (`[!] tested-green`: a human fixes the code, blind retries are out of scope), and a failed record at B2 (`Recording failed: <reason>`, for example a stale architecture delta base: a human fixes the delta or the plan, blind retries are out of scope). A gate report states the gate, the checkpoint state, and the resume path:
 
 ```
-Blocked: <open questions | red suites: <names>> for <plan-name>.
+Blocked: <open questions | red suites: <names> | record failed: <reason>> for <plan-name>.
 Checkpoint: <tasks.md path> § PR Lifecycle (<last mark written>).
-Re-invoke /speq-implement-pr <plan-name> once <the questions are answered | the failure is fixed>.
+Re-invoke /speq-implement-pr <plan-name> once <the questions are answered | the failure is fixed | the recording problem is fixed>.
 ```
+
+On a record failure the `recorded` mark stays `[ ]` and `tested-green` stays `[x]`. No new lifecycle mark exists. Entry dispatch sends the re-invocation to Phase B2, so the suites do not run again.
 
 When a fresh session's entry dispatch finds marks already set (a prior run was cut off involuntarily), report on entry which marks are `[x]` and which phase this run resumes into, then continue normally to the end.
 

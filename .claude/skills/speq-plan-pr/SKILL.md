@@ -121,7 +121,7 @@ none — agent to research as needed
 <if active: note ".speq/plan-pr-hook.md — read it and apply it" — otherwise omit this section>
 
 ## Your Task
-Produce spec deltas and plan.md per your normal workflow. You are in headless mode: follow your "Headless / Non-Interactive Mode" section — assume and document conventional decisions, escalate only irreducible ones via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
+Produce spec deltas, plan.md, and the architecture delta (when the plan changes the architecture) per your normal workflow. You are in headless mode: follow your "Headless / Non-Interactive Mode" section — assume and document conventional decisions, escalate only irreducible ones via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
 
 Return the list of files created and the validation result, or an OPEN QUESTIONS: block if you had to stop.
 ```
@@ -143,7 +143,7 @@ Delegate to plan-reviewer — Review <plan-name> (round 1)
 <same text passed to planner-agent in step 4 — headless mode has no live interview>
 
 ## Plan Artifacts
-plan.md, decision-log.md, and every specs/_plans/<plan-name>/**/spec.md delta
+plan.md, decision-log.md, every specs/_plans/<plan-name>/**/spec.md delta, and specs/_plans/<plan-name>/architecture.md when present
 
 ## Project Hook
 <if active: note ".speq/plan-pr-hook.md — read it and apply it" — otherwise omit this section>
@@ -153,7 +153,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **If `INTENT > 0`:** the plan solves a different problem than the one asked. Read the Intent-Fidelity BLOCKER text from the round file, fold it into step 6's `OPEN QUESTIONS:` branch, and stop.
 
-**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all three hold — the plan-name's verb (per the verb table) is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty. Otherwise `full`.
+**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all four hold — the plan-name's verb (per the verb table) is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`. Otherwise `full`.
 
 **If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
 
@@ -223,17 +223,23 @@ Run — operation: flag-blocked (per /speq-git-operations)
 
 ### 7. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, with the PR link either way. Print plan.md's `## Impact` section to the terminal. Print `ADR candidates: none`, or the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Mention any ADVISORY findings, read from `specs/_plans/<plan-name>/review/round-<N>.md`, not from memory, and any Design Decisions entries surfaced — terminal only, per step 6 neither ever reaches the PR. If step 5's round 1 was all-`MECHANICAL` (round 2 skipped) or ran a round-2 `MECHANICAL` follow-up, and it fully resolved, name it in one line ("N mechanical findings fixed, no human input needed") — do not restate what each one was; that detail lives in the round file.
+Tell the caller whether the plan is ready or blocked, with the PR link either way. Print plan.md's `## Impact` section to the terminal. Print `ADR candidates: none`, or the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Print the Architecture line from the PR body: `Architecture: none`, `Architecture: none (specs/architecture.md absent)`, or the changed sections. Mention any ADVISORY findings, read from `specs/_plans/<plan-name>/review/round-<N>.md`, not from memory, and any Design Decisions entries surfaced — terminal only, per step 6 neither ever reaches the PR. If step 5's round 1 was all-`MECHANICAL` (round 2 skipped) or ran a round-2 `MECHANICAL` follow-up, and it fully resolved, name it in one line ("N mechanical findings fixed, no human input needed") — do not restate what each one was; that detail lives in the round file.
 
 ## Spec Hierarchy (reference)
 
 ```
 specs/
 ├── <domain>/<feature>/spec.md            # Permanent
+├── architecture.md                       # Permanent, changed only by /speq-record
 ├── _plans/<plan-name>/                   # Active
+│   ├── architecture.md                   # Architecture delta, present only when the plan changes the architecture
 │   └── open-questions.md                 # Present only while blocked
 └── _recorded/<plan-name>/                # Archived
 ```
+
+## Repos Without architecture.md
+
+If `specs/architecture.md` does not exist, the plan carries no architecture delta. The decision log states `Architecture: no change: specs/architecture.md absent`, the PR body line reads `Architecture: none (specs/architecture.md absent)`, and `/speq-record` rejects any delta. `/speq-audit` reports the gap.
 
 ## Work Split (reference)
 
