@@ -39,7 +39,7 @@ Generate `specs/mission.md` and the first `specs/architecture.md` through an int
 ### What it does
 
 1. **Project type** — Determines whether the project is brownfield (existing code) or greenfield (new project)
-2. **Exploration** — For brownfield projects, explores the tech stack, commands, and structure
+2. **Exploration** — For brownfield projects, explores the tech stack, commands, and structure. The `architecture-agent` drafts `specs/architecture.md` from the code into a file, so the draft stays out of the conversation
 3. **Interview** — Asks clarifying questions about purpose, users, and capabilities
 4. **Generation** — Creates `specs/mission.md` and `specs/architecture.md` with all gathered information
 
@@ -61,7 +61,7 @@ The agent covers 11 areas. It groups related questions to keep the interview foc
 | Constraints | Technical, business, and performance limits. Business limits stay in `mission.md`. Technical and performance limits go to `specs/architecture.md` |
 | External Dependencies | Services or APIs that the project depends on. The answer goes to `specs/architecture.md` |
 
-If `specs/architecture.md` already exists, the agent skips the Architecture, technical and performance Constraints, and External Dependencies topics. Change the architecture through `/speq:plan`. If the file is missing and `mission.md` still holds the old sections, the agent runs a one-time migration interview seeded from them.
+If `specs/architecture.md` already exists, the agent skips the Architecture, technical and performance Constraints, and External Dependencies topics. Change the architecture through `/speq:plan`. If the file is missing and `mission.md` still holds the old sections, the agent runs a one-time migration interview. The interview starts from the `architecture-agent` draft, which already reconciles the old sections with the code. You review the draft file and settle each conflict it reports.
 > [!NOTE]
 > `/speq:mission` runs once per project. The next three steps form the repeating development cycle.
 

@@ -6,6 +6,7 @@
 - `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
 - The "project-wide process convention" ADR override is removed.
 - Skills keep the current architecture in `specs/architecture.md`. Plans change it through an architecture delta, and `/speq:record` merges it.
+- `/speq:mission` drafts `specs/architecture.md` from the code in existing projects through the new `architecture-agent`. The agent writes the draft to a file. You review it and confirm before mission writes `specs/architecture.md`.
 
 ## 0.22.0
 

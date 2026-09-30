@@ -34,6 +34,7 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `implementer-expert-agent` | `opus` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `opus` | `high` | Mission ↔ spec-library sync |
+| `architecture-agent` | `opus` | `high` | Brownfield draft of `specs/architecture.md` for `/speq:mission` |
 | `adr-audit-agent` | `fable` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
 
@@ -59,6 +60,7 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `implementer-expert-agent` | `gpt-5.5` | `xhigh` | Tasks tagged `[expert]` |
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `gpt-5.5` | `high` | Mission ↔ spec-library sync |
+| `architecture-agent` | `gpt-5.5` | `high` | Brownfield draft of `specs/architecture.md` for `/speq:mission` |
 | `adr-audit-agent` | `gpt-5.5` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
 
