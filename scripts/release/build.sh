@@ -22,7 +22,6 @@ get_short_platform() {
     case "$target" in
         *linux*)   os="linux" ;;
         *darwin*)  os="mac" ;;
-        *windows*) os="windows" ;;
         *)         os="unknown" ;;
     esac
     echo "${arch}-${os}"
@@ -32,9 +31,6 @@ HOST_TARGET=$(rustc -vV | sed -n 's/host: //p')
 TARGET="${TARGET:-$HOST_TARGET}"
 SHORT_PLATFORM=$(get_short_platform "$TARGET")
 MARKETPLACE_ARCHIVE="speq-marketplace-${VERSION}-${SHORT_PLATFORM}"
-
-BINARY_EXT=""
-[[ "$TARGET" == *windows* ]] && BINARY_EXT=".exe"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -60,7 +56,7 @@ if ! command -v cargo-about &> /dev/null; then
     cargo install cargo-about --features cli
 fi
 
-cp "target/${TARGET}/release/speq${BINARY_EXT}" "dist/marketplace/bin/speq${BINARY_EXT}"
+cp "target/${TARGET}/release/speq" "dist/marketplace/bin/speq"
 cp LICENSE dist/marketplace/bin/
 cargo about generate about.hbs > dist/marketplace/bin/THIRD_PARTY_LICENSES
 
