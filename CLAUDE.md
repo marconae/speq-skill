@@ -1,4 +1,4 @@
-# speq-skill: Local Development Rules
+# Development Rules
 
 ## Rules
 
@@ -8,11 +8,9 @@
 - **Version**: `Cargo.toml` is the only source of the version number. Read it through `scripts/lib/version.sh` (`get_version`). Do not hardcode the version anywhere else.
 - **Tests**: put integration test specs in files under `tests/fixtures/`. Do not write specs as inline strings.
 - **Commits**: use Conventional Commits — `<type>[scope]: <description>`. Types: `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `spec`, `chore`. Mark a breaking change with `!` after the type, or a `BREAKING CHANGE:` footer.
-- **Markdown**: keep one line per paragraph and per list item in prose. Do not wrap prose to a fixed width. Fenced code, tables, diagrams, YAML frontmatter, and `**Field:**` lines keep their own line breaks.
-- **Mission**:
-    - @specs/mission.md applies and describes the `speq` CLI only.
-    - @specs/architecture.md describes the speq CLI architecture only.
-    - Skill purpose and intent live in the skill files and `docs/`.
+- @specs/mission.md applies and describes the `speq` CLI only.
+- @specs/architecture.md describes the speq CLI architecture only.
+- Skill purpose and intent live in the skill files and `docs/`.
 
 ## Commands
 
