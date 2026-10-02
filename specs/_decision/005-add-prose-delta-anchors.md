@@ -25,31 +25,6 @@ A delta block's anchor must identify the section it targets without ambiguity. A
 
 Anchor detection is unambiguous and needs no new syntax. A delta author places the target heading on the first line of the block. A `DELTA:CHANGED` block on `## Background` or `# Feature: <name>` deletes any line it omits, so authors must copy the current section before editing it.
 
-## ADR: One shared legality matrix owned by check_anchor_rules
-
-**ID:** shared-anchor-legality-matrix
-**Plan:** add-prose-delta-anchors
-**Status:** Accepted
-
-### Context
-
-`speq plan validate` and `speq record` both reject illegal `(DeltaKind, DeltaAnchor)` combinations. Two separate implementations of the same rule set can drift apart.
-
-### Decision
-
-`record::check_anchor_rules(&[DeltaBlock]) -> Vec<String>` is the single owner of the legality matrix. Both commands call it. `src/plan.rs` names no heading string and derives no anchor.
-
-### Options Considered
-
-| Option | Verdict |
-|--------|---------|
-| Single shared function called by both gates | ✓ Chosen — the two gates agree by construction |
-| Re-implement the matrix in `src/plan.rs` | ✗ Rejected — two copies of one decision drift apart |
-
-### Consequences
-
-A future rule change touches one function. The validate and record gates cannot disagree. Two blocks in one delta file sharing a recognized anchor are an error, whatever the marker kinds. `record_plan` calls `check_anchor_rules` before merging, so the two gates cannot drift apart. `record_plan` skips the check when the target spec doesn't exist yet, matching the validate-side exemption.
-
 ## ADR: plan validate checks the matrix only, never anchor presence
 
 **ID:** plan-validate-skips-anchor-presence
@@ -63,20 +38,6 @@ Whether an anchor exists in the target spec can be known only by reading that sp
 ### Decision
 
 `validate_delta_anchors` applies the target-independent rules only, rejecting reading the target spec at validate time because that would read a snapshot that can go stale before record runs. The record command checks anchor presence in the target spec. A delta file that adds a scenario with `DELTA:NEW` and edits it with `DELTA:CHANGED` on the same anchor is an error under this same rule.
-
-## ADR: A prose-realignment note in the plan notes directory, distinct from the planning note
-
-**ID:** prose-realignment-note-in-plan-notes
-**Plan:** add-prose-delta-anchors
-**Status:** Accepted
-
-### Context
-
-A Background or description change needs an audit trail separate from the day-to-day planning scratch file.
-
-### Decision
-
-`record_plan` writes `specs/_plans/<plan-name>/notes/prose-realignment.md` before the archive step, so the existing `fs::rename` carries it into `specs/_recorded/NNN-<plan-name>/notes/`. It writes the file only when a Background or description section changed. `merge_delta_tracked` takes the feature path as an argument and populates it itself, so every returned value is valid at construction. The note is local evidence, since `specs/_recorded/` is gitignored in this repository.
 
 ## ADR: Recording is all or nothing across the plan
 

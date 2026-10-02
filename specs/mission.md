@@ -33,6 +33,7 @@ speq provides structural verification and exploration tools so AI agents can rel
 - Execution engine — Does not run or execute specifications like a test runner
 - Code generation — Does not generate implementation code from specs
 - Version control — Does not manage spec history beyond archiving recorded plans
+- Installation — Does not cover the installer or plugin tooling, such as model download and MCP server registration
 
 Architecture: see specs/architecture.md.
 
