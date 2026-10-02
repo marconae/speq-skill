@@ -4,7 +4,7 @@
 
 # Workflow Guide
 
-A one-time `/speq:mission` bootstrap, then a repeating Plan → Implement → Record cycle.
+A one-time `/speq:mission` to setup, then a repeating Plan → Implement → Record cycle.
 
 ```
 /speq:mission → specs/mission.md, specs/architecture.md  (once per project)
