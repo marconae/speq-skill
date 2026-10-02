@@ -43,8 +43,7 @@ See the [Serena documentation](https://github.com/oraios/serena) for advanced co
 ## What if Serena is missing
 
 - The skills carry on with the generic read, search, and edit tools
-- Nothing warns you during a run
-- `/speq:audit` shows one warning
+- `/speq:audit` shows a hint
 
 ## How the skills use them
 

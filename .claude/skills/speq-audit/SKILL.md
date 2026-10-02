@@ -36,7 +36,7 @@ Check: specs/ directory exists?
 
 ### Phase 2: Run checks (orchestrator, READ-ONLY)
 
-Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and a one-line detail for each. **Modify nothing in this phase.** The checks:
+Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and a one-line detail for each. The Serena check records `ℹ` (hint) instead of `⚠`. A hint is not a finding, so it never counts toward `N findings` and never gets a remediation. **Modify nothing in this phase.** The checks:
 
 1. Spec structure — every `spec.md` is at `specs/<domain>/<feature>/spec.md`
 2. Feature specs — `speq feature validate`
@@ -52,7 +52,7 @@ Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and
 12. Project hooks — informational only; list any `.speq/*-hook.md` present
 13. ADR noise — delegated to `adr-audit-agent` (Phase 3)
 14. Architecture file — `specs/architecture.md` present, structurally valid, and mission.md free of the old architecture sections
-15. Serena — `ToolSearch` finds Serena tools; advisory only
+15. Serena — `ToolSearch` finds Serena tools; hint only, Serena is optional
 
 Reuse the CLI (no new commands): `speq feature validate`, `speq decision-log validate`, `speq plan validate`, `speq plan list`, `speq domain list`, `speq feature list`.
 
@@ -123,7 +123,7 @@ Lead with the verdict (BLUF), then the checks table, then numbered remediations.
 | Recorded-folder naming                | ⚠ | 3 legacy names |
 | Library thresholds                    | ✓ | max 8 scenarios · 5 features |
 | Git hygiene                           | ✓ | specs/ clean |
-| Serena (code tools)                   | ⚠ | serena not found, see docs/mcp-servers.md |
+| Serena (code tools, optional)         | ℹ | not installed, skills work without it, see docs/mcp-servers.md |
 | Project hooks                         | — | 1 active: plan-hook.md |
 
 ## ADR review  (only when the agent flags a noise, stale, or unsure ADR)

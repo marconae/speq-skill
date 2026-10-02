@@ -95,9 +95,9 @@ Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `s
 **Remediate (on Yes):** missing or old sections: spawn `/speq-mission`, which runs the one-time migration interview. Bad structure: report only. The user fixes the file or plans the change with `/speq-plan`. Never edit `specs/architecture.md` here.
 
 ## 15. Serena
-**Detect:** call `ToolSearch` with the query `serena`. A match is any tool whose name contains `serena`. Read-only. The skills use Serena when it exists and work without it, so a missing server is advisory. Context7 is optional and is not checked.
-**Signal:** `✓ serena found`, `⚠ serena not found` with the Detail `see docs/mcp-servers.md`, or `— n/a` when the host has no `ToolSearch`, for example Codex.
-**Remediate:** none. It is not a gated finding and does not appear in the numbered remediations.
+**Detect:** call `ToolSearch` with the query `serena`. A match is any tool whose name contains `serena`. Read-only. Serena is optional. The skills use it when it exists and work without it, so a missing server is only a hint. Context7 is optional and is not checked.
+**Signal:** `✓ serena found`, `ℹ not installed` with the Detail `skills work without it, see docs/mcp-servers.md`, or `— n/a` when the host has no `ToolSearch`, for example Codex.
+**Remediate:** none. A hint is not a finding. It does not count toward `N findings` and does not appear in the numbered remediations.
 
 ---
 

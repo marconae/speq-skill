@@ -118,7 +118,10 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 
 ## Companions
 
-speq-skill works best with [Serena](https://github.com/oraios/serena) for code navigation. It is optional and installed globally, not bundled. The installer offers to set it up, and the skills work without it. If [Context7](https://github.com/upstash/context7) is installed, the skills also use it for library docs. See [MCP Servers](./docs/mcp-servers.md).
+speq-skill works best with [Serena](https://github.com/oraios/serena) for code navigation, but both Serena and [Context7](https://github.com/upstash/context7) are optional. The skills work without them. The skills use each one when it is installed and skip it when it is not. speq-skill does not bundle either one. The installer only offers to set up Serena. See [MCP Servers](./docs/mcp-servers.md).
+
+> [!NOTE]
+> Serena and Context7 are separate open-source projects with their own licenses and terms available in the linked repositories. Context7 sends your documentation queries to a hosted service and offers a free-tier.
 
 ## Dependencies
 
