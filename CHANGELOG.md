@@ -2,17 +2,16 @@
 
 ## 0.23.0
 
+- The plugin no longer configures Serena or Context7. The installer asks before it installs Serena for Claude Code and Codex, and skips it when Serena is already set up. Context7 stays optional: the skills use it when it is installed. To uninstall, run `./uninstall.sh`.
 - ADRs are rare by default. A new gate (`/speq:adr-rules`) admits a decision only with a named criterion. Planning lists the candidates, and recording a plan accepts them.
 - `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
 - Skills keep the current architecture in `specs/architecture.md`. Plans change it through an architecture delta, and `/speq:record` merges it.
-- `/speq:mission` drafts `specs/architecture.md` from the code in existing projects through the new `architecture-agent`. The agent writes the draft to a file. You review it and confirm before mission writes `specs/architecture.md`.
+- `/speq:mission` drafts `specs/architecture.md` from the code in existing projects and writes it to a draft file. You review the draft and confirm before mission writes `specs/architecture.md`.
 
 ## 0.22.0
 
-- Serena starts through a `serena` command that the installer sets up with `uv tool install` (optional, skipped when `uv` is missing).
-- Stricter ADR promotion: workflow decisions default to `no`, minor decisions record as short ADRs. `plan-reviewer` flags `[IMPLEMENTATION_LEAKAGE]` and `[ADR_OVERPROMOTION]`.
-- `/speq:audit` checks ADR noise through the new `adr-audit-agent` and removes noise ADRs after you confirm.
-- `speq-writing-guardrails` is cut to nine rules.
+- Stricter ADR promotion: workflow decisions default to `no`, minor decisions record as short ADRs. Plan review flags implementation detail in plans and ADRs that should not exist.
+- `/speq:audit` checks for noise ADRs and removes them after you confirm.
 
 ## 0.21.0
 
@@ -26,41 +25,25 @@
 
 ## 0.19.0
 
-- `speq-plan-pr` and `speq-implement-pr` run git and `gh` operations directly. `git-agent` is retired, so pipelines start faster.
+- `speq-plan-pr` and `speq-implement-pr` start faster.
 - Round 2 of plan review shrinks to a blocker recheck for small plans.
-- `planner-agent` reuses the orchestrator's context, self-checks before review, and hands off through `notes/planning.md`.
-
-## 0.18.0
-
-- Shorter agent and skill prose.
+- Planning reuses the orchestrator's context and hands off through `notes/planning.md`.
 
 ## 0.16.0
 
 - Reviewers write full findings to `review/round-<N>.md` and `review-findings.md` and return a one-line verdict, which gains an `INTENT` count.
 - `speq-implement` stops when `open-questions.md` is not empty, like `speq-implement-pr`.
-- Fix: `speq-implement-pr` now commits evidence artifacts before recording, so they reach git history.
-- Fix: `build.sh` no longer rewrites file-path citations into nonexistent paths.
+- `speq-implement-pr` commits evidence artifacts before recording, so they reach git history.
 
 ## 0.15.0
 
-- New `speq-design-philosophy` skill. Stricter `speq-code-guardrails` and `speq-code-review` (error handling, design depth, test quality). Plan review gains a Design Depth axis.
+- New `speq-design-philosophy` skill. Stricter `speq-code-guardrails` and `speq-code-review` (error handling, design depth, test quality). 
+- Plan review gains a Design Depth axis.
 
 ## 0.14.0
 
-- `plan.md` gains a required `## Impact` section. `/speq:plan-pr` puts it in the draft PR body. Advisory findings and design decisions post as a PR comment. `/speq:implement-pr` posts a verification summary comment.
-
-## 0.13.3
-
-- Fix: the installer provisions the embedding model into the macOS cache directory, so `speq search query` finds it.
-
-## 0.13.2
-
-- Fix: skill names no longer double the namespace (`speq:speq:<skill>`).
-
-## 0.13.1
-
-- Search indexing is 38% faster on 1,000 scenarios, with unchanged ranking.
-- Clearer skill and agent descriptions for more reliable auto-invocation.
+- `plan.md` gains a required `## Impact` section. `/speq:plan-pr` puts it in the draft PR body. Advisory findings and design decisions post as a PR comment. 
+- `/speq:implement-pr` posts a verification summary comment.
 
 ## 0.13.0
 
@@ -72,7 +55,7 @@
 
 ## 0.11.0
 
-- New `/speq:audit`: a read-only health check of spec structure, validators, the decision log, mission sync, unrecorded plans, gitignore hygiene, and library thresholds. It offers confirmed fixes. `audit-agent` checks `mission.md` against the specs.
+- New `/speq:audit`: a read-only health check of spec structure, validators, the decision log, mission sync, unrecorded plans, gitignore hygiene, and library thresholds. It checks `mission.md` against the specs and offers fixes after you confirm.
 
 ## 0.10.0
 
@@ -86,7 +69,7 @@
 
 ## 0.8.2
 
-- `git-pr-agent` becomes the general `git-agent`. `speq-plan-pr` always leaves the PR as a draft. Only `speq-implement-pr` marks it ready.
+- `speq-plan-pr` always leaves the PR as a draft. Only `speq-implement-pr` marks it ready.
 
 ## 0.8.1
 
@@ -94,12 +77,12 @@
 
 ## 0.8.0
 
-- `code-reviewer` gains a YAGNI and over-engineering category, and every category uses `[TAG]` markers. `speq-code-guardrails` gains a dependency rule and YAGNI checks.
+- Code review flags over-engineering (YAGNI), and the code guardrails gain a dependency rule.
 
 ## 0.7.0
 
 - New `speq-plan-pr` and `speq-implement-pr`: headless planning and implementation on a `feat/<plan-name>` branch with a PR.
-- `planner-agent` can escalate in headless mode through an `OPEN QUESTIONS:` sentinel.
+- Headless planning lists `OPEN QUESTIONS:` when a decision needs a human.
 
 ## 0.4.0
 
@@ -108,25 +91,16 @@
 ## 0.3.1
 
 - New `speq decision-log validate` for the ADR format. `speq plan validate` checks an optional `decision-log.md`.
-- `planner-agent` writes the plan decision log. `recorder-agent` promotes curated entries to the permanent log.
+- Planning writes a plan decision log, and recording promotes curated entries to the permanent log.
 
 ## 0.3.0
 
-- `speq-plan` and `speq-record` become thin orchestrators over `planner-agent` and `recorder-agent`.
-- New `implementer-expert-agent` for tasks tagged `[expert]`. Model and effort are pinned per sub-agent.
+- Planning and recording run in dedicated sub-agents. Tasks tagged `[expert]` go to a new expert implementer.
 
 ## 0.2.9
 
 - Record rejects mismatched or unclosed delta markers.
 - Local cache fallback when the system cache is not writable. `SPEQ_CACHE_DIR` overrides the cache location.
-
-## 0.2.7
-
-- Semantic anchors in skills and docs.
-
-## 0.2.5
-
-- Fix: RFC 2119 keyword matching at word boundaries.
 
 ## 0.2.4
 
