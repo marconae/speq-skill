@@ -261,12 +261,6 @@ generate_manifests() {
     stamp_file "$CODEX_MARKETPLACE_FILE" "$version" "$author"
 }
 
-generate_mcp_configs() {
-    log_info "Generating MCP configs..."
-    cp "$SCRIPT_DIR/mcp.json" "$CLAUDE_PLUGIN_DIR/.mcp.json"
-    cp "$SCRIPT_DIR/mcp-codex.json" "$CODEX_PLUGIN_DIR/.mcp.json"
-}
-
 main() {
     local version
     local author
@@ -285,7 +279,6 @@ main() {
     copy_skills
     copy_agents
     generate_manifests "$version" "$author"
-    generate_mcp_configs
 
     echo ""
     log_info "Plugin artifacts built successfully!"

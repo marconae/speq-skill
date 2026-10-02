@@ -14,6 +14,8 @@ description: External documentation and research via Context7 and WebSearch — 
 
 ## Context7 Workflow
 
+Use Context7 if available. User installs it globally, so its tool prefix varies. Find the tools with `ToolSearch` (query `context7`) and load them before calling. If none exist, skip Context7 and use WebSearch. Do not warn and do not stop.
+
 ```
 1. resolve-library-id
    query: "<what you need>"

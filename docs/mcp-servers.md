@@ -4,83 +4,59 @@
 
 # MCP Servers
 
-speq-skill integrates with two MCP (Model Context Protocol) servers. These servers improve code comprehension and research.
+speq-skill works best with [Serena](https://github.com/oraios/serena), an MCP (Model Context Protocol) server for code navigation. You install it once, globally. speq-skill does not bundle or configure it. The skills find its tools at run time.
 
----
+[Context7](https://github.com/upstash/context7) is optional. If it is installed, the skills use it for library documentation. If not, they skip it. speq-skill does not install or manage Context7.
 
-## Overview
+| Server | What your agent gets | Used by |
+|--------|----------------------|---------|
+| Serena | Symbol-level code navigation and editing | `/speq:code-tools` |
+| Context7 (optional) | Current library documentation | `/speq:ext-research` |
 
-| Server | Purpose |
-|--------|---------|
-| [Serena](https://github.com/oraios/serena) | Semantic code navigation and editing |
-| [Context7](https://github.com/upstash/context7) | Library documentation lookup |
+## Why Serena
 
-The generated plugin declares both servers in its MCP configuration. The plugin launches both servers from their upstream packages. See the documentation of each server for its behavior, limits, and license terms.
+- It finds symbols, references, and implementations, and edits one symbol at a time
+- The agent reads less code and changes only what the plan names
 
----
+## Set up Serena
 
-## How speq-skill uses them
+The installer asks before it installs Serena. It skips Serena when it is already registered. To do it yourself:
 
-### Code comprehension (Serena)
-
-The `/speq:code-tools` skill uses Serena for semantic code operations:
-
-- **Explore** — Navigates the codebase structure at the symbol level: classes, functions, and methods
-- **Understand** — Finds where symbols are defined and referenced
-- **Edit** — Makes precise changes to specific symbols, with no changes to the surrounding code
-- **Verify** — Confirms that changes do not break existing references
-
-### External research (Context7 + WebSearch)
-
-The `/speq:ext-research` skill combines Context7 and WebSearch:
-
-```
-Need library API details?
-├─ Yes → Context7 (method signatures, usage examples)
-└─ No  → Need design guidance?
-         ├─ Yes → WebSearch (patterns, best practices)
-         └─ No  → Proceed with existing knowledge
-```
-
-**Context7** — Queries library documentation for correct, up-to-date API usage.
-
-> [!NOTE]
-> The Context7 MCP server is open source (MIT licensed) but connects to a cloud service. See [Context7](https://context7.com) for details.
-
-**WebSearch** — Researches design patterns, architecture decisions, and industry best practices.
-
-### Combined workflow
-
-During implementation, the skills work together:
-
-1. **Explore codebase** (Serena) — Examines the existing structure
-2. **Research APIs** (Context7) — Gets the correct library usage
-3. **Research patterns** (WebSearch) — Informs design decisions
-4. **Edit code** (Serena) — Makes precise, semantic changes
-
----
-
-## Configuration
-
-Each generated plugin configures its MCP servers in a `.mcp.json` file:
-
-```
-~/.speq-skill/plugins/speq-skill/.mcp.json
-~/.speq-skill/codex/plugins/speq-skill/.mcp.json
-```
-
-The Claude plugin starts Serena with the Claude Code context. The Codex plugin starts Serena with the Codex context and the `--project-from-cwd` flag. This setup follows the [Codex client guidance](https://oraios.github.io/serena/02-usage/030_clients.html#codex-cli-and-app) from Serena.
-
-Both templates start Serena by the bare `serena` command. The installer installs the Serena CLI once with `uv tool install -p 3.13 serena-agent`, rather than fetching it from git on every server start.
-
-When the Codex CLI is available, the installer takes three steps. It registers the local Codex marketplace with `codex plugin marketplace add`. It keeps the MCP declarations in the generated plugin payload. Then it registers the Codex MCP servers with these commands:
+**Claude Code**
 
 ```bash
-codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex
-codex mcp add context7 -- npx -y @upstash/context7-mcp
+uv tool install -p 3.13 serena-agent
+claude mcp add --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd
 ```
 
-See the documentation of each project for advanced configuration:
+This needs no plugin marketplace. Do not start Claude Code from your home directory, because `--project-from-cwd` can then scan all of it.
 
-- [Serena documentation](https://github.com/oraios/serena)
-- [Context7 documentation](https://github.com/upstash/context7)
+**Codex**
+
+```bash
+uv tool install -p 3.13 serena-agent
+codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex
+```
+
+See the [Serena documentation](https://github.com/oraios/serena) for advanced configuration.
+
+## What if Serena is missing
+
+- The skills carry on with the generic read, search, and edit tools
+- Nothing warns you during a run
+- `/speq:audit` shows one warning
+
+## How the skills use them
+
+```
+Explore codebase  → Serena     structure, symbols, references
+Research APIs     → Context7   method signatures, usage examples (when installed)
+Research patterns → WebSearch  design guidance, best practices
+Edit code         → Serena     precise, symbol-level changes
+```
+
+Without Context7, library API questions go to WebSearch.
+
+## Upgrading from an earlier version
+
+Earlier versions of speq-skill configured Serena and Context7 inside the plugin and registered them in Codex. The installer leaves existing Serena and Context7 registrations as they are, and offers to install Serena if it is missing.

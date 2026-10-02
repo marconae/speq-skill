@@ -64,11 +64,12 @@ if ! grep -q '"path": "./plugins/speq-skill"' ~/.speq-skill/codex/.agents/plugin
 fi
 echo "PASS: Codex marketplace manifest exists"
 
-if [[ ! -f ~/.speq-skill/codex/plugins/speq-skill/.mcp.json ]]; then
-    echo "FAIL: Codex MCP config missing"
+# Serena comes from the global install, not from the plugins
+if [[ -e ~/.speq-skill/plugins/speq-skill/.mcp.json || -e ~/.speq-skill/codex/plugins/speq-skill/.mcp.json ]]; then
+    echo "FAIL: plugins must not ship an MCP config"
     exit 1
 fi
-echo "PASS: Codex MCP config exists"
+echo "PASS: plugins ship no MCP config"
 
 if ! grep -q '^name: speq:plan$' ~/.speq-skill/codex/plugins/speq-skill/skills/plan/SKILL.md; then
     echo "FAIL: Codex /speq:plan skill name missing"
@@ -98,22 +99,13 @@ if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" ~/.codex/config.toml; the
 fi
 echo "PASS: Codex marketplace registered"
 
-if ! grep -q '^\[mcp_servers\.serena\]' ~/.codex/config.toml; then
-    echo "FAIL: Codex Serena MCP registration missing"
+# No terminal in this container, so the installer must not register servers
+if grep -Eq '^\[mcp_servers\.serena\]' ~/.codex/config.toml; then
+    echo "FAIL: installer registered Serena without asking"
     cat ~/.codex/config.toml
     exit 1
 fi
-if ! grep -q '^command = "serena"' ~/.codex/config.toml; then
-    echo "FAIL: Codex Serena MCP registration is not by-command"
-    cat ~/.codex/config.toml
-    exit 1
-fi
-if ! grep -q '^\[mcp_servers\.context7\]' ~/.codex/config.toml; then
-    echo "FAIL: Codex Context7 MCP registration missing"
-    cat ~/.codex/config.toml
-    exit 1
-fi
-echo "PASS: Codex MCP servers registered"
+echo "PASS: Serena not registered without a terminal"
 
 # Test 4: Verify Claude plugin registration
 echo ""

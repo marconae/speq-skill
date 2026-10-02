@@ -13,7 +13,7 @@ echo "--- Test 2: Install speq-skill ---"
 ./install.sh
 
 echo ""
-echo "--- Test 3: Verify Codex plugin payload and MCP config ---"
+echo "--- Test 3: Verify Codex plugin payload ---"
 CODEX_PLUGIN_DIR="${HOME}/.speq-skill/codex/plugins/speq-skill"
 
 if [[ ! -f "${CODEX_PLUGIN_DIR}/.codex-plugin/plugin.json" ]]; then
@@ -22,21 +22,12 @@ if [[ ! -f "${CODEX_PLUGIN_DIR}/.codex-plugin/plugin.json" ]]; then
 fi
 echo "PASS: Codex plugin manifest exists"
 
-if [[ ! -f "${CODEX_PLUGIN_DIR}/.mcp.json" ]]; then
-    echo "FAIL: Codex MCP config missing"
+# Serena comes from the global install, not from the plugin
+if [[ -e "${CODEX_PLUGIN_DIR}/.mcp.json" ]]; then
+    echo "FAIL: Codex plugin must not ship an MCP config"
     exit 1
 fi
-echo "PASS: Codex MCP config exists"
-
-if ! grep -q '"serena"' "${CODEX_PLUGIN_DIR}/.mcp.json"; then
-    echo "FAIL: Serena MCP config missing"
-    exit 1
-fi
-if ! grep -q '"context7"' "${CODEX_PLUGIN_DIR}/.mcp.json"; then
-    echo "FAIL: Context7 MCP config missing"
-    exit 1
-fi
-echo "PASS: Serena and Context7 MCP config present"
+echo "PASS: Codex plugin ships no MCP config"
 
 if grep -R -E "AskUserQuestion|AskUserTool|Task\\(|subagent_type=|ExitPlanMode|Claude Code|CodexSubagent|Codex user-input prompt|Codex task" "${CODEX_PLUGIN_DIR}" >/tmp/codex-plugin-claude-syntax.txt; then
     echo "FAIL: Codex plugin contains Claude-only workflow syntax"
@@ -75,22 +66,13 @@ if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" "${HOME}/.codex/config.to
 fi
 echo "PASS: Codex marketplace registered"
 
-if ! grep -q '^\[mcp_servers\.serena\]' "${HOME}/.codex/config.toml"; then
-    echo "FAIL: Codex Serena MCP registration missing"
+# No terminal in this container, so the installer must not register servers
+if grep -Eq '^\[mcp_servers\.serena\]' "${HOME}/.codex/config.toml"; then
+    echo "FAIL: installer registered Serena without asking"
     cat "${HOME}/.codex/config.toml"
     exit 1
 fi
-if ! grep -q '^command = "serena"' "${HOME}/.codex/config.toml"; then
-    echo "FAIL: Codex Serena MCP registration is not by-command"
-    cat "${HOME}/.codex/config.toml"
-    exit 1
-fi
-if ! grep -q '^\[mcp_servers\.context7\]' "${HOME}/.codex/config.toml"; then
-    echo "FAIL: Codex Context7 MCP registration missing"
-    cat "${HOME}/.codex/config.toml"
-    exit 1
-fi
-echo "PASS: Codex MCP servers registered"
+echo "PASS: Serena not registered without a terminal"
 
 for skill in cli code-guardrails code-tools ext-research git-discipline implement mission plan record; do
     if [[ ! -f "${HOME}/.codex/skills/speq-${skill}/SKILL.md" ]]; then

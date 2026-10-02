@@ -17,6 +17,7 @@ Detection recipes, thresholds, and remediation procedures for each `speq-audit` 
 - [12. Project hooks](#12-project-hooks)
 - [13. ADR noise](#13-adr-noise)
 - [14. Architecture file](#14-architecture-file)
+- [15. Serena](#15-serena)
 - [Remediation: decision-log migration](#remediation-decision-log-migration)
 - [Remediation: domain/feature restructure](#remediation-domainfeature-restructure)
 - [Remediation: ADR noise removal](#remediation-adr-noise-removal)
@@ -92,6 +93,11 @@ Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `s
 3. Bad structure: the first line is not `# Architecture`, a canonical `##` section (Overview, Components, Data Flow, Interfaces, Constraints, External Dependencies) is missing, duplicated, or out of order, the body has a `###` heading, a table, or a prose paragraph, or an empty canonical section lacks `- None`.
 **Signal:** `✓ present, N sections`, `✗ missing`, `✗ missing, mission.md holds the old sections`, or `✗ bad structure: <first violation with line>`.
 **Remediate (on Yes):** missing or old sections: spawn `/speq-mission`, which runs the one-time migration interview. Bad structure: report only. The user fixes the file or plans the change with `/speq-plan`. Never edit `specs/architecture.md` here.
+
+## 15. Serena
+**Detect:** call `ToolSearch` with the query `serena`. A match is any tool whose name contains `serena`. Read-only. The skills use Serena when it exists and work without it, so a missing server is advisory. Context7 is optional and is not checked.
+**Signal:** `✓ serena found`, `⚠ serena not found` with the Detail `see docs/mcp-servers.md`, or `— n/a` when the host has no `ToolSearch`, for example Codex.
+**Remediate:** none. It is not a gated finding and does not appear in the numbered remediations.
 
 ---
 

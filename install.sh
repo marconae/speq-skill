@@ -11,6 +11,8 @@ CODEX_MARKETPLACE_NAME="speq-skill-local"
 CODEX_MARKETPLACE_ROOT="$MARKETPLACE_DIR/codex"
 CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 CODEX_SERENA_ADD="codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex"
+CLAUDE_SERENA_ADD="claude mcp add --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd"
+SERENA_CLI_INSTALL="uv tool install -p 3.13 serena-agent"
 
 # Colors
 RED='\033[0;31m'
@@ -108,51 +110,6 @@ register_codex_plugin() {
     else
         warn "Codex CLI not found. Register the marketplace after installing Codex:"
         echo "  codex plugin marketplace add $CODEX_MARKETPLACE_ROOT"
-    fi
-}
-
-register_codex_mcp_servers() {
-    if command -v codex &> /dev/null; then
-        info "Registering Codex MCP servers..."
-
-        local serena_get_output
-        if serena_get_output=$(codex mcp get serena 2>&1); then
-            if echo "$serena_get_output" | grep -qE '^[[:space:]]*command: uvx$'; then
-                if codex mcp remove serena >/dev/null 2>&1; then
-                    info "Replacing git-sourced Codex MCP server registration: serena"
-                    if $CODEX_SERENA_ADD >/dev/null 2>&1; then
-                        info "Registered Codex MCP server: serena"
-                    else
-                        warn "Codex MCP server registration failed: serena"
-                        echo "  Run manually: $CODEX_SERENA_ADD"
-                    fi
-                else
-                    warn "Failed to remove existing Codex MCP server registration: serena"
-                    echo "  Run manually: codex mcp remove serena"
-                    echo "  Then: $CODEX_SERENA_ADD"
-                fi
-            else
-                info "Codex MCP server already registered: serena"
-            fi
-        elif $CODEX_SERENA_ADD >/dev/null 2>&1; then
-            info "Registered Codex MCP server: serena"
-        else
-            warn "Codex MCP server registration failed: serena"
-            echo "  Run manually: $CODEX_SERENA_ADD"
-        fi
-
-        if codex mcp get context7 >/dev/null 2>&1; then
-            info "Codex MCP server already registered: context7"
-        elif codex mcp add context7 -- npx -y @upstash/context7-mcp >/dev/null 2>&1; then
-            info "Registered Codex MCP server: context7"
-        else
-            warn "Codex MCP server registration failed: context7"
-            echo "  Run manually: codex mcp add context7 -- npx -y @upstash/context7-mcp"
-        fi
-    else
-        warn "Codex CLI not found. Register MCP servers after installing Codex:"
-        echo "  $CODEX_SERENA_ADD"
-        echo "  codex mcp add context7 -- npx -y @upstash/context7-mcp"
     fi
 }
 
@@ -297,7 +254,6 @@ install_from_prebuilt() {
     fi
 
     register_codex_plugin
-    register_codex_mcp_servers
     install_codex_skills
 
     return 0
@@ -377,7 +333,6 @@ build_from_source() {
 
     # Register with Codex marketplace
     register_codex_plugin
-    register_codex_mcp_servers
     install_codex_skills
 }
 
@@ -393,32 +348,90 @@ default_cache_dir() {
     esac
 }
 
-# Install the Serena CLI as a standalone uv tool, so the MCP server template
-# can start it by the bare `serena` command instead of a per-start `uvx` git fetch.
-install_serena_tool() {
-    if command -v serena &> /dev/null; then
-        info "Serena CLI already installed: $(command -v serena)"
-        return 0
-    fi
+# Serena comes from the user's global install. The helpers below detect it and
+# offer to install or enable it. They never install silently. Context7 is not
+# managed here: the skills use it when it is there.
+#
+# Prompts read from /dev/tty, not stdin, so they also work under
+# `curl ... | bash`. SPEQ_TTY overrides the device (used by the tests).
+has_tty() { { : < "${SPEQ_TTY:-/dev/tty}"; } 2>/dev/null; }
+
+ask_yes_no() {
+    has_tty || return 1
+    local reply
+    read -p "$1 [y/N] " -n 1 -r reply < "${SPEQ_TTY:-/dev/tty}" || return 1
+    echo ""
+    [[ $reply =~ ^[Yy]$ ]]
+}
+
+# Make sure the Serena CLI exists for the MCP registration.
+ensure_serena_cli() {
+    command -v serena &> /dev/null && return 0
 
     if command -v uv &> /dev/null; then
         info "Installing Serena CLI via uv..."
-        if uv tool install -p 3.13 serena-agent >/dev/null 2>&1; then
-            info "Installed Serena CLI via uv"
-        else
-            warn "Serena CLI installation failed."
-            echo "  Run manually: uv tool install -p 3.13 serena-agent"
+        if $SERENA_CLI_INSTALL >/dev/null 2>&1; then
+            return 0
         fi
+        warn "Serena CLI installation failed."
+        echo "  Run manually: $SERENA_CLI_INSTALL"
     else
         warn "uv not found. Install uv, then install the Serena CLI:"
         echo "  curl -LsSf https://astral.sh/uv/install.sh | sh"
-        echo "  uv tool install -p 3.13 serena-agent"
+        echo "  $SERENA_CLI_INSTALL"
+    fi
+    return 1
+}
+
+# offer_action <verb> <past-tense> <server> <host> <command> [prepare-function]
+offer_action() {
+    local verb="$1" past="$2" server="$3" host="$4" command="$5" prepare="${6:-}"
+
+    if ! ask_yes_no "$verb $server for $host?"; then
+        if ! has_tty; then
+            warn "$server is not $(echo "$past" | tr 'A-Z' 'a-z') for $host. Run:"
+            if [[ -n "$prepare" ]] && ! command -v serena &> /dev/null; then
+                echo "  $SERENA_CLI_INSTALL"
+            fi
+            echo "  $command"
+        fi
+        return 0
     fi
 
+    if [[ -n "$prepare" ]] && ! $prepare; then
+        return 0
+    fi
+
+    if $command >/dev/null 2>&1; then
+        info "$past $server for $host"
+    else
+        warn "$verb $server for $host failed."
+        echo "  Run manually: $command"
+    fi
     return 0
 }
 
-# Download the embedding model files from HuggingFace into the model cache directory
+# Serena counts as installed for Claude Code when it is registered as an MCP
+# server (any scope) or when a Serena plugin is enabled.
+claude_has_serena() {
+    claude mcp get serena >/dev/null 2>&1 && return 0
+    claude plugin list 2>/dev/null | awk '
+        /❯/ { cur = ($2 ~ /^serena@/) }
+        cur && /Status:/ { found = ($0 !~ /✘|disabled/); exit }
+        END { exit !found }'
+}
+
+offer_mcp_servers() {
+    if command -v claude &> /dev/null && ! claude_has_serena; then
+        offer_action Install Installed serena "Claude Code" "$CLAUDE_SERENA_ADD" ensure_serena_cli
+    fi
+
+    if command -v codex &> /dev/null && ! codex mcp get serena >/dev/null 2>&1; then
+        offer_action Install Installed serena "Codex" "$CODEX_SERENA_ADD" ensure_serena_cli
+    fi
+    return 0
+}
+
 provision_embedding_model() {
     local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main"
 
@@ -508,8 +521,8 @@ main() {
         build_from_source "$version"
     fi
 
-    # Install the Serena CLI as a standalone uv tool
-    install_serena_tool
+    # Serena comes from the global install
+    offer_mcp_servers
 
     # Provision embedding model
     provision_embedding_model

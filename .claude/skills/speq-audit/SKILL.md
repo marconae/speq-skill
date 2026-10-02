@@ -52,6 +52,7 @@ Run every check in `references/checks.md`, recording a `✓` / `✗` / `⚠` and
 12. Project hooks — informational only; list any `.speq/*-hook.md` present
 13. ADR noise — delegated to `adr-audit-agent` (Phase 3)
 14. Architecture file — `specs/architecture.md` present, structurally valid, and mission.md free of the old architecture sections
+15. Serena — `ToolSearch` finds Serena tools; advisory only
 
 Reuse the CLI (no new commands): `speq feature validate`, `speq decision-log validate`, `speq plan validate`, `speq plan list`, `speq domain list`, `speq feature list`.
 
@@ -122,6 +123,7 @@ Lead with the verdict (BLUF), then the checks table, then numbered remediations.
 | Recorded-folder naming                | ⚠ | 3 legacy names |
 | Library thresholds                    | ✓ | max 8 scenarios · 5 features |
 | Git hygiene                           | ✓ | specs/ clean |
+| Serena (code tools)                   | ⚠ | serena not found, see docs/mcp-servers.md |
 | Project hooks                         | — | 1 active: plan-hook.md |
 
 ## ADR review  (only when the agent flags a noise, stale, or unsure ADR)

@@ -11,7 +11,7 @@ color: red
 ## First: Invoke Required Skills
 
 BEFORE any implementation work, invoke these skills:
-- `/speq-code-tools`: you must use Serena's symbol tools (find_symbol, get_symbols_overview, find_referencing_symbols, replace_symbol_body, insert_after_symbol, insert_before_symbol, rename_symbol, search_for_pattern, find_declaration, find_implementations) instead of Read/Grep/Edit for code navigation and editing — see the skill for the full mapping
+- `/speq-code-tools`: semantic code navigation and editing
 - `/speq-ext-research`: library documentation
 - `/speq-code-guardrails`: TDD workflow and guardrails
 - `/speq-design-philosophy`: complexity-management design principles

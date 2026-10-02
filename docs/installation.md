@@ -20,31 +20,27 @@ Open Claude Code or Codex. Start with the matching trigger: `/speq:mission` in C
 - macOS or Linux (Windows via WSL)
 - Claude Code CLI or Codex CLI/App, installed and configured
 - Rust toolchain, needed only if your platform has no pre-built binary. If Rust is missing, the installer installs it for you. You can also get Rust from [rustup](https://rustup.rs/).
-- `uv`, needed only to install the Serena CLI. Get it from [astral.sh/uv](https://astral.sh/uv/). If `uv` is missing, the installer warns and continues; install Serena manually afterward.
+- Optional: [Serena](https://github.com/oraios/serena), installed globally. The installer offers to install it. See [MCP Servers](./mcp-servers.md). `uv` is needed only if the `serena` command is not installed yet and you let the installer install it. Get it from [astral.sh/uv](https://astral.sh/uv/).
 
 ## What the installer installs
 
 | Component | Location |
 |-----------|----------|
 | `speq` CLI | `~/.local/bin/speq` |
-| Serena CLI | `uv tool install`, on the `uv` tool PATH |
 | Plugin files | `~/.speq-skill/` |
 | Claude marketplace payload | `~/.speq-skill/` |
 | Codex plugin payload | `~/.speq-skill/codex/plugins/speq-skill/` |
 | Codex marketplace manifest | `~/.speq-skill/codex/.agents/plugins/marketplace.json` |
 | Codex marketplace registration | `~/.codex/config.toml` (`speq-skill-local`) |
-| Codex MCP server registrations | `~/.codex/config.toml` (`serena`, `context7`) |
 | Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
 | Embeddings model | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
 
 The installer also:
 - Copies the pre-built `speq` binary to your PATH. On platforms without one, for example Intel Mac, it downloads the release source instead and builds `speq` with the Rust toolchain.
-- Installs the Serena CLI with `uv tool install -p 3.13 serena-agent` when `uv` is available and `serena` is not already on your PATH
 - Installs the speq-skill plugin for Claude Code and Codex
 - When Codex is installed, registers the local Codex marketplace via `codex plugin marketplace add`
-- When Codex is installed, registers Serena and Context7 via `codex mcp add`
+- Asks before it installs Serena for Claude Code or Codex, when it is not registered yet. It installs the Serena CLI with `uv tool install`, then registers Serena as a user-scope MCP server. It skips Serena when it is already registered or when a Serena plugin is enabled in Claude Code. It reads your answer from the terminal, so the prompts also work with `curl ... | bash`. Without a terminal it prints the commands instead
 - Installs Codex skills into `$CODEX_HOME/skills` so Codex can load the `$`-triggered `speq:*` skills
-- Installs plugin MCP configuration for Serena and Context7
 - Downloads the [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) embeddings model into `~/.cache/speq/models/`
 
 ## Install from source
@@ -77,9 +73,6 @@ ls ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json
 # Check Codex marketplace registration
 grep -n "speq-skill-local" ~/.codex/config.toml
 
-# Check Codex MCP server registrations
-codex mcp list
-
 # Check Codex skills
 ls ~/.codex/skills/speq-mission
 
@@ -109,7 +102,7 @@ curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/uninstall.
 If you installed from source, run locally instead:
 
 ```bash
-./scripts/uninstall.sh
+./uninstall.sh
 ```
 
 ## Troubleshooting
@@ -118,13 +111,9 @@ If you installed from source, run locally instead:
 
 Add `~/.local/bin` to your PATH.
 
-### `serena: command not found`
+### Serena tools are missing
 
-The installer installs the Serena CLI with `uv`. If `uv` was missing during installation, or the `uv tool install` step failed, install it manually:
-
-```bash
-uv tool install -p 3.13 serena-agent
-```
+The plugin does not configure Serena. Install it globally. The skills work without it. `/speq:audit` reports when it is missing. See [MCP Servers](./mcp-servers.md) for the install commands.
 
 ### Rust build errors
 
@@ -172,55 +161,22 @@ rustup update
    codex plugin marketplace add ~/.speq-skill/codex
    ```
 
-4. Verify the Codex MCP servers are registered:
-   ```bash
-   codex mcp list
-   ```
-
-5. If missing, register them manually:
-   ```bash
-   codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex
-   codex mcp add context7 -- npx -y @upstash/context7-mcp
-   ```
-
-6. Verify the Codex skill copies exist:
+4. Verify the Codex skill copies exist:
    ```bash
    ls ~/.codex/skills/speq-mission/SKILL.md
    ```
 
-7. Restart Codex. Then invoke:
+5. Restart Codex. Then invoke:
    ```
    # In Codex, type $ and select the speq:mission skill
    ```
 
-### MCP server connection errors
-
-The plugin depends on the Serena and Context7 MCP servers. If you see connection errors:
-
-1. Verify the servers are installed:
-   ```bash
-   ls ~/.speq-skill/plugins/speq-skill/.mcp.json
-   ls ~/.speq-skill/codex/plugins/speq-skill/.mcp.json
-   ```
-
-2. Verify the server configuration in `~/.speq-skill/plugins/speq-skill/.mcp.json` for Claude, or `~/.speq-skill/codex/plugins/speq-skill/.mcp.json` for Codex.
-
-3. If you use Codex, verify that the marketplace and MCP servers are registered:
-   ```bash
-   codex plugin marketplace add ~/.speq-skill/codex
-   codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex
-   codex mcp add context7 -- npx -y @upstash/context7-mcp
-   ```
-
-4. Restart Claude Code or Codex to reconnect.
-
 ## Dependencies
 
-| Dependency | Purpose | License |
-|------------|---------|---------|
-| [Serena](https://github.com/oraios/serena) | Semantic code navigation | MIT |
-| [Context7](https://github.com/upstash/context7) | Library documentation | MIT |
-| [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~86MB) | Apache 2.0 |
+| Dependency | Purpose |
+|------------|---------|
+| [Serena](https://github.com/oraios/serena) | Semantic code navigation |
+| [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) | Embeddings model (~86MB) |
 
 > [!NOTE]
 > The installer downloads the embeddings model into `~/.cache/speq/models/` during installation.

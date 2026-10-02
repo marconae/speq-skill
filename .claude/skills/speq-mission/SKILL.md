@@ -82,7 +82,7 @@ For existing projects, gather context BEFORE interviewing:
 
 For technologies discovered or mentioned:
 
-- **Context7 MCP**: query library documentation for correct API usage
+- **Context7 MCP** (when installed): query library documentation for correct API usage
 - **WebSearch**: research best practices, alternatives, common patterns
 
 Use research to inform interview questions and validate user choices.
@@ -116,7 +116,7 @@ Apply **User Story Mapping** (Patton): identify activities, then decompose into 
 
 #### 4.6 Tech Stack
 - Language/runtime, framework, database, testing framework. Greenfield: ask each. Brownfield: confirm the discovered stack ("I found: Rust with tokio, clap for CLI, no database. Correct?").
-- Use Context7 to research mentioned technologies.
+- Use Context7, when installed, to research mentioned technologies.
 
 #### 4.7 Commands
 - Build, test, lint/format, and coverage commands. Greenfield: ask each. Brownfield: confirm discovered commands and ask for any missing ones ("No coverage command found. What should it be?").
