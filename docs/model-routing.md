@@ -84,15 +84,3 @@ When `/speq:implement` processes a task group:
 - When expert tasks establish invariants that standard tasks depend on, they run first
 
 Use `[expert]` for concurrency, subtle correctness, cross-file refactors, novel algorithms, and security-sensitive work. Avoid it for routine CLI plumbing, fixtures, docs, or straightforward use of existing patterns.
-
----
-
-## Packaging
-
-The checked-in source currently lives in `.claude/skills` and `.claude/agents`. `scripts/plugin/build.sh` treats that as the shared source and generates platform-specific outputs:
-
-- Claude artifacts under `dist/marketplace/plugins/speq-skill`
-- Codex artifacts under `dist/marketplace/codex/plugins/speq-skill`
-- Codex marketplace manifest under `dist/marketplace/codex/.agents/plugins/marketplace.json`
-
-Claude-generated output exposes `/speq:*` skills. Codex-generated output exposes the same workflows behind the `$` trigger. Generation also rewrites Codex-specific prompt text.

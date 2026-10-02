@@ -38,9 +38,9 @@ speq domain list
 **Example**
 ```bash
 $ speq domain list
-cli
-validation
-search
+cli/
+core/
+...
 ```
 
 ---
@@ -58,14 +58,22 @@ speq feature list [domain]
 **Example**
 ```bash
 $ speq feature list
-specs/
 ├── cli/
-│   ├── validate/
-│   └── record/
-├── validation/
-│   └── keyword-casing/
-└── search/
-    └── semantic/
+│   ├── domain-list
+│   ├── feature-get
+│   ...  
+├── core/
+│   └── spec-hierarchy
+├── decision/
+│   ├── decision-log-show
+│   ...  
+├── plan/
+│   ├── plan-list
+│   ├── plan-validate
+│   ...  
+└── validation/
+    ├── document-structure
+    │   ...  
 ```
 
 ### `speq feature get`
@@ -79,8 +87,8 @@ speq feature get "<domain>/<feature>/<scenario-name>"
 
 **Example**
 ```bash
-$ speq feature get cli/validate
-$ speq feature get "cli/validate/Validation fails on missing field"
+$ speq feature get cli/feature-validate
+$ speq feature get "cli/feature-validate/Validate single feature"
 ```
 
 ### `speq feature validate`

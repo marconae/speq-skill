@@ -4,7 +4,6 @@
 
 - ADRs are rare by default. A new gate (`/speq:adr-rules`) admits a decision only with a named criterion. Planning lists the candidates, and recording a plan accepts them.
 - `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
-- The "project-wide process convention" ADR override is removed.
 - Skills keep the current architecture in `specs/architecture.md`. Plans change it through an architecture delta, and `/speq:record` merges it.
 - `/speq:mission` drafts `specs/architecture.md` from the code in existing projects through the new `architecture-agent`. The agent writes the draft to a file. You review it and confirm before mission writes `specs/architecture.md`.
 
@@ -102,26 +101,6 @@
 - New `speq-plan-pr` and `speq-implement-pr`: headless planning and implementation on a `feat/<plan-name>` branch with a PR.
 - `planner-agent` can escalate in headless mode through an `OPEN QUESTIONS:` sentinel.
 
-## 0.6.0
-
-- Pre-built binaries for Linux x86_64 and ARM64, macOS, and Windows. The installer tries them first and falls back to a source build.
-
-## 0.5.1
-
-- Fix: the installer skipped `main` when piped through `curl | bash`.
-
-## 0.5.0
-
-- Embedding inference is pure Rust and needs no separate runtime, also on Intel Mac. The installer downloads the model on every install. Missing model files fail with a clear error.
-
-## 0.4.2
-
-- Fix: MCP servers registered twice.
-
-## 0.4.1
-
-- Fix: Serena starts in the current project (`--project-from-cwd`).
-
 ## 0.4.0
 
 - Codex support: the installer generates a Codex plugin next to the Claude Code one, registers a Codex marketplace, and installs skills into `$CODEX_HOME/skills`. Skills stay `/speq:*` on both. Serena and Context7 are declared for Codex.
@@ -141,10 +120,6 @@
 - Record rejects mismatched or unclosed delta markers.
 - Local cache fallback when the system cache is not writable. `SPEQ_CACHE_DIR` overrides the cache location.
 
-## 0.2.8
-
-- Builds on Intel Mac. Semantic anchors in skills and docs.
-
 ## 0.2.7
 
 - Semantic anchors in skills and docs.
@@ -152,12 +127,10 @@
 ## 0.2.5
 
 - Fix: RFC 2119 keyword matching at word boundaries.
-- New curl-pipeable uninstaller.
 
 ## 0.2.4
 
-- New `plan list` command. MCP config moves into the plugin.
-- Fix: the installer exited when the Rust toolchain was missing.
+- New `plan list` command.
 
 ## 0.2.2
 

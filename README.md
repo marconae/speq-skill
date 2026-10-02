@@ -91,7 +91,7 @@ It introduces a lightweight workflow for spec-driven development. It adds a CLI 
 
 Specs live in `specs/<domain>/<feature>/spec.md`. `specs/architecture.md` holds the current architecture. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
 
-For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the same cycle headlessly against a `feat/<plan-name>` branch and PR — see [Workflow](./docs/workflow.md#headless-pr-pipeline).
+For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the same cycle headlessly against a `feat/<plan-name>` branch and PR — see [Headless PR Pipeline](./docs/headless-workflow.md).
 
 ---
 
@@ -101,10 +101,11 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 |-------|-------------|
 | [Installation](./docs/installation.md) | Setup CLI and plugin |
 | [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
-| [Headless PR Pipeline](./docs/workflow.md#headless-pr-pipeline) | Autonomous plan/implement via a feat/ branch + PR |
+| [FAQ](./docs/faq.md) | Add features, fix bugs, start greenfield or brownfield |
+| [Headless PR Pipeline](./docs/headless-workflow.md) | Autonomous plan/implement via a feat/ branch + PR |
 | [Decision Log](./docs/decision-log.md) | Design decisions, ADR fragment format, validation, and show |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
-| [MCP Servers](./docs/mcp-servers.md) | Serena and Context7 |
+| [MCP Servers](./docs/mcp-servers.md) | Serena setup, Context7 optional |
 | [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
 | [Model Routing](./docs/model-routing.md) | How workflow skills and sub-agents are routed across models |
 | [Hooks](./docs/hooks.md) | Repo-local `.speq/<name>-hook.md` customizations |
@@ -115,16 +116,18 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 
 `speq-skill` is a plugin for Claude Code, Codex, and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent generates all code, specs, or other artifacts**.
 
-## Dependencies
+## Companions
 
-This plugin uses [Serena](https://github.com/oraios/serena) and [Context7](https://github.com/upstash/context7) MCP servers. The generated plugin payload declares them as a convenience. The installer installs Serena as a `uv` tool (`uv tool install -p 3.13 serena-agent`); Context7 runs via `npx` at server start. Their behavior, limitations, and conditions are governed by their own documentation. Context7's MCP server connects to a cloud service with a free tier — see [Context7](https://context7.com).
+speq-skill works best with [Serena](https://github.com/oraios/serena) for code navigation. It is optional and installed globally, not bundled. The installer offers to set it up, and the skills work without it. If [Context7](https://github.com/upstash/context7) is installed, the skills also use it for library docs. See [MCP Servers](./docs/mcp-servers.md).
+
+## Dependencies
 
 The `speq` CLI uses [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) for semantic search. The [installer](./docs/installation.md) downloads the model files automatically onto your machine so inference runs fully offline.
 
 ## Acknowledgments
 
 - The `code-reviewer` agent's YAGNI / Over-Engineering review category was inspired by the tag taxonomy of [ponytail](https://github.com/DietrichGebert/ponytail).
-- The [semantic anchor](./docs/semantic-anchors.md) approach — naming established methodologies (Clean Code, London School TDD, MECE, ADR, and others) directly in skill instructions — draws on the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog.
+- The [semantic anchor](./docs/semantic-anchors.md) approach — naming established methodologies (e.g. London School TDD) directly in skill instructions — draws on the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog.
 
 ## License
 
