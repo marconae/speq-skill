@@ -6,7 +6,7 @@ The CLI SHALL provide a command to list feature specifications in a tree view fo
 
 * Command syntax: `speq feature list [domain]`
 * Output format is a tree view showing domain/feature hierarchy
-* Exit code 0 on success, 1 on error
+* Exit code 0, including when no features are found
 
 ## Scenarios
 
@@ -28,8 +28,8 @@ The CLI SHALL provide a command to list feature specifications in a tree view fo
 
 * *GIVEN* no domain named `nonexistent` exists
 * *WHEN* the user runs `speq feature list nonexistent`
-* *THEN* the system SHALL report an error indicating the domain was not found
-* *AND* the system SHALL exit with code 1
+* *THEN* the system SHALL display "No features found in domain 'nonexistent'."
+* *AND* the system SHALL exit with code 0
 
 ### Scenario: Empty specs directory
 

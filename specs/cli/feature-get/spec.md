@@ -48,5 +48,5 @@ The CLI SHALL provide a command to retrieve and display a feature specification 
 
 * *GIVEN* a scenario with GIVEN, WHEN, THEN, and AND steps
 * *WHEN* the user runs `speq feature get <domain>/<feature>/<scenario>`
-* *THEN* each step SHALL be prefixed with its keyword (GIVEN, WHEN, THEN, AND)
+* *THEN* each step SHALL be prefixed with its keyword in title case (Given, When, Then, And)
 * *AND* steps SHALL be indented for readability

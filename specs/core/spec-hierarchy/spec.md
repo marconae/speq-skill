@@ -7,7 +7,8 @@ The system SHALL organize feature specifications in a shallow two-level hierarch
 * Specs are stored at `specs/<domain>/<feature>/spec.md`
 * Domains group related features (e.g., `cli/`, `validation/`)
 * Maximum nesting depth is 2 levels (domain/feature)
-* The `_plans/` and `_recorded/` directories are reserved for plan management
+* Top-level directories whose names start with `_` are reserved: `_plans/` and `_recorded/` hold plan management, and `_decision/` holds the permanent decision records
+* Top-level directories whose names start with `.` are hidden and are not domains
 * Domain and feature names use kebab-case
 
 ## Scenarios
@@ -22,7 +23,7 @@ The system SHALL organize feature specifications in a shallow two-level hierarch
 
 * *GIVEN* a specs directory with multiple domain subdirectories
 * *WHEN* the system lists domains
-* *THEN* the system SHALL return all immediate subdirectories except `_plans` and `_recorded`
+* *THEN* the system SHALL return all immediate subdirectories except those whose names start with `_` or `.`
 
 ### Scenario: Discover features in domain
 
@@ -39,9 +40,9 @@ The system SHALL organize feature specifications in a shallow two-level hierarch
 
 ### Scenario: Reserved directories excluded
 
-* *GIVEN* a specs directory containing `_plans/` and `_recorded/` directories
+* *GIVEN* a specs directory containing `_plans/`, `_recorded/`, and `_decision/` directories
 * *WHEN* the system discovers domains or features
-* *THEN* the system SHALL NOT include `_plans` or `_recorded` as domains
+* *THEN* the system SHALL NOT include `_plans`, `_recorded`, or `_decision` as domains
 
 ### Scenario: Empty domain ignored
 

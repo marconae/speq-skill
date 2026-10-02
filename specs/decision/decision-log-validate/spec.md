@@ -1,12 +1,11 @@
 # Feature: Decision Log Validation
 
-Validates the permanent Architecture Decision Records stored as one fragment file per plan under `specs/_decision/`. Catches malformed, duplicate-identity, or dangling ADRs before they accumulate. Fragments are the long-lived record promoted from per-plan decision logs by `speq record`, so structural integrity is non-negotiable.
+Validates the permanent Architecture Decision Records stored as one fragment file per plan under `specs/_decision/`. Catches malformed, duplicate-identity, or dangling ADRs before they accumulate.
 
 ## Background
 
 * The permanent decision records live as one fragment file per plan under the `specs/_decision/` directory
 * Each fragment file is named `NNN-<plan-name>.md`, where `NNN` is a numeric ordering prefix
-* Each fragment uses ADR (Nygard) format, NOT the lightweight per-plan format
 * Each fragment file MUST start with H1 `# Decisions: <plan-name>`
 * Each ADR MUST be a `## ADR: <Title>` heading
 * Each ADR MUST carry an `**ID:**` field whose value is a kebab-case slug
@@ -17,7 +16,6 @@ Validates the permanent Architecture Decision Records stored as one fragment fil
 * When `**Status:**` is `Superseded by <slug>`, the `<slug>` MUST resolve to an existing ADR `**ID:**`
 * Slug and status references MAY resolve to ADRs in a different fragment file
 * `### Options Considered` and `### Consequences` are OPTIONAL sections within an ADR
-* ADR ordering numbers are NOT validated; duplicate `NNN-` prefixes across fragment files are acceptable
 * The CLI command is `speq decision-log validate`
 
 ## Scenarios

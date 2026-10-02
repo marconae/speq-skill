@@ -6,9 +6,7 @@ The validator SHALL ensure that scenario steps use RFC 2119 keywords to express 
 
 * RFC 2119 defines keywords: MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY
 * Keywords MUST appear in uppercase
-* Each step (GIVEN, WHEN, THEN, AND) SHOULD contain at least one RFC 2119 keyword
-* GIVEN and WHEN steps describe state and actions, which MAY not require normative keywords
-* THEN steps describe expected outcomes and MUST contain normative keywords
+* THEN steps, and AND steps that follow a THEN step, MUST contain at least one RFC 2119 keyword
 
 ## Scenarios
 
@@ -44,17 +42,10 @@ The validator SHALL ensure that scenario steps use RFC 2119 keywords to express 
 
 ### Scenario: Step missing RFC 2119 keyword
 
-* *GIVEN* a scenario step without any RFC 2119 keyword
+* *GIVEN* a THEN step without any RFC 2119 keyword
 * *WHEN* the validator checks the step for RFC 2119 compliance
 * *THEN* the system SHALL report an error indicating the step is missing a normative keyword
 * *AND* the error message SHALL identify the scenario and step
-
-### Scenario: Lowercase keyword not accepted
-
-* *GIVEN* a scenario step containing "shall" in lowercase
-* *WHEN* the validator checks the step for RFC 2119 compliance
-* *THEN* the system SHALL report an error indicating the step is missing a normative keyword
-* *AND* the system SHALL NOT accept lowercase variants as valid keywords
 
 ### Scenario: Word containing keyword substring not treated as keyword
 

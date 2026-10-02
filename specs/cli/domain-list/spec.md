@@ -5,7 +5,7 @@ The CLI SHALL provide a command to list all domains in the specs directory.
 ## Background
 
 * Command syntax: `speq domain list`
-* A domain is a top-level directory in `specs/` (excluding `_plans`, `_recorded`, and hidden directories)
+* A domain is a top-level directory in `specs/` whose name does not start with `_` or `.`, so `_plans`, `_recorded`, `_decision`, and hidden directories are not domains
 * Output format shows domain names with trailing slash
 * Exit code 0 on success
 

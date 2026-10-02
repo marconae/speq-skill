@@ -6,8 +6,9 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 
 * Command syntax: `speq search query <query>` for searching, `speq search index` for rebuilding
 * Search uses vector embeddings for semantic similarity
-* Single app cache at `$XDG_CACHE_HOME/speq/` containing:
-  - `models/` - the embedding model files (weights, tokenizer, config)
+* The cache directory is `$SPEQ_CACHE_DIR` when it is set. Otherwise it is the platform cache directory joined with `speq`: `${XDG_CACHE_HOME:-$HOME/.cache}/speq` on Linux
+* The cache directory contains:
+  - `models/` - the embedding model files `model.onnx` and `tokenizer.json`
   - `indexes/` - binary index files, one per project
 * Index file named after project path slug (e.g., `-home-user-code-my-project.idx`)
 * Slug format: absolute project path with `/` replaced by `-` (e.g., `/home/user/code/my-project` → `-home-user-code-my-project`)
@@ -15,7 +16,7 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * Results ranked by cosine similarity
 * If no index exists when searching, the system SHALL automatically build it
 * Exit code 0 regardless of match count
-* The embedding model runs entirely in pure Rust with no native ONNX Runtime library and no C/C++ runtime dependency, so behavior is identical on every supported platform including Intel macOS (`x86_64-apple-darwin`)
+* The embedding model runs entirely in pure Rust with no runtime dependency, so behavior is identical on every supported platform
 
 ## Scenarios
 
@@ -65,14 +66,11 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 
 ### Scenario: Cache storage location
 
-* *GIVEN* `$XDG_CACHE_HOME` is set to `/home/user/.cache`
+* *GIVEN* the system runs on Linux with `$XDG_CACHE_HOME` set to `/home/user/.cache` and `$SPEQ_CACHE_DIR` unset
 * *AND* the project path is `/home/user/code/my-project`
 * *WHEN* the user runs `speq search index`
-* *THEN* the index file SHALL be stored at `/home/user/.cache/speq/indexes/-home-user-code-my-project.idx`
-* *AND* the embedding model files SHALL be cached under `/home/user/.cache/speq/models/`
-* *AND* the model identity SHALL be `Snowflake/snowflake-arctic-embed-xs`
-* *AND* the cached model files SHALL consist of model weights, a tokenizer definition, and a model configuration
-* *AND* subsequent operations SHALL reuse the cached model files without re-downloading them
+* *THEN* the system SHALL store the index file at `/home/user/.cache/speq/indexes/-home-user-code-my-project.idx`
+* *AND* the system SHALL load the model files `model.onnx` and `tokenizer.json` from `/home/user/.cache/speq/models/`
 
 ### Scenario: Model files present in cache
 
