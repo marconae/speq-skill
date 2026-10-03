@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.24.0
+
+- `/speq:implement-pr` keeps rotation hand-off notes (`notes/`) out of its commits.
+- Plan review treats a plan as small when its verb is `fix`, its decision log has no design decisions, and it has no architecture delta.
+
 ## 0.23.0
 
-- The plugin no longer configures Serena or Context7. The installer asks before it installs Serena for Claude Code and Codex, and skips it when Serena is already set up. Context7 stays optional: the skills use it when it is installed. To uninstall, run `./uninstall.sh`.
 - ADRs are rare by default. A new gate (`/speq:adr-rules`) admits a decision only with a named criterion. Planning lists the candidates, and recording a plan accepts them.
 - `/speq:audit` removes existing ADRs that fail the gate, after you confirm.
 - Skills keep the current architecture in `specs/architecture.md`. Plans change it through an architecture delta, and `/speq:record` merges it.

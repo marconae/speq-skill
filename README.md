@@ -45,9 +45,9 @@ To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall)
 
 I want to leverage AI coding agents such as Claude Code and Codex as effective tools to write software.
 
-There are many other spec-driven development tools out there: OpenSpec, BMAD, SpecKit... 
+There are many other spec-driven development tools out there... 
 
-...but I was missing the following:
+...but I wanted the following:
 
 1. A system that is not primped on one language or framework (e.g., Python or TypeScript)
 2. A straightforward repeatable workflow (`plan → implement → record`)
