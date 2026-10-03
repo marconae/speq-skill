@@ -11,7 +11,7 @@ The decision log records why a plan chose its design. It has two parts: a plan-l
 | Plan-level log | `specs/_plans/<plan-name>/decision-log.md` | Interview answers and design choices of one plan |
 | Permanent log | `specs/_decision/NNN-<plan-name>.md` | One fragment per plan, holding its accepted ADRs |
 
-An ADR (Architecture Decision Record) is one durable decision. The `## Design` section of `plan.md` is not an ADR. It describes how one plan builds its change.
+An ADR (Architecture Decision Record) is one durable decision. The decisions of one plan live in that plan's `decision-log.md`. Only the durable ones become ADRs. The `## Context` section of `plan.md` is a bullet list of the problem. It holds no decisions.
 
 ---
 

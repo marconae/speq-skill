@@ -1,6 +1,6 @@
 # Checkpoint Protocol (PR Lifecycle)
 
-The headless pipeline runs end-to-end in one session, but a session can be cut off involuntarily: a usage-limit reset mid-run, a crash, a killed process. Each phase writes its mark on completion, so a fresh invocation reads the marks and resumes from the correct phase instead of redoing or skipping work. The checkpoint is interruption resilience, not a deliberate session boundary: under normal conditions one invocation runs Phase A through C without stopping. `speq-implement-pr` cites this file. If `speq-plan-pr` later gets the same resilience, it cites this file too instead of restating it.
+The headless pipeline runs end-to-end in one session, but a session can be cut off involuntarily: a usage-limit reset mid-run, a crash, a killed process. Each phase writes its mark on completion, so a fresh invocation reads the marks and resumes from the correct phase instead of redoing or skipping work. The checkpoint is interruption resilience, not a deliberate session boundary: under normal conditions one invocation runs Phase A through C without stopping. `speq-implement-pr` cites this file.
 
 ## Lifecycle Schema
 

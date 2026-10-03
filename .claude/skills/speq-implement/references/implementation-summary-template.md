@@ -8,7 +8,7 @@ A terminal print has no `<details>` equivalent; the "Full evidence" line is alre
 
 ```markdown
 ## Verdict
-<PASS|FAIL> — <one sentence>
+<PASS|FAIL>: <one sentence>
 
 ## Requirements Implemented
 
@@ -33,7 +33,7 @@ A terminal print has no `<details>` equivalent; the "Full evidence" line is alre
 | Format | ✅ |
 | Manual tests | ✅ (<n>/<n>) |
 
-Code review: <n> findings — <n> fixed
+Code review: <n> findings, <n> fixed
 
 Full evidence: `verification-report.md`
 ```

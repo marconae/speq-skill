@@ -20,9 +20,9 @@ Every placeholder MUST be replaced with real information.
 
 ## Core Capabilities
 
-1. **<Capability>** — <what it does, not how>
-2. **<Capability>** — <what it does, not how>
-3. **<Capability>** — <what it does, not how>
+1. **<Capability>**: <what it does, not how>
+2. **<Capability>**: <what it does, not how>
+3. **<Capability>**: <what it does, not how>
 
 ## Out of Scope
 

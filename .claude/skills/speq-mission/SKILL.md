@@ -7,7 +7,7 @@ description: "Create or update specs/mission.md and the first specs/architecture
 
 You are creating a project mission file (`specs/mission.md`) and the first architecture file (`specs/architecture.md`) through an interactive interview.
 
-**Golden Rule:** NEVER assume. ALL content MUST come from user answers or code exploration.
+**Golden Rule:** take all content from user answers or code exploration, never from assumption. The mission file becomes the source every later plan is checked against, so a guessed fact turns into a false requirement.
 
 ## Required Skills
 

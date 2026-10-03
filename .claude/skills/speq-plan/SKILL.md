@@ -129,7 +129,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 1. Respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings from that file, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-run `speq plan validate`, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
 2. **Round 2 runs only if round 1's `HUMAN` count was greater than 0.** A `HUMAN: 0` round 1 means every BLOCKER was `MECHANICAL` — the reviewer already judged none needed adversarial re-checking, only a fix. Skip to the ship decision below without respawning `plan-reviewer`.
-3. **`HUMAN > 0`:** compute Plan Size (the plan is `small` when all four hold — the plan-name's verb, per the verb table, is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`; otherwise `full`), then respawn `plan-reviewer` for round 2 with the path to `review/round-1.md` plus `Plan Size: small | full`, so it confirms each round-1 BLOCKER is resolved before checking for new ones (or, on `small`, confirms and stops there). Do not run a third adversarial round, even if round 2 raises new BLOCKERs.
+3. **`HUMAN > 0`:** compute Plan Size (the plan is `small` when all three hold: the plan-name's verb, per the verb table, is `fix`; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`; otherwise `full`), then respawn `plan-reviewer` for round 2 with the path to `review/round-1.md` plus `Plan Size: small | full`, so it confirms each round-1 BLOCKER is resolved before checking for new ones (or, on `small`, confirms and stops there). Do not run a third adversarial round, even if round 2 raises new BLOCKERs.
 
 **BLOCKERs remaining after round 2, split by `Escalation`:**
 
@@ -164,7 +164,7 @@ specs/
 | Step | Performed by | Why |
 |------|--------------|-----|
 | Discovery, interview, coordination | This skill (pins Sonnet) | Conversational, tool-call heavy |
-| Spec delta authoring, design section, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; a defect here compounds through implementation |
+| Spec delta authoring, plan context and decision log, task decomposition | `planner-agent` sub-agent | Reasoning-heavy; a defect here compounds through implementation |
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation |
 
 Each sub-agent pins its own model and effort in its frontmatter, so planning quality does not depend on the parent session's configuration.

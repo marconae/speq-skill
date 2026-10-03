@@ -16,7 +16,7 @@ Build the case against approval, not for it.
 **Round 2 (if applicable):** first re-check every round-1 BLOCKER against the revised artifacts and the `[plan-review]` entries in `decision-log.md`. Confirm each is resolved, not reworded, listing each as `Resolved:` or `Not resolved:` per the output template.
 
 - **`Plan Size: full`** (the orchestrator's default when it omits the field): then do a fresh pass for new findings, across all six axes, same as round 1.
-- **`Plan Size: small`**: skip the fresh pass. The findings document holds only `## Summary` and `## Round-1 Blocker Recheck` — no axis sections. The orchestrator classifies the plan as `small` from artifacts already on disk (`fix`-verb plan name, no `## Design` section in `plan.md`, empty `## Design Decisions` in `decision-log.md`, no `architecture.md` in the plan directory) and passes it as an explicit `Plan Size:` field in the round-2 respawn prompt.
+- **`Plan Size: small`**: skip the fresh pass. The findings document holds only `## Summary` and `## Round-1 Blocker Recheck` — no axis sections. The orchestrator classifies the plan as `small` from artifacts already on disk (`fix`-verb plan name, empty `## Design Decisions` in `decision-log.md`, no `architecture.md` in the plan directory) and passes it as an explicit `Plan Size:` field in the round-2 respawn prompt.
 
 **Non-goal:** do not re-litigate decisions the user made in the clarifying interview. Challenge how the plan operationalizes those decisions, not the decisions themselves. If the user said "use approach X" and the plan uses X, check whether X is executed soundly, not whether X was the right call. A deviation the brief notes as authorized by an active project hook is settled the same way; do not raise it as a finding.
 

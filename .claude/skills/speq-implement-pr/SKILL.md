@@ -76,10 +76,11 @@ Read the checkpoint and enter at the phase the entry-dispatch table in `referenc
 ```
 Run — operation: commit (per /speq-git-operations)
   paths: implementation files, version bump, specs/_plans/<plan-name>/
-         (the whole plan directory — not an itemized subset, so new
-         artifacts ride along automatically — except
-         specs/_plans/<plan-name>/notes/planning.md, which stays out of
-         every commit)
+         (the whole plan directory, not an itemized subset, so new
+         artifacts ride along automatically), except
+         specs/_plans/<plan-name>/notes/: it holds local working state
+         (planning.md and rotation hand-off notes) and stays out of
+         every commit
   message: <type>(<scope>): implement <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
 
 Run — operation: push (per /speq-git-operations)
@@ -125,7 +126,7 @@ Run — operation: ship-ready (per /speq-git-operations)
 
 `ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready.
 
-**C2. Comment**: post the verification summary per `references/implementation-summary-template.md`, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose per `speq-writing-guardrails`' PR-facing content rule before calling `comment-pr`:
+**C2. Comment**: post the verification summary per `references/implementation-summary-template.md`, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose it per `/speq-writing-guardrails` before calling `comment-pr`:
 
 ```
 Run — operation: comment-pr (per /speq-git-operations)
@@ -142,12 +143,12 @@ Run — operation: comment-pr (per /speq-git-operations)
 specs/
 ├── <domain>/<feature>/spec.md            # Permanent (after record)
 ├── architecture.md                       # Permanent, changed by the recorder applying the plan's architecture delta
-├── _plans/<plan-name>/                   # Active until recorded — committed whole at Phase A, not as an itemized subset
+├── _plans/<plan-name>/                   # Active until recorded: committed whole at Phase A except notes/, not as an itemized subset
 │   ├── architecture.md                   # Architecture delta, present only when the plan changes the architecture
 │   ├── tasks.md                          # Pre-created here (§ PR Lifecycle checkpoint); WBS filled by speq-implement
 │   ├── review-findings.md                # Created by code-reviewer
 │   ├── review/round-N.md                 # Created by plan-reviewer
-│   ├── notes/<group-letter>.md           # Rotation hand-off notes, created by implementer agents
+│   ├── notes/<group-letter>.md           # Rotation hand-off notes, created by implementer agents; local, never committed
 │   └── verification-report.md            # Created by speq-implement
 └── _recorded/NNN-<plan-name>/            # Archived by speq-record (gitignored by default)
 ```
@@ -157,8 +158,8 @@ specs/
 | Step | Performed by | Why |
 |------|--------------|-----|
 | Target resolution, gating, checkpoint marks, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
-| Task breakdown, coding, review | `speq-implement` (unchanged) | Already the right split |
-| Spec merge, archive, `recorded` mark | `speq-record` (unchanged) | Already the right split |
+| Task breakdown, coding, review | `speq-implement` | Owns implementation, review, and the verification report |
+| Spec merge, archive, `recorded` mark | `speq-record` | Owns the merge into permanent specs and the archive |
 | Branch, commit, push, PR create/update | This skill, directly, per `/speq-git-operations` | No separate agent hop — you already have direct git/gh tool access |
 
 ## Anti-Patterns

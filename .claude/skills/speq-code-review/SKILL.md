@@ -13,7 +13,7 @@ Analyze each changed file for the categories below.
 
 Per `/speq-code-guardrails`:
 - `[TOO_MANY_ARGUMENTS]`: more than 3 arguments
-- `[SIDE_EFFECT]`: function has side effects
+- `[SIDE_EFFECT]`: function has a side effect its name and contract do not announce (a query that mutates, a command that touches unrelated state)
 - `[BOOLEAN_FLAG_PARAMETER]`: boolean flag parameter
 - `[MAGIC_NUMBER]`: magic number without a named constant (standing in for a failure, it is `[SENTINEL_ERROR_VALUE]`, not this tag)
 - `[MISSING_DOC_COMMENT]`: missing doc comment on a public interface

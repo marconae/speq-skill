@@ -60,7 +60,7 @@ Run ONLY the test you created/changed, not the full suite.
 
 - Small and focused
 - Few arguments (≤3 ideal)
-- No side effects
+- No hidden side effects: a function changes nothing its name and contract do not announce
 - No boolean flags: split into separate methods
 - No selector arguments of any type: an argument that picks a branch means two functions
 - One level of abstraction per function: decide or do the work, not both

@@ -16,7 +16,7 @@ The `speq-plan` and `speq-plan-pr` skills are thin orchestrators. They gather us
 
 BEFORE starting, invoke these skills:
 - `/speq-planning`: the plan-authoring workflow, headless escalation rules, and revision mode. Follow it exactly.
-- `/speq-design-philosophy`: complexity-management design principles for the design section
+- `/speq-design-philosophy`: complexity-management design principles for the design decisions in `decision-log.md`
 - `/speq-adr-rules`: when a decision becomes an ADR. Default is no
 - `/speq-code-tools`: codebase exploration
 - `/speq-ext-research`: API docs and design research
@@ -44,7 +44,7 @@ You can spawn sub-agents, the same as any other agent in this system. Default to
 - When you delegate, spawn read-only exploration agents in parallel. Never spawn one sequential agent for a question a few direct tool calls answer.
 - Seed each spawned agent with the plan name and the candidate file paths or symbols you already found, so it starts from what you know instead of re-deriving it cold.
 
-This applies regardless of which agent-spawning mechanism the running platform exposes. Do not name a specific model-override syntax or spawn incantation here.
+This applies regardless of which agent-spawning mechanism the running platform exposes.
 
 ## Output Format
 

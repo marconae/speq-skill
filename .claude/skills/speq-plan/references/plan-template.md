@@ -10,32 +10,12 @@ Read `specs/mission.md` for project-specific commands.
 
 One-paragraph description of what this plan achieves (max two sentences).
 
-## Design
+## Context
 
-Required for new features and significant changes. Skip for small fixes. This section describes how this plan builds the change. It is not an ADR.
+Required for new features and significant changes. Skip for small fixes. A bullet list of the problem and the forces behind this change, one fact per bullet. No decisions: decisions go in `decision-log.md`. Structural changes to the system (components, boundaries, data flow, interfaces, constraints, external dependencies) go in the architecture delta, `architecture.md` in the plan directory, not here. Point to the delta from a bullet.
 
-### Context
-
-The problem, the forces at play, and why it needs a design decision.
-
-- **Goals** — <what this design achieves>
-- **Non-Goals** — <what this design explicitly does NOT address>
-
-### Decision
-
-The chosen approach: patterns and local interfaces. Structural changes to the system (components, boundaries, data flow, interfaces, constraints, external dependencies) go in the architecture delta, `architecture.md` in the plan directory, not here. Point to the delta from this text.
-
-#### Patterns
-
-| Pattern | Where | Why |
-|---------|-------|-----|
-| <pattern> | <component> | <rationale> |
-
-### Consequences
-
-| Decision | Alternatives Considered | Rationale |
-|----------|------------------------|-----------|
-| <choice made> | <other options> | <why this choice> |
+- <fact about the problem or a force behind this change>
+- <fact>
 
 ## Features
 
@@ -44,9 +24,9 @@ The chosen approach: patterns and local interfaces. Structural changes to the sy
 | <feature-name> | NEW / CHANGED / REMOVED | `<path>/spec.md` |
 
 Status values:
-- **NEW** — Feature doesn't exist yet
-- **CHANGED** — Modifying existing feature behavior
-- **REMOVED** — Deprecating/deleting feature
+- **NEW**: Feature doesn't exist yet
+- **CHANGED**: Modifying existing feature behavior
+- **REMOVED**: Deprecating/deleting feature
 
 ## Impact
 
@@ -80,16 +60,16 @@ Optional: For changes affecting existing data/structure
 
 ## Parallelization
 
-Optional: task groups for the implement orchestrator. Each group is a knowledge cluster — a vertical slice of one spec delta plus the source and test files it governs. Fixtures, module code, and the feature's tests belong in the same group, not in separate layer groups.
+Optional: task groups for the implement orchestrator. Each group is a knowledge cluster: a vertical slice of one spec delta plus the source and test files it governs. Fixtures, module code, and the feature's tests belong in the same group, not in separate layer groups.
 
 | Group | Tasks | Depends on | Knowledge |
 |-------|-------|------------|-----------|
 | A: <cluster name> | 1.1-1.4, 3.1 | — | spec delta `<domain>/<feature>`; `src/<module>/`, `<test-file-path>` |
 | B: <cluster name> | 2.1-2.3 | A (shares `src/<module>/`) | spec delta `<domain>/<other-feature>`; `src/<module>/`, `<test-file-path>` |
 
-- **Knowledge** — the group's spec delta path(s) plus the source and test files they govern. The implement orchestrator passes this entry to the group's agent as its orientation pointer.
+- **Knowledge**: the group's spec delta path(s) plus the source and test files they govern. The implement orchestrator passes this entry to the group's agent as its orientation pointer.
 - Tasks that share a spec delta or a source module default into one group.
-- Overlapping Knowledge entries across groups are a consolidation signal, not a parallelism opportunity — merge the groups, or declare a dependency and run them in sequence.
+- Overlapping Knowledge entries across groups are a consolidation signal, not a parallelism opportunity. Merge the groups, or declare a dependency and run them in sequence.
 
 ## Dead Code Removal
 
@@ -116,8 +96,8 @@ Do NOT copy placeholders below. Replace with real values.
 |----------|-----------|---------------|-----------|
 | <scenario from spec> | Integration / Unit | `<test-file-path>` | `<test_function_name>` |
 
-- **Integration test** — default for all scenarios
-- **Unit test** — only for pure computation with no I/O or side effects
+- **Integration test**: default for all scenarios
+- **Unit test**: only for pure computation with no I/O or side effects
 - A feature is complete when ALL its scenarios have passing tests
 
 ### Manual Testing

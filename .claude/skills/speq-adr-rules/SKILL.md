@@ -41,7 +41,7 @@ The entry's Rationale names the criterion that applies and states the result of 
 |---------|-------------|
 | Conventions that bind contributors or agents | `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or `specs/mission.md` Constraints |
 | WHAT the system is: components and boundaries | `specs/architecture.md`, changed through an architecture delta |
-| HOW this plan builds it | `plan.md` `## Design` |
+| HOW this plan builds it | `decision-log.md` `## Design Decisions`, an entry with `Promotes to ADR: no` |
 | Execution steps | `plan.md` `## Implementation Tasks` |
 
 An ADR records why. specs/architecture.md records what is.
@@ -57,7 +57,7 @@ Before you set `yes`, run `speq decision-log show` and read the result. If an AD
 - One ADR records one decision.
 - Decision states the choice in plain words. It holds no function signatures, file paths, or flags.
 - An ADR names a library but never pins its version. A version number lives in the manifest or lockfile. The Decision states the policy instead, for example "use the registry release, not a git tag".
-- If the Decision needs a list of paths, signatures, or version numbers to make sense, the content is implementation detail. Move it to `plan.md` `## Design`.
+- If the Decision needs a list of paths, signatures, or version numbers to make sense, the content is implementation detail. Move it to a `decision-log.md` `## Design Decisions` entry with `Promotes to ADR: no`.
 
 ## 7. Shape
 
@@ -79,7 +79,7 @@ An ADR has four short sections: Context, Decision, Options Considered, Consequen
 | Term | Meaning |
 |------|---------|
 | ADR | A permanent record in `specs/_decision/` of one durable decision |
-| Design section | The `## Design` part of `plan.md`. It describes how one plan builds its change. It is not an ADR |
+| Plan context | The `## Context` part of `plan.md`: a bullet list of the problem and the forces behind one plan's change. It holds no decisions and is not an ADR |
 | Decision-log entry | A note in a plan's `decision-log.md`. Only an entry marked `Promotes to ADR: yes` can become an ADR |
 | ADR candidate | A decision-log entry marked `Promotes to ADR: yes`. It is the proposal, shown when the plan is ready |
 | Accepted | An ADR written by `/speq-record`. Recording the plan is the acceptance |

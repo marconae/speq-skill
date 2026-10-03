@@ -102,7 +102,7 @@ Delegated to `adr-audit-agent` (see SKILL.md Phase 3b). The agent reads every `s
 ---
 
 ## Remediation: decision-log migration
-Replay the recorder's promotion mapping (from `recorder-agent.md`) to convert an OLD single `specs/decision-log.md` (sequential `## ADR-NNN` blocks) into NEW per-plan fragments. Because the old file predates per-plan attribution, group all ADRs into ONE migration fragment unless each block names its originating plan.
+Replay the ADR promotion mapping (from `/speq-spec-merge`, section "Promote ADRs to Permanent Decision Log") to convert an OLD single `specs/decision-log.md` (sequential `## ADR-NNN` blocks) into NEW per-plan fragments. Because the old file predates per-plan attribution, group all ADRs into ONE migration fragment unless each block names its originating plan.
 
 Delegate to a spawned worker (Yes required):
 1. Parse each `## ADR-NNN: <Title>` block.

@@ -153,7 +153,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **If `INTENT > 0`:** the plan solves a different problem than the one asked. Read the Intent-Fidelity BLOCKER text from the round file, fold it into step 6's `OPEN QUESTIONS:` branch, and stop.
 
-**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all four hold — the plan-name's verb (per the verb table) is `fix`; `plan.md` has no `## Design` section; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`. Otherwise `full`.
+**Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all three hold: the plan-name's verb (per the verb table) is `fix`; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`. Otherwise `full`.
 
 **If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
 
@@ -178,8 +178,8 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
      message: spec(plan): <plan-name>
      title: <the derived <type>(<scope>): <slug>>
      body: per references/pr-body-template.md, ending "Draft pending
-           implementation — run /speq:implement-pr <plan-name> to implement
-           and mark ready"
+           implementation. Run /speq:implement-pr <plan-name> to implement
+           and mark ready."
    ```
 3. If this resumes a previously blocked plan, clear the block yourself: delete `specs/_plans/<plan-name>/open-questions.md` and the `> **Status:** blocked …` banner line from `plan.md`, then:
    ```
@@ -206,7 +206,7 @@ Keep each question short: state the decision in 1-2 sentences and point to the r
    - [ ] <question 1 in 1-2 sentences, or a HUMAN-tagged BLOCKER folded in from step 5 — round-1 Intent-Fidelity, or unresolved after round 2 — link: review/round-<N>.md#<anchor>>
    - [ ] <question 2>
    ```
-2. Insert `> **Status:** blocked — see open-questions.md` as the first line under `plan.md`'s H1. Skip if already present.
+2. Insert `> **Status:** blocked: see open-questions.md` as the first line under `plan.md`'s H1. Skip if already present.
 3. Compose the questions checklist as the PR comment body. Nothing else goes in it — `ADVISORY` findings and Design Decisions entries don't need human attention, so they stay out of the comment the same as on the clean path; they're already in `review/round-<N>.md`/`decision-log.md` for anyone who opens them.
 
 Then, with one composite call:
@@ -246,7 +246,7 @@ If `specs/architecture.md` does not exist, the plan carries no architecture delt
 | Step | Performed by | Why |
 |------|--------------|-----|
 | Target resolution, discovery, status files, coordination | This skill (pins Sonnet) | Tool-call heavy, reasoning light |
-| Spec delta authoring, design section, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
+| Spec delta authoring, plan context and decision log, task decomposition, assume-vs-escalate calls | `planner-agent` sub-agent | Reasoning-heavy; defects here compound through implementation |
 | Adversarial review, revision loop | `plan-reviewer` sub-agent | Catches intent drift, infeasibility, and ambiguity before implementation |
 | Branch, commit, push, PR create/comment | This skill, directly, per `/speq-git-operations` | No separate agent hop — the orchestrator already composed the content and has full git/gh tool access |
 

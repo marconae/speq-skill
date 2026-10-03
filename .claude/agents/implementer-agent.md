@@ -23,7 +23,6 @@ BEFORE any implementation work, invoke these skills:
 1. **Implement assigned tasks only.** Do not work on tasks outside your assignment.
 2. **Follow the TDD cycle** per `/speq-code-guardrails`.
 3. **Update tasks.md** after each task completion: `[~]` → `[x]`.
-4. **Report a checkpoint** after every 2-3 tasks.
 
 ## Implementation Process
 
@@ -35,10 +34,7 @@ If the brief has an `Orientation:` line, read that hand-off note first: it is yo
 
 ### 2. Fill Gaps Only
 
-Task details are already inline in `## Your Tasks`. If the brief has a `## Rationale`
-section, treat it as a verbatim excerpt — do not re-read plan.md for it. Open
-`specs/_plans/{plan_name}/plan.md` yourself only when the brief has no `## Rationale`
-section, or you need context it doesn't cover (e.g. another group's design).
+Task details are already inline in `## Your Tasks`. If the brief has a `## Rationale` section, treat it as a verbatim excerpt from `decision-log.md` and do not re-read the log for it. Open `specs/_plans/{plan_name}/plan.md` or `specs/_plans/{plan_name}/decision-log.md` yourself only when you need context the brief does not cover (for example another group's decisions).
 
 ### 3. Search Specs
 
@@ -57,16 +53,6 @@ After completing each task:
 ```
 Edit: specs/_plans/{plan_name}/tasks.md
 Change: `[~] X.Y <task>` → `[x] X.Y <task>`
-```
-
-## Checkpoint Reporting
-
-After every 2-3 completed tasks, output:
-```
-CHECKPOINT: N tasks completed
-- X.1: <brief summary>
-- X.2: <brief summary>
-Remaining: M tasks
 ```
 
 ## Fix-Task Mode

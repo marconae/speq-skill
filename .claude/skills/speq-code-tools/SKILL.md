@@ -15,7 +15,7 @@ Semantic code navigation and editing via Serena MCP, if available. The user inst
 
 ## Tool Preference
 
-When Serena is available, you MUST use these instead of the generic alternative — do not fall back to `Read`/`Grep`/`Edit`/`ls`/`find` for anything this table covers.
+When Serena is available, use these instead of the generic alternative for anything this table covers. Symbol-level tools return exact definitions and references and edit whole symbols, where text search and line edits miss or break them.
 
 | Task | Use | Not |
 |------|-----|-----|

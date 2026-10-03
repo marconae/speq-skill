@@ -10,7 +10,6 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 - **BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN; integration tests by default, unit tests only for isolated pure computation
 - **EARS syntax**: spec narratives use unambiguous behavioral clauses
 - **RFC 2119 keywords**: THEN steps use MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY (uppercase)
-- **Nygard-style design section**: the `plan.md` design section captures Goals / Non-Goals / Patterns / Trade-offs / Key Interfaces. Structural architecture changes go in the architecture delta, not in this section. It is not an ADR (see `/speq-adr-rules`)
 
 ## Workflow
 
@@ -66,12 +65,11 @@ Every scenario requires two forms of external proof. No claims, only evidence.
 
 Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
-1. **Context**: why the change is being made
+1. **Context**: a bullet list of the problem and the forces behind this change, one fact per bullet. Required for new features and major changes; skip it for minor fixes. It holds no decisions: those go in `decision-log.md` (step 5). Do not restate components, boundaries, or data flow here. Point to the architecture delta instead
 2. **Features**: table referencing spec delta files (NEVER embed spec content), immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
-3. **Design**: a design section for new features and major changes; skip it for minor fixes. It records HOW this plan builds the change. It is not an ADR. State patterns and local interfaces only. Do not restate components, boundaries, or data flow here. Point to the architecture delta instead. For a new abstraction or module boundary, justify it against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
-4. **Tasks**: work breakdown in implementation order
-5. **Parallelization**: knowledge clusters, per the rules below
-6. **Verification**: Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
+3. **Tasks**: work breakdown in implementation order
+4. **Parallelization**: knowledge clusters, per the rules below
+5. **Verification**: Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
 
 **Parallelization groups are knowledge clusters.** Group tasks vertically: one spec delta plus the code area it governs. Never group by layer. Layer slices (fixtures, then module, then CLI, then tests) make each layer's agent re-derive the same mental model; a vertical slice orients one agent once. Each group row declares a `Knowledge` column: the group's spec delta path(s) plus the source and test files they govern. The implement orchestrator hands this entry to the group's agent as its orientation pointer. Two facts govern the grouping:
 
@@ -86,7 +84,7 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `reference
 
 **What to capture:**
 - **Interview section**: verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
-- **Design Decisions section**: one entry per significant choice made while authoring spec deltas or plan.md (architecture patterns, rejected alternatives, scope boundaries)
+- **Design Decisions section**: one entry per significant choice made while authoring spec deltas or plan.md (how this plan builds the change, patterns and local interfaces, rejected alternatives, scope boundaries). For a new abstraction or module boundary, justify it in the entry's Rationale against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 - **Architecture field**: an entry with `Promotes to ADR: yes` whose Rationale names `/speq-adr-rules` rule-2 criterion 1, 2, or 3 needs an `- **Architecture:** <§ Section[, § Section] | no change: <reason>>` line. Every named section needs a block in the architecture delta
 - **Review Findings section**: leave empty; populated in Revision Mode after `plan-reviewer` blockers, and by `speq-implement` after code review
 
@@ -102,7 +100,7 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `reference
 
 A `[plan-review]`-prefixed entry (Revision Mode, below) records a mistake this plan made and then corrected. Apply the same gate. It almost always stays `no`.
 
-### 6. Expert-Task Tagging (CRITICAL)
+### 6. Expert-Task Tagging
 
 Tag tasks that require deep reasoning with `[expert]` at the end of the task line:
 
@@ -152,13 +150,11 @@ A revision-mode respawn (below) reads this note first, before it re-reads `plan.
 
 This note stays out of every commit. It is local scratch, never evidence.
 
-This is a hypothesis-driven fix for the revision loop's cold-context re-exploration cost. It is not a confirmed root-cause fix. Confirming it needs a re-measured token and cache volume on a real consuming project, after this ships.
-
 ### 9. Pre-Return Self-Check
 
 Before you return to the orchestrator, run this checklist once against your own `plan.md`, `decision-log.md`, and spec deltas. Answer each line against the artifacts on disk, not from memory. Fix anything that answers "no" before you return.
 
-This is prevention, not the review gate. `plan-reviewer` still runs next, full-strength, unchanged. This step only lowers how often it finds something. Its effect is checkable over time: compare round-1 BLOCKER counts before and after this step ships. The orchestrator's step-7 report already states that count.
+This is prevention, not the review gate. `plan-reviewer` still runs next at full strength.
 
 Check your artifacts do not trip `/speq-plan-review`'s finding tags, across its five non-Prose axes (Prose stays `/speq-writing-guardrails`'s job):
 

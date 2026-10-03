@@ -23,7 +23,7 @@ ADR candidates: <none | titles of the `Promotes to ADR: yes` entries>
 Architecture: <none | none (specs/architecture.md absent) | § Components (changed), § Deployment (new)>
 
 <details>
-<summary>Full detail — spec, decisions, test evidence</summary>
+<summary>Full detail: spec, decisions, test evidence</summary>
 
 `plan.md` · `architecture.md` · `decision-log.md` · `review/round-*.md`
 
@@ -64,24 +64,24 @@ After, per this template (the one thing a user needs to know — their old sessi
 Session state (buffer lines and defined variables) is saved as JSON to `~/.crabculator/state.json`, via `serde`.
 
 ## What Changes
-State now saves as plain text to `~/.crabculator/state.txt`, one buffer line per file line. Variables are no longer persisted — they're recomputed by evaluating the buffer on load.
+State now saves as plain text to `~/.crabculator/state.txt`, one buffer line per file line. Variables are no longer persisted. They are recomputed by evaluating the buffer on load.
 - Drops the `serde`/`serde_json` dependency entirely
 - New file name and format; the old file is never read again, not migrated
 
 ## Impact
-Breaking change for anyone with an existing `state.json`: on first launch after this change, their saved buffer and variables are silently gone — no error, no migration, the app just starts empty.
+Breaking change for anyone with an existing `state.json`: on first launch after this change, their saved buffer and variables are gone. The app starts empty, with no error and no migration.
 - A variable's *saved value* does not survive; only the expression that computed it does, and only if that expression is still in the buffer
 - No corruption risk: the old `state.json` is simply never looked at again, not misread as plain text
 
 <details>
-<summary>Full detail — spec, decisions, test evidence</summary>
+<summary>Full detail: spec, decisions, test evidence</summary>
 
 `plan.md` · `decision-log.md` · `review/round-1.md`
 
 </details>
 
 Test plan
-- [x] `test_save_state_saves_buffer_lines`, `test_state_persistence_special_characters` — new format round-trips correctly
-- [x] `state_file_ends_with_state_txt` — path/filename updated everywhere
+- [x] `test_save_state_saves_buffer_lines`, `test_state_persistence_special_characters`: new format round-trips correctly
+- [x] `state_file_ends_with_state_txt`: path/filename updated everywhere
 - [ ] Manual check: upgrading over an existing `state.json` starts with an empty buffer, no crash (pending)
 ```

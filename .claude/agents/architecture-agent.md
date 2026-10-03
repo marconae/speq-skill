@@ -50,7 +50,7 @@ From the orchestrator, as paths and no pasted content:
 
 ## Output Format
 
-Return at most 30 lines:
+Return only this summary. The draft and the evidence stay in their files:
 
 ```
 Architecture draft: <draft path> · <N> components · <C> conflicts · <Q> questions · structure ✓
