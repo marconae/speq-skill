@@ -6,7 +6,7 @@ The validator SHALL ensure that scenario steps use RFC 2119 keywords to express 
 
 * RFC 2119 defines keywords: MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY
 * Keywords MUST appear in uppercase
-* THEN steps, and AND steps that follow a THEN step, MUST contain at least one RFC 2119 keyword
+* THEN steps, and AND steps that follow a THEN step, MUST contain at least one RFC 2119 keyword outside inline code spans
 
 ## Scenarios
 
@@ -53,3 +53,9 @@ The validator SHALL ensure that scenario steps use RFC 2119 keywords to express 
 * *WHEN* the validator checks the step for RFC 2119 compliance
 * *THEN* the system SHALL NOT treat partial word matches as RFC 2119 keywords
 * *AND* the system SHALL accept the step as valid because it contains "SHALL"
+
+### Scenario: Keyword inside inline code is not normative
+
+* *GIVEN* a THEN step whose only RFC 2119 keyword appears inside an inline code span
+* *WHEN* the validator checks the step for RFC 2119 compliance
+* *THEN* the system SHALL report an error indicating the step is missing a normative keyword

@@ -145,4 +145,17 @@ mod rfc_keywords {
             .success()
             .stdout(predicate::str::contains("0 warnings"));
     }
+
+    #[test]
+    fn no_warning_for_lowercase_keyword_inside_inline_code() {
+        let tmp = TempDir::new().unwrap();
+        setup_fixture(&tmp, "lowercase-in-code-span");
+
+        cmd()
+            .current_dir(tmp.path())
+            .args(["feature", "validate", "test/feature"])
+            .assert()
+            .success()
+            .stdout(predicate::str::contains("0 errors, 0 warnings"));
+    }
 }

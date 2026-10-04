@@ -62,7 +62,6 @@
 
 - Run `speq search query "<terms>"`, then `speq feature get <domain>/<feature>`
 - After you change a spec, run `speq feature validate`
-- Agents do the same
 
 ## How do I check that the library is healthy?
 

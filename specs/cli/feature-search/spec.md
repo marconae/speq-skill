@@ -51,9 +51,9 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 
 * *GIVEN* no search index exists for the project
 * *WHEN* the user runs `speq search query "validation"`
-* *THEN* the system SHALL automatically build the search index
-* *AND* the system SHALL execute the search query
-* *AND* the system SHALL display results if any match
+* *THEN* the system SHALL print the notice `Info: no search index found. Building it now, this may take a while.` to stderr
+* *AND* the system SHALL automatically build the search index and execute the search query
+* *AND* the system SHALL print the results to stdout without the notice
 * *AND* the system SHALL exit with code 0
 
 ### Scenario: No matches found
@@ -97,4 +97,18 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * *WHEN* the user runs `speq search query "validation"`
 * *THEN* the system SHALL execute the search query using the pure-Rust inference path
 * *AND* the system MUST NOT require, load, or dynamically link an ONNX Runtime library
+* *AND* the system SHALL exit with code 0
+
+### Scenario: Index inline code in scenario text
+
+* *GIVEN* a scenario whose name and steps contain inline code spans
+* *WHEN* the user runs `speq search index`
+* *THEN* the indexed text of that scenario SHALL contain each inline code span wrapped in backticks
+
+### Scenario: Existing index prints no build notice
+
+* *GIVEN* a search index exists for the project
+* *WHEN* the user runs `speq search query "validation"`
+* *THEN* the system MUST NOT print the `Info: no search index found.` notice
+* *AND* the system SHALL execute the search query against the existing index
 * *AND* the system SHALL exit with code 0

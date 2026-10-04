@@ -24,11 +24,10 @@ pub fn validate(spec: &FeatureSpec) -> ValidationResult {
 }
 
 fn validate_document_structure(spec: &FeatureSpec, result: &mut ValidationResult) {
-    if spec.description.is_none()
-        || spec
-            .description
-            .as_ref()
-            .is_some_and(|d| d.trim().is_empty())
+    if spec
+        .description_signal
+        .as_ref()
+        .is_none_or(|d| d.trim().is_empty())
     {
         result.add_error(ValidationError::MissingFeatureDescription);
     }
@@ -84,10 +83,10 @@ fn validate_scenario(scenario: &Scenario, result: &mut ValidationResult) {
         match step.kind {
             StepKind::Then => {
                 in_then_section = true;
-                check_rfc2119_in_step(&step.text, &scenario.name, result);
+                check_rfc2119_in_step(&step.normative_text, &scenario.name, result);
             }
             StepKind::And if in_then_section => {
-                check_rfc2119_in_step(&step.text, &scenario.name, result);
+                check_rfc2119_in_step(&step.normative_text, &scenario.name, result);
             }
             StepKind::Given | StepKind::When => {
                 in_then_section = false;
@@ -201,29 +200,29 @@ mod tests {
     use super::*;
     use crate::validate::parser::Step;
 
+    fn step(kind: StepKind, text: &str) -> Step {
+        Step {
+            kind,
+            display_text: text.to_string(),
+            normative_text: text.to_string(),
+        }
+    }
+
     fn valid_spec() -> FeatureSpec {
         FeatureSpec {
             feature_name: Some("Test".to_string()),
-            description: Some("Description".to_string()),
+            description_signal: Some("Description".to_string()),
             has_background: true,
             has_scenarios_section: true,
             scenarios: vec![Scenario {
                 name: "Test scenario".to_string(),
                 steps: vec![
-                    Step {
-                        kind: StepKind::Given,
-                        text: "a precondition".to_string(),
-                    },
-                    Step {
-                        kind: StepKind::When,
-                        text: "an action".to_string(),
-                    },
-                    Step {
-                        kind: StepKind::Then,
-                        text: "the system SHALL respond".to_string(),
-                    },
+                    step(StepKind::Given, "a precondition"),
+                    step(StepKind::When, "an action"),
+                    step(StepKind::Then, "the system SHALL respond"),
                 ],
             }],
+            ..FeatureSpec::default()
         }
     }
 
@@ -238,7 +237,20 @@ mod tests {
     #[test]
     fn error_when_missing_description() {
         let mut spec = valid_spec();
-        spec.description = None;
+        spec.description_signal = None;
+        let result = validate(&spec);
+        assert!(
+            result
+                .errors
+                .contains(&ValidationError::MissingFeatureDescription)
+        );
+    }
+
+    #[test]
+    fn display_description_does_not_satisfy_description_check() {
+        let mut spec = valid_spec();
+        spec.description = Some("* a description written as a list".to_string());
+        spec.description_signal = None;
         let result = validate(&spec);
         assert!(
             result
@@ -250,7 +262,7 @@ mod tests {
     #[test]
     fn error_when_empty_description() {
         let mut spec = valid_spec();
-        spec.description = Some("   ".to_string());
+        spec.description_signal = Some("   ".to_string());
         let result = validate(&spec);
         assert!(
             result
@@ -329,7 +341,7 @@ mod tests {
     #[test]
     fn error_when_then_step_missing_rfc2119_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "something happens".to_string();
+        spec.scenarios[0].steps[2].normative_text = "something happens".to_string();
         let result = validate(&spec);
         assert!(
             result
@@ -342,7 +354,7 @@ mod tests {
     #[test]
     fn accepts_must_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "the system MUST respond".to_string();
+        spec.scenarios[0].steps[2].normative_text = "the system MUST respond".to_string();
         let result = validate(&spec);
         assert!(
             !result
@@ -355,7 +367,7 @@ mod tests {
     #[test]
     fn accepts_should_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "the system SHOULD respond".to_string();
+        spec.scenarios[0].steps[2].normative_text = "the system SHOULD respond".to_string();
         let result = validate(&spec);
         assert!(
             !result
@@ -368,7 +380,7 @@ mod tests {
     #[test]
     fn accepts_may_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "the system MAY respond".to_string();
+        spec.scenarios[0].steps[2].normative_text = "the system MAY respond".to_string();
         let result = validate(&spec);
         assert!(
             !result
@@ -381,7 +393,7 @@ mod tests {
     #[test]
     fn warns_on_lowercase_rfc_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "the system shall respond".to_string();
+        spec.scenarios[0].steps[2].normative_text = "the system shall respond".to_string();
         let result = validate(&spec);
         // Should be a warning, not an error
         assert!(result.is_success());
@@ -394,7 +406,7 @@ mod tests {
     #[test]
     fn warns_on_lowercase_must_keyword() {
         let mut spec = valid_spec();
-        spec.scenarios[0].steps[2].text = "the system must respond".to_string();
+        spec.scenarios[0].steps[2].normative_text = "the system must respond".to_string();
         let result = validate(&spec);
         assert!(result.is_success());
         assert!(result.warnings.iter().any(|w| matches!(
@@ -420,10 +432,10 @@ mod tests {
     fn warning_when_more_than_three_and_steps() {
         let mut spec = valid_spec();
         for i in 0..4 {
-            spec.scenarios[0].steps.push(Step {
-                kind: StepKind::And,
-                text: format!("the system SHALL do thing {i}"),
-            });
+            spec.scenarios[0].steps.push(step(
+                StepKind::And,
+                &format!("the system SHALL do thing {i}"),
+            ));
         }
         let result = validate(&spec);
         assert!(result.warnings.iter().any(|w| matches!(
@@ -436,10 +448,10 @@ mod tests {
     fn no_warning_when_three_or_fewer_and_steps() {
         let mut spec = valid_spec();
         for i in 0..3 {
-            spec.scenarios[0].steps.push(Step {
-                kind: StepKind::And,
-                text: format!("the system SHALL do thing {i}"),
-            });
+            spec.scenarios[0].steps.push(step(
+                StepKind::And,
+                &format!("the system SHALL do thing {i}"),
+            ));
         }
         let result = validate(&spec);
         assert!(result.warnings.is_empty());
@@ -487,5 +499,33 @@ mod tests {
             !contains_rfc2119_keyword("MUSTard is good"),
             "should not match MUST inside MUSTard"
         );
+    }
+
+    #[test]
+    fn keyword_only_in_display_text_does_not_satisfy_rfc2119_check() {
+        let mut spec = valid_spec();
+        spec.scenarios[0].steps[2] = Step {
+            kind: StepKind::Then,
+            display_text: "the output contains `SHALL`".to_string(),
+            normative_text: "the output contains".to_string(),
+        };
+        let result = validate(&spec);
+        assert!(result.errors.iter().any(|e| matches!(
+            e,
+            ValidationError::StepMissingRfc2119Keyword { step, .. } if step == "the output contains"
+        )));
+    }
+
+    #[test]
+    fn lowercase_keyword_only_in_display_text_raises_no_warning() {
+        let mut spec = valid_spec();
+        spec.scenarios[0].steps[2] = Step {
+            kind: StepKind::Then,
+            display_text: "the system SHALL create `must_exist.txt`".to_string(),
+            normative_text: "the system SHALL create".to_string(),
+        };
+        let result = validate(&spec);
+        assert!(result.is_success());
+        assert!(result.warnings.is_empty());
     }
 }

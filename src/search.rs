@@ -133,7 +133,7 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
                     let steps_text: String = scenario
                         .steps
                         .iter()
-                        .map(|s| format!("{:?} {}", s.kind, s.text))
+                        .map(|s| format!("{:?} {}", s.kind, s.display_text))
                         .collect::<Vec<_>>()
                         .join("\n");
 
@@ -203,11 +203,20 @@ pub fn index_specs(base: &Path) -> Result<usize, String> {
     Ok(count)
 }
 
-/// Search for scenarios matching a query
-pub fn search_specs(query: &str, limit: usize) -> Result<Vec<SearchResult>, String> {
+/// Search for scenarios matching a query.
+///
+/// When the project has no index file, this builds it first. `on_build` runs
+/// once, right before that automatic build, and never when an index exists, so
+/// the caller decides how to tell the user about the wait.
+pub fn search_specs(
+    query: &str,
+    limit: usize,
+    on_build: impl FnOnce(),
+) -> Result<Vec<SearchResult>, String> {
     // Load the index, auto-building if missing
     let index_path = get_index_path();
     if !index_path.exists() {
+        on_build();
         let base = Path::new("specs");
         index_specs(base)?;
     }

@@ -78,17 +78,17 @@ $ speq feature list
 
 ### `speq feature get`
 
-This command prints a full feature spec. If you append a scenario name to the path, the command prints only that scenario. If the scenario name contains spaces, quote the path.
+This command prints a full feature spec: the description, the Background, and the scenarios. If you append a scenario name to the path, the command prints only that scenario. Single-quote a scenario path. In double quotes, the shell runs the text between backticks as a command.
 
 ```bash
 speq feature get <domain>/<feature>
-speq feature get "<domain>/<feature>/<scenario-name>"
+speq feature get '<domain>/<feature>/<scenario-name>'
 ```
 
 **Example**
 ```bash
 $ speq feature get cli/feature-validate
-$ speq feature get "cli/feature-validate/Validate single feature"
+$ speq feature get 'cli/feature-validate/Validate single feature'
 ```
 
 ### `speq feature validate`
@@ -252,7 +252,7 @@ Indexed 42 scenarios.
 
 ### `speq search query`
 
-This command runs a semantic search across all scenarios.
+This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command prints an info notice on stderr, builds the index, and then prints the results on stdout.
 
 ```bash
 speq search query "<query>" [--limit <n>]

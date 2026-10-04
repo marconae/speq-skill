@@ -35,7 +35,10 @@ fn handle_search_command(command: cli::SearchCommands) -> ExitCode {
             }
         }
         cli::SearchCommands::Query { query, limit } => {
-            match search::search_specs(&query, limit) {
+            let announce_build = || {
+                eprintln!("Info: no search index found. Building it now, this may take a while.")
+            };
+            match search::search_specs(&query, limit, announce_build) {
                 Ok(results) => {
                     if results.is_empty() {
                         println!("No matches found.");
@@ -213,7 +216,7 @@ fn handle_feature_get(base: &std::path::Path, path: &str) -> ExitCode {
             println!("{}/{}/{}", domain, feature_name, scenario_name);
             println!();
             for step in &scenario.steps {
-                println!("  {:?} {}", step.kind, step.text);
+                println!("  {:?} {}", step.kind, step.display_text);
             }
             ExitCode::SUCCESS
         } else {
@@ -233,11 +236,17 @@ fn handle_feature_get(base: &std::path::Path, path: &str) -> ExitCode {
             println!("{}", desc);
             println!();
         }
+        if let Some(background) = &parsed.spec.background {
+            println!("## Background");
+            println!();
+            println!("{}", background);
+            println!();
+        }
         for scenario in &parsed.spec.scenarios {
             println!("### {}", scenario.name);
             println!();
             for step in &scenario.steps {
-                println!("  {:?} {}", step.kind, step.text);
+                println!("  {:?} {}", step.kind, step.display_text);
             }
             println!();
         }

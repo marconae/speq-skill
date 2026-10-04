@@ -510,6 +510,49 @@ mod search {
                 .exists()
         );
     }
+
+    #[test]
+    #[serial]
+    fn index_keeps_inline_code_in_scenario_text() {
+        ensure_model_cached();
+        let cache_dir = system_cache_dir();
+        let tmp = TempDir::new().unwrap();
+        let feature_dir = tmp.path().join("specs/demo/char-type");
+        fs::create_dir_all(&feature_dir).unwrap();
+        fs::copy(
+            "tests/fixtures/spec_text/specs/demo/char-type/spec.md",
+            feature_dir.join("spec.md"),
+        )
+        .unwrap();
+
+        cmd()
+            .current_dir(tmp.path())
+            .env("SPEQ_CACHE_DIR", &cache_dir)
+            .args(["search", "index"])
+            .assert()
+            .success();
+
+        let slug = tmp
+            .path()
+            .canonicalize()
+            .unwrap()
+            .to_string_lossy()
+            .replace('/', "-");
+        let index_path = Path::new(&cache_dir)
+            .join("indexes")
+            .join(format!("{slug}.idx"));
+        let bytes = fs::read(&index_path).unwrap();
+        fs::remove_file(&index_path).unwrap();
+        let index: speq_skill::search::SearchIndex = postcard::from_bytes(&bytes).unwrap();
+
+        let scenario = index
+            .scenarios
+            .iter()
+            .find(|s| s.scenario.starts_with("Pushdown of"))
+            .expect("the substr scenario is indexed");
+        assert!(scenario.content.contains("`CHAR(10)`"));
+        assert!(scenario.content.contains("`substr`"));
+    }
 }
 
 mod record {

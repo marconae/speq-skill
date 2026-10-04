@@ -6,7 +6,6 @@ The CLI SHALL provide a command to retrieve and display a feature specification 
 
 * Command syntax: `speq feature get <path>`
 * Path format: `<domain>/<feature>` for full spec, `<domain>/<feature>/<scenario>` for single scenario
-* Output is formatted text (not raw markdown)
 * Exit code 0 on success, 1 on error
 
 ## Scenarios
@@ -50,3 +49,45 @@ The CLI SHALL provide a command to retrieve and display a feature specification 
 * *WHEN* the user runs `speq feature get <domain>/<feature>/<scenario>`
 * *THEN* each step SHALL be prefixed with its keyword in title case (Given, When, Then, And)
 * *AND* steps SHALL be indented for readability
+
+### Scenario: Display the full feature description
+
+* *GIVEN* a feature spec whose description has two paragraphs under the feature heading
+* *AND* the Background section of that spec holds a paragraph
+* *WHEN* the user runs `speq feature get <domain>/<feature>`
+* *THEN* the system SHALL display both description paragraphs before the Background section
+* *AND* the system SHALL display the Background paragraph only inside the Background section
+
+### Scenario: Display the Background section
+
+* *GIVEN* a feature spec whose Background section holds a paragraph, a list item, and a nested list item
+* *WHEN* the user runs `speq feature get <domain>/<feature>`
+* *THEN* the system SHALL display a `## Background` heading after the description and before the first scenario
+* *AND* the system SHALL display the paragraph, the list item, and the nested list item exactly as they appear in the spec file
+
+### Scenario: Omit an empty Background section
+
+* *GIVEN* a feature spec whose `## Background` heading is followed directly by the `## Scenarios` heading
+* *WHEN* the user runs `speq feature get <domain>/<feature>`
+* *THEN* the system SHALL NOT display a `## Background` heading
+
+### Scenario: Display inline code in steps
+
+* *GIVEN* a scenario step whose text contains the inline code span `CHAR(10)`
+* *WHEN* the user runs `speq feature get <domain>/<feature>/<scenario>`
+* *THEN* the system SHALL display `CHAR(10)` in the step text, wrapped in backticks
+
+### Scenario: Display inline code in feature and scenario names
+
+* *GIVEN* a feature heading that contains the inline code span `CHAR`
+* *AND* a scenario heading whose name ends with the inline code span `substr`
+* *WHEN* the user runs `speq feature get <domain>/<feature>`
+* *THEN* the system SHALL display the feature name with `CHAR` wrapped in backticks
+* *AND* the system SHALL display the scenario name with `substr` wrapped in backticks
+
+### Scenario: Get a scenario whose name contains inline code
+
+* *GIVEN* a scenario heading whose name ends with the inline code span `substr`
+* *WHEN* the user runs `speq feature get <domain>/<feature>/<scenario>` with the scenario name written as in the heading, where each inline code span uses single backticks
+* *THEN* the system SHALL display that scenario
+* *AND* the system SHALL exit with code 0

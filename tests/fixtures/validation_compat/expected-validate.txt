@@ -1,0 +1,12 @@
+✓ compat/background-heading-with-code (0 errors, 0 warnings)
+✓ compat/background-only-prose (0 errors, 0 warnings)
+✗ compat/code-only-description (1 errors, 0 warnings)
+    ERROR: Missing feature description
+✓ compat/empty-background (0 errors, 0 warnings)
+✗ compat/keyword-in-code-span (1 errors, 0 warnings)
+    ERROR: Step in scenario 'Keyword only in code' is missing RFC 2119 keyword: the output contains
+✗ compat/list-only-description (1 errors, 0 warnings)
+    ERROR: Missing feature description
+✗ compat/then-wrapped-after-keyword (1 errors, 0 warnings)
+    ERROR: Step in scenario 'Wrapped step' is missing RFC 2119 keyword: the system SHALLrespond to the request
+✓ compat/uppercase-keyword-with-code-spans (0 errors, 0 warnings)
