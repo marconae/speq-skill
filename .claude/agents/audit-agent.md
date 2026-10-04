@@ -23,10 +23,10 @@ From the orchestrator: the mission path (`specs/mission.md`) and instruction to 
 
 1. Read `specs/mission.md`: `## Core Capabilities` and `## Domain Glossary`. Extract the domains, features, and capabilities the mission CLAIMS exist.
 2. Build the live inventory: `speq domain list` and `speq feature list`.
-3. Diff the two. Before you declare a mismatch, bridge naming differences with `speq search query "<capability>"`: a differently-named feature can back a capability.
+3. Diff the two. Before you declare a mismatch, bridge naming differences with `/speq-cli`'s absence check for the capability's terms: a differently-named feature can back a capability.
 4. Produce two lists:
    - **Unmentioned in mission**: real domains/features with no corresponding capability or glossary entry.
-   - **Unbacked capabilities**: mission capabilities with no backing spec (no feature, and `speq search` finds no scenario).
+   - **Unbacked capabilities**: mission capabilities with no backing spec (no feature, and `/speq-cli`'s absence check finds nothing).
 
 ## Output Format
 
@@ -48,5 +48,5 @@ Unbacked capabilities:
 
 - READ-ONLY. Do NOT edit `mission.md`, specs, or any file. `/speq-mission` owns `mission.md`.
 - Do NOT author replacement mission content. Return findings only.
-- Match on meaning, not exact strings. Use `speq search` before flagging a mismatch. Never flag on a naming difference alone.
+- Match on meaning, not exact strings. Run `/speq-cli`'s absence check before flagging a mismatch. Never flag on a naming difference alone.
 - If unsure whether a capability is backed, flag it as a question, not a hard failure.

@@ -52,7 +52,7 @@ Use these for gaps the `Knowledge:` entry does not cover:
 
 ```bash
 speq search query "<relevant terms>"
-speq feature get "<domain>/<feature>/<scenario>"
+speq feature get '<domain>/<feature>/<scenario>'
 ```
 
 ### 4. TDD Cycle

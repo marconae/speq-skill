@@ -9,7 +9,7 @@
 3. `Fix:` is an imperative instruction addressed to `planner-agent` — name the artifact, section, and concrete change. It must be executable without re-reading `Issue`.
 4. The Summary block carries four counts: total blockers, total advisories, `Intent Fidelity blockers`, and `Human-escalation blockers` — the number of BLOCKER findings tagged `Escalation: HUMAN` (Intent Fidelity blockers included). The verdict line's `INTENT:` and `HUMAN:` fields are the third and fourth counts; both must match the Summary exactly.
 5. Round 2 only: open with `## Round-1 Blocker Recheck`, listing each round-1 BLOCKER as `Resolved:` or `Not resolved:` (with evidence) before any new findings. A `Not resolved:` entry restates that finding's `Escalation:` and `Fix:` verbatim from round 1 (refined only if round 2 learned something that changes the concrete instruction) — round-2.md must be self-sufficient for the orchestrator and `planner-agent`; neither re-reads round-1.md for this.
-6. Confirm-only round 2 (orchestrator passed `Plan Size: small`): the document holds only `## Summary` and `## Round-1 Blocker Recheck`. Omit every axis section. The verdict's `ADVISORY:` count is always `0` for this document. The orchestrator reads round 1's advisories from `review/round-1.md` instead, since this round ran no fresh pass that could surface or supersede them. The Summary still carries `Human-escalation blockers not resolved:`, matching the verdict's `HUMAN:` field.
+6. Confirm-only round 2 (orchestrator passed `Plan Size: small`): the document holds only `## Summary` and `## Round-1 Blocker Recheck`. Omit every axis section. The Summary still carries `Human-escalation blockers not resolved:`, matching the verdict's `HUMAN:` field.
 
 ## Skeleton
 
@@ -69,14 +69,6 @@
 - Not resolved: [<TAG>] <finding title> — <evidence>
   - Escalation: <HUMAN|MECHANICAL>   <!-- carried from round 1 -->
   - Fix: <imperative instruction to planner-agent>   <!-- carried from round 1 -->
-```
-
-## Verdict Line
-
-After writing the document, return exactly one line and nothing else:
-
-```
-PLAN REVIEW round <N>: BLOCKERS: <n>, ADVISORY: <n>, INTENT: <n>, HUMAN: <n> — specs/_plans/<plan-name>/review/round-<N>.md
 ```
 
 ## Example

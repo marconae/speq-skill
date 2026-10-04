@@ -98,8 +98,4 @@ The split preserves rotation discipline: the orchestrator can respawn the sub-ag
 | Pattern | Why Wrong |
 |---------|-----------|
 | Record without verification report | Implementation not proven |
-| Orchestrator merges directly | Breaks rotation / context discipline |
-| Assume split/domain decisions | User must confirm |
-| Skip validation | Broken specs may result |
-| Leave DELTA markers | Pollutes permanent specs |
 | Archive after an architecture delta failure | The delta was not merged, so the plan must stay open |

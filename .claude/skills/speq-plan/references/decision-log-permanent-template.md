@@ -2,24 +2,10 @@
 
 <!-- One fragment per plan. Add one ## ADR block per promoted decision below. Rules: /speq-adr-rules. -->
 <!-- ID is a kebab-case slug, unique across every file in specs/_decision. -->
+<!-- Minimum text, no history, per /speq-adr-rules rule 7a. -->
 <!-- Supersedes is optional — set it only when this ADR replaces an earlier one. -->
 
-<!--
-Two shapes. Never infer either optional section from the entry's prose — emit each
-only from what the plan-level decision-log.md entry actually carries:
-
-- Full form: both optional sections present.
-  - ### Options Considered ⇐ the entry's Alternatives names a real rejected option
-    (not `none` and not empty).
-  - ### Consequences ⇐ the entry carries a Consequences line.
-- Short form: field block + ### Context + ### Decision, nothing else.
-  - Applies when the entry's Alternatives is empty/`none` AND the entry carries no
-    Consequences line. Omit both ### Options Considered and ### Consequences entirely
-    — do not emit empty or placeholder sections.
-
-The two triggers are independent: an entry can have Options Considered without
-Consequences, or the reverse.
--->
+<!-- Optional sections follow /speq-spec-merge's ADR mapping. Omit a section the entry does not carry. -->
 
 ## ADR: <Title>
 
@@ -30,11 +16,11 @@ Consequences, or the reverse.
 
 ### Context
 
-What problem or situation prompted this decision.
+<One or two sentences: the situation that forces the decision. Present tense, no history.>
 
 ### Decision
 
-The chosen approach.
+<One to three sentences: the chosen approach.>
 
 ### Options Considered
 
@@ -49,22 +35,4 @@ The chosen approach.
 
 <!-- Optional — include only when the entry carries a Consequences line. -->
 
-What becomes easier or harder as a result.
-
-<!--
-Short-form example (Alternatives: none, no Consequences line):
-
-## ADR: <Title>
-
-**ID:** <kebab-case-slug>
-**Plan:** <plan-name>
-**Status:** Accepted
-
-### Context
-
-What problem or situation prompted this decision.
-
-### Decision
-
-The chosen approach.
--->
+<Short bullets: what becomes easier or harder.>

@@ -45,10 +45,6 @@ git diff     # Review actual changes
 - `specs/_recorded/` is gitignored by default. This is a default, not an enforced rule: a project can track `_recorded/`, and the archived plan then lands in history a second time.
 - `/speq-audit`'s gitignore-hygiene checks default to this split (`_plans`/`_decision` tracked, `_recorded` ignored). They only offer to align a drifted project, never force it.
 
-## Security
-
-Never commit secrets (API keys, passwords, credentials, tokens).
-
 ## Commit Conventions
 
 Use Conventional Commits. This project also uses the type `spec` for spec changes.

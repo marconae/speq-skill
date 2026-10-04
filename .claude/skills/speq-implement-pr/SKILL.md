@@ -61,7 +61,7 @@ Run — operation: create-branch (per /speq-git-operations)
 
 ### 2. Checkpoint Dispatch (orchestrator)
 
-Read the checkpoint and enter at the phase the entry-dispatch table in `references/checkpoint-protocol.md` selects. When the table calls for it, pre-create `specs/_plans/<plan-name>/tasks.md` with only the H1 and the `## PR Lifecycle` section, and mark `[x] resolved`. The dispatch decides where execution enters, not where it stops: from the entry phase, run each remaining phase in order in this same session. If dispatch finds marks already set (a prior run was cut off), report which marks are `[x]` and which phase this run resumes into, then continue normally.
+Read the checkpoint and enter at the phase the entry-dispatch table in `references/checkpoint-protocol.md` selects, pre-creating `specs/_plans/<plan-name>/tasks.md` (only the H1 and the `## PR Lifecycle` section, with `[x] resolved`) when the table says so. Then run every remaining phase in this session.
 
 ### Phase A: Implement + Commit
 
@@ -126,7 +126,7 @@ Run — operation: ship-ready (per /speq-git-operations)
 
 `ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready.
 
-**C2. Comment**: post the verification summary per `references/implementation-summary-template.md`, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose it per `/speq-writing-guardrails` before calling `comment-pr`:
+**C2. Comment**: post the verification summary, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose it per `/speq-writing-guardrails` before calling `comment-pr`:
 
 ```
 Run — operation: comment-pr (per /speq-git-operations)
@@ -166,12 +166,6 @@ specs/
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Treating `## PR Lifecycle` entries as work items | They are checkpoints; they are unnumbered exactly so task dispatch skips them |
-| Letting a sub-agent write lifecycle marks | Marks are orchestrator-written, except `recorded` (recorder-agent, per the writer table) |
 | Proceeding past a non-empty open-questions.md | The human-in-the-loop gate lives at A1 |
-| Continuing to Phase C after `Recording failed` | The merge did not happen. Stop with `Blocked: record failed: <reason>` and leave `recorded` as `[ ]` |
-| Recording with any suite red | `/speq-record` runs only on fully green suites |
 | Skipping the A4 commit | Evidence artifacts silently never reach git history once `/speq-record`'s archive `mv` moves them out of tracked space |
-| Re-entering `/speq-implement` on the red path | The red path re-runs suites only; new implementation work is an explicit, separate invocation |
-| Spawning a sub-agent for git/gh work | No agent hop needed — you already have direct tool access and composed the content; a spawn only adds latency |
 | Merging the PR | The pipeline ends at a ready PR; a human merges |

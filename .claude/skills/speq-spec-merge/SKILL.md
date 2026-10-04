@@ -59,7 +59,7 @@ The optional file `specs/_plans/<plan-name>/architecture.md` changes `specs/arch
    - Otherwise check: the H1 is `# Architecture Delta: <plan-name>`, DELTA markers are balanced, each block's first non-empty line is `## <Section>` and is its only `##` line, no two blocks share an anchor, and only legal kinds are used (NEW and REMOVED on non-canonical sections only).
    - Check that `specs/architecture.md` exists, that each CHANGED and REMOVED anchor exists in it, and that no NEW anchor exists in it.
    - Check the line rules: outside blocks only the H1, the BASE comment, and blank lines. Inside blocks only `- ` bullets, fenced blocks, and blank lines. No `###`, no tables, no prose paragraphs.
-2. **Base check.** Run `git hash-object specs/architecture.md` and compare it with the BASE comment. If they match, continue. If they differ, run `git cat-file -p <BASE>` and compare each CHANGED and REMOVED section with the same section in the current file. A differing section, or a missing blob, stops the record with a stale-base error. Both commands are read-only and fit `/speq-git-discipline`.
+2. **Base check.** Run `git hash-object specs/architecture.md` and compare it with the BASE comment. If they match, continue. If they differ, run `git cat-file -p <BASE>` and compare each CHANGED and REMOVED section with the same section in the current file. A differing section, or a missing blob, stops the record with a stale-base error. Both commands are read-only and fit `/speq-git-discipline`. A stale BASE would overwrite another plan's changes.
 3. **Feature merges.** Run "Apply Deltas" as usual.
 4. **Merge.** Build the merged text in memory. CHANGED replaces the heading and body up to the next `##`, and any line the block omits is deleted. NEW appends the section at the end. REMOVED deletes the section. Strip all DELTA markers. Write the file once.
 5. **Post-check.** The H1 is `# Architecture`. The six canonical sections appear once each, in order. No `##` heading is duplicated. No DELTA text is left. The line rules hold. On failure, restore the original text, report the failure, and do not archive.
@@ -93,8 +93,8 @@ For each entry where `Promotes to ADR: yes`:
    - **Plan** — `<plan-name>`
    - **Status** — `Accepted`. Recording the plan is the acceptance, per `/speq-adr-rules`
    - **Supersedes** (optional) — if the entry carries a `Supersedes` line, copy that slug. Check that it names an existing ADR slug
-   - **Context** — synthesized from the entry's Rationale + Alternatives
-   - **Decision** — from the entry's Decision bullet
+   - **Context** — one or two sentences from the entry's Rationale: the situation that forces the decision, stated as present fact. No history of how the plan reached it, per `/speq-adr-rules` rule 7a. Do not copy Rationale or Alternatives prose
+   - **Decision** — from the entry's Decision bullet, in one to three sentences
    - **Options Considered** — emit this section ONLY when the entry's Alternatives names a real rejected option (not `none`, not empty). Never infer it from prose elsewhere in the entry
    - **Consequences** — emit this section ONLY from the entry's own Consequences line, when present. Never infer it from Rationale or any other field
    - The entry's `Architecture` field is not mapped into the ADR. It states which sections of `specs/architecture.md` the plan changes, and the merge in "Apply Architecture Delta" already applied them
@@ -122,16 +122,10 @@ If a threshold is exceeded, return BEFORE archiving and ask the orchestrator to 
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Merging without running validator | Broken specs may land |
-| Assuming split/domain reorganization | User must decide |
 | Rewriting scenario wording during merge | Recording is a mechanical operation |
-| Leaving DELTA markers | Pollutes permanent specs |
 | `DELTA:CHANGED` or `DELTA:REMOVED` naming a scenario absent from the target spec | Rejected — `record` errors instead of silently merging nothing |
 | Heading left outside the marker, so the block's first line is not a recognized anchor | Rejected — `record` cannot tell what the block targets |
 | Two delta blocks of one file sharing an anchor, whatever their marker kinds | Rejected — the merged result would depend on block order; write one block carrying the final text |
 | Writing `Status: Proposed` on promotion | Rejected — `/speq-record` accepts the ADR, per `/speq-adr-rules` |
-| Filling an optional ADR section the entry does not carry | Rejected — `### Options Considered` and `### Consequences` are emitted only from the entry's own Alternatives/Consequences fields, never inferred from prose |
-| Merging the architecture delta before the base check | A stale BASE would overwrite another plan's changes |
 | `DELTA:NEW` or `DELTA:REMOVED` on a canonical architecture section | Rejected — canonical sections always exist; use `DELTA:CHANGED` |
 | Editing `specs/architecture.md` beyond the delta | Recording is a mechanical operation |
-| Archiving after a failed architecture post-check | The permanent architecture file would be invalid |

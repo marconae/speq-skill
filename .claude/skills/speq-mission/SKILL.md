@@ -80,12 +80,7 @@ For existing projects, gather context BEFORE interviewing:
 
 ### 3. Research Phase
 
-For technologies discovered or mentioned:
-
-- **Context7 MCP** (when installed): query library documentation for correct API usage
-- **WebSearch**: research best practices, alternatives, common patterns
-
-Use research to inform interview questions and validate user choices.
+Research the technologies discovered or mentioned per `/speq-ext-research`. Use the results to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
@@ -116,7 +111,6 @@ Apply **User Story Mapping** (Patton): identify activities, then decompose into 
 
 #### 4.6 Tech Stack
 - Language/runtime, framework, database, testing framework. Greenfield: ask each. Brownfield: confirm the discovered stack ("I found: Rust with tokio, clap for CLI, no database. Correct?").
-- Use Context7, when installed, to research mentioned technologies.
 
 #### 4.7 Commands
 - Build, test, lint/format, and coverage commands. Greenfield: ask each. Brownfield: confirm discovered commands and ask for any missing ones ("No coverage command found. What should it be?").
@@ -151,7 +145,7 @@ After collecting ALL information:
 
 Present the generated mission.md and architecture.md and ask: "Do these accurately capture your project? Anything to add, change, or remove?" Iterate until the user approves.
 
-With an `architecture-agent` draft, the user approves the draft file. Then move it into place with `mv <draft path> specs/architecture.md`, so the content never enters your context. The agent already reported `structure ✓`. If the user edited the draft, check the moved file against the structural rules of `/speq-audit` check 14 with grep (first line, six `##` sections in order, no `###`, no table rows), not a full read. Delete the evidence file.
+With an `architecture-agent` draft, the user approves the draft file. Then move it into place with `mv <draft path> specs/architecture.md`, so the content never enters your context. The agent already reported `structure ✓`. If the user edited the draft, check the moved file against the structural rules of `/speq-audit` check 14 (first line, six `##` sections in order, no `###`, no table rows) without reading the whole file. Delete the evidence file.
 
 ## Interview Guidelines
 
@@ -174,11 +168,3 @@ Group questions into MECE partitions (max 3-4 per `AskUserQuestion` call). Each 
 | Simple CLI tool | Minimal (architecture.md with Overview and Components only, other sections `- None`) |
 | Web application | Standard (all sections) |
 | Distributed system | Deep (detailed architecture, failure modes) |
-
-### Never Assume
-
-| Wrong | Right |
-|-------|-------|
-| "I'll use Jest for testing" | "What testing framework do you want?" |
-| "Architecture is MVC" | "What architecture pattern fits best?" |
-| "Coverage target is 80%" | "What coverage target do you want?" |

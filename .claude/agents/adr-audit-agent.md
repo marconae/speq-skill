@@ -25,7 +25,7 @@ From the orchestrator: the fragment directory (`specs/_decision/`) and the instr
 1. List `specs/_decision/*.md`. Read every fragment in full, in `NNN-` order. Never judge from titles or a sample. Every `## ADR:` block gets a verdict.
 2. Build the reference map: which ADRs name another ADR in `**Supersedes:**` or in `**Status:** Superseded by`.
 3. Apply the ADR gate to each ADR, as if it were a new `Promotes to ADR: yes` entry. Name the rule 2 criterion it meets. Check it against the rule 3 list, the rule 5 duplicate test, and the rule 6 test (one decision, no implementation detail). An ADR that meets no rule 2 criterion fails the gate. Give it a `NOISE-*` verdict from the tags below.
-4. Check accuracy. For each ADR you do not mark as noise, take the claims that name a file, function, flag, dependency, command, path, or number. Verify each against the current code and specs. Grep the code first. Use `speq feature get` and `speq search query` for claims about spec behavior and to find the statement a `NOISE-DUPLICATE` restates.
+4. Check accuracy. For each ADR you do not mark as noise, take the claims that name a file, function, flag, dependency, command, path, or number. Verify each against the current code and specs. Grep the code first. Use `speq feature get` for claims about spec behavior. To find the statement a `NOISE-DUPLICATE` restates, run `/speq-cli`'s absence check.
 5. Return the verdict table.
 
 ## Verdict Tags

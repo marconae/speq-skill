@@ -1,6 +1,6 @@
 # Audit Checks — Detection and Remediation
 
-Detection recipes, thresholds, and remediation procedures for each `speq-audit` check. All paths are relative to the project root. Run every command with the local repo build convention (`speq …`).
+Detection recipes, thresholds, and remediation procedures for each `speq-audit` check. All paths are relative to the project root.
 
 ## Contents
 - [1. Spec structure](#1-spec-structure)

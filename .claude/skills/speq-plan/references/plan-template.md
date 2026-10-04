@@ -68,8 +68,6 @@ Optional: task groups for the implement orchestrator. Each group is a knowledge 
 | B: <cluster name> | 2.1-2.3 | A (shares `src/<module>/`) | spec delta `<domain>/<other-feature>`; `src/<module>/`, `<test-file-path>` |
 
 - **Knowledge**: the group's spec delta path(s) plus the source and test files they govern. The implement orchestrator passes this entry to the group's agent as its orientation pointer.
-- Tasks that share a spec delta or a source module default into one group.
-- Overlapping Knowledge entries across groups are a consolidation signal, not a parallelism opportunity. Merge the groups, or declare a dependency and run them in sequence.
 
 ## Dead Code Removal
 

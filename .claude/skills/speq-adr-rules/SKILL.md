@@ -52,6 +52,8 @@ To change an existing ADR, write a new ADR with `Supersedes: <slug>`. Do not edi
 
 Before you set `yes`, run `speq decision-log show` and read the result. If an ADR already covers the decision, do not promote a duplicate. Either set `no`, or supersede that ADR when the decision has changed. State the search result in Rationale.
 
+Every plan reads the accepted ADRs before it records design decisions. A plan whose decision, spec delta, or architecture delta contradicts an accepted ADR either conforms to it or supersedes it through a decision-log entry with `Supersedes: <slug>` and `Promotes to ADR: yes`. A silent contradiction is a defect.
+
 ## 6. One Decision, No Detail
 
 - One ADR records one decision.
@@ -66,6 +68,18 @@ An ADR has four short sections: Context, Decision, Options Considered, Consequen
 - Options Considered appears only when a real alternative was rejected.
 - Consequences appears only when the entry carries a Consequences line.
 - Each section is a few sentences. A section that needs a page is more than one decision or holds implementation detail.
+
+## 7a. Minimum Text, No History
+
+An ADR holds the least text that states the decision. Follow `/speq-writing-guardrails`.
+
+- State the current fact in the present tense. Do not narrate how the decision was reached: no earlier attempts, review rounds, plan names, dates, or "was changed from".
+- Context is one or two sentences: the situation that forces the decision.
+- Decision is one to three sentences.
+- An Options Considered row is one line: the option and the reason it lost.
+- Consequences are short bullets that name what becomes easier or harder.
+- Do not copy a decision-log entry's Rationale or Alternatives prose into the ADR. Keep only what a later reader needs to understand why.
+- Remove a sentence that a reader could drop without losing the decision or its reason.
 
 ## 8. Status Lifecycle
 

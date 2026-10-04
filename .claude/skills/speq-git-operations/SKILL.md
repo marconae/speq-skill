@@ -10,7 +10,9 @@ This skill documents the git/gh write commands available to `speq-plan-pr` and `
 ## Rules
 
 - Run one operation at a time. The fixed composite sequences below are the exception.
-- Compose commit messages, PR and issue titles and bodies, and comment text as your own workflow step, before you run an operation. Pass that text through unchanged. Never add a `Co-Authored-By` trailer.
+- Compose commit messages, PR and issue titles and bodies, and comment text as your own workflow step, before you run an operation.
+- Write commit messages as Conventional Commits. The type `spec` marks spec changes.
+- Never stage secrets or sensitive information (API keys, passwords, credentials, tokens).
 - Stage only the paths you name. Touch only the refs, PRs, or issues you name.
 - Report a no-op plainly (nothing to commit, PR already exists, already ready). It is not an error.
 - Report ambiguity or a not-found target. Do not guess.

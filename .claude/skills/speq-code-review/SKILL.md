@@ -104,10 +104,6 @@ Write the findings document to `specs/_plans/<plan-name>/review-findings.md` per
 CODE REVIEW: <n> findings — standard: <n>, expert: <n> — specs/_plans/<plan-name>/review-findings.md
 ```
 
-Never return the findings as response text. The implementer agents read them from the file.
-
-Each finding's `Fix:` field follows the template's rules: an imperative addressed to the consuming implementer agent, never an optional suggestion.
-
 ## Routing
 
 You partition the findings. The orchestrator never sees them individually. Place each finding under `## Standard fixes` or `## Expert fixes` in the findings document. The partition decides which single agent applies the whole fix pass: any Expert finding routes both sections to `implementer-expert-agent`. With no Expert finding, `implementer-agent` applies `## Standard fixes`.

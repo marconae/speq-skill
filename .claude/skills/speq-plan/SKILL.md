@@ -31,7 +31,11 @@ Run the speq CLI:
 speq domain list
 speq feature list
 speq search query "<relevant terms>"
+speq search query "<exact term>"   # per /speq-cli's absence check, repeated for each exact term in the request
+speq decision-log show
 ```
+
+Read `specs/architecture.md` if it exists.
 
 Collect only enough context for good interview questions, not a full exploration.
 
@@ -74,7 +78,7 @@ Delegate to planner-agent — Plan <plan-name>
 <verbatim Q&A from the AskUserQuestion exchanges>
 
 ## Existing Context
-<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq feature get` calls you ran, each followed by its output — name the query, not just the result>
+<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq feature get` / `speq decision-log show` calls you ran, each followed by its output, plus the content of `specs/architecture.md` when it exists — name the query, not just the result>
 
 ## External Research
 <any research already conducted, or "none — agent to research as needed">
@@ -140,7 +144,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 ### 7. Explain next steps (orchestrator)
 
-Print the plan's summary per `/speq-plan-pr`'s `references/pr-body-template.md` — Current State / What Changes / Impact, composed from `plan.md`/`decision-log.md` the same way `speq-plan-pr` composes the PR body from them. This is terminal output, not a PR: print the `<details>` block's file list as a plain line, not the HTML fold, and the Test plan checklist as-is. `speq-plan-pr` and `speq-implement-pr` are the only skills that ever post this content as a PR; this step never touches git or GitHub.
+Print the plan's summary to the terminal per `/speq-plan-pr`'s `references/pr-body-template.md` and its terminal-print rule, composed from `plan.md` and `decision-log.md`. This step never touches git or GitHub.
 
 Then:
 - Print `ADR candidates: none`, or list the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Each one is a proposed ADR, and `/speq-record` accepts it. To drop one, set it to `Promotes to ADR: no` and run this skill again
@@ -173,10 +177,7 @@ Each sub-agent pins its own model and effort in its frontmatter, so planning qua
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Authoring plan.md or spec deltas in the orchestrator | `planner-agent` owns all plan authoring |
 | Skipping the clarifying interview | Content comes from user answers, never assumptions |
-| A third adversarial review round | Bounded to 2 — a `MECHANICAL` remainder gets one direct fix pass instead, a `HUMAN` remainder goes to the user |
 | Asking the user about a `MECHANICAL` finding | Round count is not the escalation test — `Escalation: HUMAN` is; fix mechanical findings directly, no interruption |
 | Running round 2 when round 1's `HUMAN` count is 0 | A round with nothing judgment-worthy left doesn't need a second adversarial pass — fix and ship |
 | Persisting ADVISORY findings or looping on them | Report-only; they never gate |
-| Embedding spec content in plan.md | Plans reference delta files |

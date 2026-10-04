@@ -15,16 +15,18 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 
 ### 1. Discover Existing Specs
 
-The orchestrator already ran `speq domain list` / `speq feature list` / `speq search query` and passed the results as this brief's `## Existing Context` section. Treat that as the baseline. Do not re-run the same queries. Re-query only for gaps it does not answer:
+The orchestrator already ran `speq domain list` / `speq feature list` / `speq search query` (once per exact term in the request, per `/speq-cli`'s absence check), and `speq decision-log show`, and read `specs/architecture.md` if present. It passed the calls and their output as this brief's `## Existing Context` section. Treat that as the baseline. Do not re-run the same queries. Re-query only for gaps it does not answer:
 
 ```bash
 speq feature get <domain>/<feature>   # a specific feature's full spec, if Existing Context only named it
 speq search query "<narrower terms>"  # only if Existing Context's results do not cover a sub-area you need
 ```
 
-**Search first** when modifying existing behavior. Check `Existing Context` before you assume a feature does not exist yet.
+Existing Context holds the content of `specs/architecture.md`, the current architecture that step 2a changes. If Existing Context lacks it and the file exists, read the file. Step 2a reads the file itself only to copy the sections a delta changes.
 
-Also read `specs/architecture.md` if it exists. It holds the current architecture. Step 2a changes it.
+Check the plan against every accepted ADR in the `speq decision-log show` output from Existing Context, per `/speq-adr-rules` rule 5. Run the command only if Existing Context lacks it.
+
+Before you author a NEW feature spec or state that no spec covers a behavior, run `/speq-cli`'s absence check.
 
 ### 2. Author Spec Deltas
 
@@ -65,7 +67,7 @@ Every scenario requires two forms of external proof. No claims, only evidence.
 
 Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
-1. **Context**: a bullet list of the problem and the forces behind this change, one fact per bullet. Required for new features and major changes; skip it for minor fixes. It holds no decisions: those go in `decision-log.md` (step 5). Do not restate components, boundaries, or data flow here. Point to the architecture delta instead
+1. **Context**: per the template's Context section. Decisions go in `decision-log.md` (step 5)
 2. **Features**: table referencing spec delta files (NEVER embed spec content), immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
 3. **Tasks**: work breakdown in implementation order
 4. **Parallelization**: knowledge clusters, per the rules below
@@ -88,17 +90,7 @@ Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `reference
 - **Architecture field**: an entry with `Promotes to ADR: yes` whose Rationale names `/speq-adr-rules` rule-2 criterion 1, 2, or 3 needs an `- **Architecture:** <§ Section[, § Section] | no change: <reason>>` line. Every named section needs a block in the architecture delta
 - **Review Findings section**: leave empty; populated in Revision Mode after `plan-reviewer` blockers, and by `speq-implement` after code review
 
-**Promotion gate.** Invoke `/speq-adr-rules` first. It owns the rules. Summary for this step:
-
-- Default `Promotes to ADR: no`. The expected count of `yes` entries per plan is zero.
-- Set `yes` only when one criterion in `/speq-adr-rules` rule 2 applies. Name that criterion in the entry's Rationale.
-- Before you set `yes`, run `speq decision-log show`. State the search result in Rationale. If an ADR already covers the decision, set `no`.
-- Never promote content on the never-an-ADR list (`/speq-adr-rules` rule 3). This applies to Design Decisions and Review Findings entries alike.
-- Keep Decision to one decision, in plain words, with no signatures, paths, or flags.
-- If the decision replaces an earlier ADR, add a `- **Supersedes:** <slug>` line to the entry. Take the slug from `speq decision-log show`. The line is optional.
-- A corollary of a promoted decision is not its own entry. Record it as a bullet in the parent entry's `Consequences` line.
-
-A `[plan-review]`-prefixed entry (Revision Mode, below) records a mistake this plan made and then corrected. Apply the same gate. It almost always stays `no`.
+**Promotion gate.** Apply `/speq-adr-rules` to every Design Decisions and Review Findings entry. Default `Promotes to ADR: no`. For `yes`, name the rule-2 criterion and the `speq decision-log show` result in Rationale. A promoted entry's Decision and Rationale are short and state facts, not history: the recorder derives the ADR from them (`/speq-adr-rules` rule 7a). A `[plan-review]` entry almost always stays `no`.
 
 ### 6. Expert-Task Tagging
 
@@ -162,7 +154,7 @@ Check your artifacts do not trip `/speq-plan-review`'s finding tags, across its 
 - **Feasibility**: no `[EFFORT_MISESTIMATION]` (a task line that hides more work than it states), `[HIDDEN_DEPENDENCY]` (an unmodeled prerequisite), `[UNSTATED_ASSUMPTION]` (a load-bearing belief never stated), or `[NFR_IGNORED]` (security, performance, migration, or concurrency left untouched where the change touches it).
 - **Requirement Quality**: no `[AMBIGUOUS_REQUIREMENT]` (not testable as written), `[COMPLETENESS_GAP]` (a missing edge case or error path), `[REQUIREMENT_CONFLICT]` (contradicts another delta or a recorded spec — check via `/speq-cli`), or `[IMPLEMENTATION_LEAKAGE]` (a Background or Feature description fact no scenario step depends on).
 - **Task Breakdown**: no `[TRACEABILITY_GAP]` (a delta with no implementing task, or the reverse), `[TASK_GRANULARITY]` (a task too large to verify as one unit), or `[CLUSTER_INCOHERENCE]` (a Parallelization group sliced by layer, or overlapping `Knowledge` entries across groups).
-- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`), or `[ARCHITECTURE_DRIFT]` (a qualifying ADR entry with no `Architecture:` line, a named section the delta lacks, or `no change` with no reason; a component, boundary, interface, data flow, constraint, or external dependency in `plan.md` that the delta lacks; or a delta that breaks the delta template).
+- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`), `[ARCHITECTURE_DRIFT]` (a qualifying ADR entry with no `Architecture:` line, a named section the delta lacks, or `no change` with no reason; a component, boundary, interface, data flow, constraint, or external dependency in `plan.md` that the delta lacks; or a delta that breaks the delta template), or `[ADR_CONFLICT]` (a decision, spec delta, or architecture delta that contradicts an accepted ADR with no superseding entry).
 
 Open `/speq-plan-review` for a tag's full definition if you are unsure it applies.
 

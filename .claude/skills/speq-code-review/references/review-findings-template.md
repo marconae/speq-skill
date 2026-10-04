@@ -1,6 +1,6 @@
 # Code Review Findings Template
 
-`code-reviewer` writes this document to `specs/_plans/<plan-name>/review-findings.md` and returns only a one-line verdict. Primary consumer: one implementer agent, routed by the hardest finding. `implementer-expert-agent` reads both sections when any Expert finding exists, `implementer-agent` reads § Standard fixes otherwise. The agent derives fix tasks directly from the `Fix:` lines. No human or orchestrator summarizes this file first.
+`code-reviewer` writes this document to `specs/_plans/<plan-name>/review-findings.md`. Its reader is one implementer agent, which derives fix tasks directly from the `Fix:` lines. No human or orchestrator summarizes it first.
 
 ## Rules
 
@@ -29,14 +29,6 @@
 
 ## Expert fixes
 [none]
-```
-
-## Verdict Line
-
-After writing the document, return exactly one line and nothing else:
-
-```
-CODE REVIEW: <n> findings — standard: <n>, expert: <n> — specs/_plans/<plan-name>/review-findings.md
 ```
 
 ## Example

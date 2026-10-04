@@ -177,10 +177,7 @@ Print the final status and any remaining manual next steps.
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Modifying files during Phase 2 | Audit is read-only until the user confirms |
-| Applying a fix without a Yes | Every remediation is user-gated |
 | Editing `mission.md` directly | `/speq-mission` owns that file |
 | Judging ADR noise in the orchestrator | Only `adr-audit-agent` verdicts count. The orchestrator relays them |
 | Removing an ADR that another ADR references | It breaks `speq decision-log validate`. The agent keeps chain members |
-| Auto-restructuring domains or thresholds | Reorganization is a user decision |
 | Reporting "fast"/"clean" without counts | Quantify findings (N features, N scenarios) |

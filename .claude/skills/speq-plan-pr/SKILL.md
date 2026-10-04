@@ -12,8 +12,7 @@ You are a thin orchestrator with no live user to interview. Your goal:
 - Hand any irreducible decision to a human as a PR comment and stop there.
 
 Rules:
-- Delegate all planning judgment to `planner-agent`. Run every git/GitHub action yourself, per `/speq-git-operations`. Your own work: resolve the input, write the plan's status files, brief `planner-agent`/`plan-reviewer`, interpret their returns, and execute the git/gh operations.
-- Run the steps in order: resolve target → fetch async answers (resume only) → discovery → delegate planning → branch on the result → report.
+- Your own work: resolve the input, write the plan's status files, brief `planner-agent` and `plan-reviewer`, interpret their returns, and run the git/gh operations.
 - Keep one `feat/<plan-name>` branch and one PR per plan. `create-pr` (per `/speq-git-operations`) reuses an existing PR.
 
 ## Required Skills (for the orchestrator)
@@ -90,7 +89,11 @@ Gather enough context to brief `planner-agent`, the same lightweight calls `speq
 speq domain list
 speq feature list
 speq search query "<relevant terms>"
+speq search query "<exact term>"   # per /speq-cli's absence check, repeated for each exact term in the request
+speq decision-log show
 ```
+
+Read `specs/architecture.md` if it exists.
 
 ### 4. Delegate to planner-agent
 
@@ -112,7 +115,7 @@ headless
 <the free-text feature intent (new plan), or the Q&A text step 2 fetched (resume) — this stands in for a live interview>
 
 ## Existing Context
-<the exact `speq domain list` / `speq feature list` / `speq search query "..."` calls you ran, each followed by its output — name the query, not just the result>
+<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq decision-log show` calls you ran, each followed by its output, plus the content of `specs/architecture.md` when it exists — name the query, not just the result>
 
 ## External Research
 none — agent to research as needed
@@ -164,7 +167,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **Ship decision, whichever path produced the final fix pass** (round 1 alone when `HUMAN: 0`, or the round-2 `MECHANICAL` follow-up above): clean only if `speq plan validate` passed AND every finding came back `Resolved:`. Any `Could not resolve:` line, or a failed re-validate, is not a clean return — fold that finding into `OPEN QUESTIONS:` too, with its `Could not resolve:` reason as the question text. A `MECHANICAL` tag means the reviewer judged it not to need human judgment; it does not guarantee a fix exists on the first retry, and this is not the place to find out by shipping it silently.
 
-**ADVISORY findings:** carry into step 7's terminal report only — never a PR comment or body content, per step 6. Read from the last round file that actually ran — round 1's, if round 2 was skipped entirely (`HUMAN: 0`) or ran confirm-only (`Plan Size: small`); round 2's otherwise. Never block or persist them.
+**ADVISORY findings:** carry into step 7's terminal report only. Read from the last round file that actually ran — round 1's, if round 2 was skipped entirely (`HUMAN: 0`) or ran confirm-only (`Plan Size: small`); round 2's otherwise. Never block or persist them.
 
 ### 6. Branch on the Result
 
@@ -207,7 +210,7 @@ Keep each question short: state the decision in 1-2 sentences and point to the r
    - [ ] <question 2>
    ```
 2. Insert `> **Status:** blocked: see open-questions.md` as the first line under `plan.md`'s H1. Skip if already present.
-3. Compose the questions checklist as the PR comment body. Nothing else goes in it — `ADVISORY` findings and Design Decisions entries don't need human attention, so they stay out of the comment the same as on the clean path; they're already in `review/round-<N>.md`/`decision-log.md` for anyone who opens them.
+3. Compose the questions checklist as the PR comment body. Nothing else goes in it.
 
 Then, with one composite call:
 ```
@@ -223,7 +226,7 @@ Run — operation: flag-blocked (per /speq-git-operations)
 
 ### 7. Report (orchestrator)
 
-Tell the caller whether the plan is ready or blocked, with the PR link either way. Print plan.md's `## Impact` section to the terminal. Print `ADR candidates: none`, or the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Print the Architecture line from the PR body: `Architecture: none`, `Architecture: none (specs/architecture.md absent)`, or the changed sections. Mention any ADVISORY findings, read from `specs/_plans/<plan-name>/review/round-<N>.md`, not from memory, and any Design Decisions entries surfaced — terminal only, per step 6 neither ever reaches the PR. If step 5's round 1 was all-`MECHANICAL` (round 2 skipped) or ran a round-2 `MECHANICAL` follow-up, and it fully resolved, name it in one line ("N mechanical findings fixed, no human input needed") — do not restate what each one was; that detail lives in the round file.
+Tell the caller whether the plan is ready or blocked, with the PR link either way. Print plan.md's `## Impact` section to the terminal. Print `ADR candidates: none`, or the title of each `Promotes to ADR: yes` entry in `decision-log.md`. Print the Architecture line from the PR body: `Architecture: none`, `Architecture: none (specs/architecture.md absent)`, or the changed sections. Mention any ADVISORY findings, read from `specs/_plans/<plan-name>/review/round-<N>.md`, not from memory, and any Design Decisions entries surfaced. If step 5's round 1 was all-`MECHANICAL` (round 2 skipped) or ran a round-2 `MECHANICAL` follow-up, and it fully resolved, name it in one line ("N mechanical findings fixed, no human input needed") — do not restate what each one was; that detail lives in the round file.
 
 ## Spec Hierarchy (reference)
 
@@ -254,11 +257,6 @@ If `specs/architecture.md` does not exist, the plan carries no architecture delt
 
 | Pattern | Why Wrong |
 |---------|-----------|
-| Asking the user a live question | Headless — irreducible decisions go to the PR comment |
-| Spawning a sub-agent for git/gh work | No agent hop needed — you already have direct tool access and composed the content; a spawn only adds latency |
 | Marking the PR ready | `speq-implement-pr` owns `ready-pr`; plans stay draft |
-| A third adversarial review round | Bounded to 2 — a `MECHANICAL` remainder gets one direct fix pass instead, a `HUMAN` remainder becomes an open question |
-| Pasting a finding's full Issue/Fix text into a PR comment | State the decision in 1-2 sentences, link to `review/round-<N>.md` for the rest |
 | Escalating a `MECHANICAL` finding to the human because round 2 didn't close it | Round count is not the escalation test — `Escalation: HUMAN` is; fix mechanical findings directly |
 | Running round 2 when round 1's `HUMAN` count is 0 | A round with nothing judgment-worthy left doesn't need a second adversarial pass — fix and ship |
-| Posting `ADVISORY` findings or Design Decisions as a PR comment | They never need human attention by definition — silent in `review/round-<N>.md`/`decision-log.md`, reachable via the body's `<details>` pointer |

@@ -26,22 +26,4 @@ Use Context7 if available. User installs it globally, so its tool prefix varies.
    query: "<specific question>"
 ```
 
-## WebSearch Workflow
-
-```
-1. WebSearch(query: "<design question>")
-2. Extract relevant patterns
-3. Apply to implementation
-```
-
-## Priority Decision
-
-Prefer primary documentation over secondary commentary:
-
-```
-Need library API details?
-├─ Yes → Context7
-└─ No  → Need design guidance?
-         ├─ Yes → WebSearch
-         └─ No  → Proceed with existing knowledge
-```
+Prefer primary documentation over secondary commentary. Research only when existing knowledge does not settle the question.

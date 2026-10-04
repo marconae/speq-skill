@@ -1,8 +1,6 @@
 # Implementation Summary Template
 
-Used by `/speq-implement` (Phase 7), which prints this as terminal output, and `/speq-implement-pr` (Phase C, "Ship"), which posts the same content as a PR comment. Same content either way; only the destination differs — `/speq-implement`'s own print is not a PR comment, `speq-implement-pr` composes its comment straight from `verification-report.md`, not by parsing the printed text. A reader gets the verdict and three tables in one pass; `verification-report.md` holds the full evidence trail — Tool Evidence, per-command logs, Notes — for anyone who wants it.
-
-A terminal print has no `<details>` equivalent; the "Full evidence" line is already plain text either way, so nothing changes between the two destinations.
+`/speq-implement` prints this in Phase 7. `/speq-implement-pr` posts it as a PR comment in Phase C, composed from `verification-report.md` and not from the printed text. The report keeps the full evidence trail.
 
 ## Skeleton
 
@@ -19,7 +17,7 @@ A terminal print has no `<details>` equivalent; the "Full evidence" line is alre
 
 ## Test Coverage
 
-| Type | Run | Passed | Failed |
+| Type | Run | Passed | Ignored |
 |---|---:|---:|---:|
 | Unit | <n> | <n> | <n> |
 | Integration | <n> | <n> | <n> |
@@ -29,6 +27,7 @@ A terminal print has no `<details>` equivalent; the "Full evidence" line is alre
 | Check | Result |
 |---|---|
 | Build | ✅ |
+| Tests | ✅ |
 | Lint | ✅ |
 | Format | ✅ |
 | Manual tests | ✅ (<n>/<n>) |

@@ -4,12 +4,7 @@
 STRUCTURAL TEMPLATE - DO NOT COPY-PASTE
 Generate actual content from the clarifying interview and plan design.
 Capture interview Q&A verbatim or close paraphrase.
-Promotion gate: default "Promotes to ADR: no". The expected count of "yes" entries is zero.
-Mark "yes" only when a criterion in /speq-adr-rules applies. Name the criterion and the
-`speq decision-log show` search result in Rationale. Never promote content on the
-never-an-ADR list, and keep Decision free of signatures, paths, and flags.
-A corollary of an already-promoted decision is not its own entry: add it as a bullet in that
-parent entry's Consequences line instead.
+Promotion gate: /speq-adr-rules. Default "Promotes to ADR: no".
 -->
 
 ## Interview
