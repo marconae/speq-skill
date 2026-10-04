@@ -62,7 +62,7 @@ Architecture: see specs/architecture.md.
 | Inference | tract-onnx | Pure-Rust ONNX inference for semantic search (no native runtime required) |
 | Tokenization | tokenizers | Fast tokenization for embedding inputs |
 | Errors | thiserror 2 | Ergonomic error type definitions |
-| Serialization | serde, serde_json | Serialize embedding-index and metadata structures |
+| Serialization | serde | Serialize embedding-index and metadata structures |
 | Serialization | postcard | Compact binary format for the cached embedding index |
 | Platform paths | dirs | Resolve the platform cache directory for the embedding model and index |
 | Parallelism | rayon | Parallel iteration for search indexing and query |

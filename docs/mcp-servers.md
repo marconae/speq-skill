@@ -4,9 +4,7 @@
 
 # MCP Servers
 
-speq-skill works best with [Serena](https://github.com/oraios/serena), an MCP (Model Context Protocol) server for code navigation. You install it once, globally. speq-skill does not bundle or configure it. The skills find its tools at run time.
-
-[Context7](https://github.com/upstash/context7) is optional. If it is installed, the skills use it for library documentation. If not, they skip it. speq-skill does not install or manage Context7.
+speq-skill works well with [Serena](https://github.com/oraios/serena), an MCP (Model Context Protocol) server for code navigation, and [Context7](https://github.com/upstash/context7), an MCP server for library documentation. Both are optional. The skills use each one when it is installed and skip it when it is not. You install Serena and/or Context7 once, globally. The skills find its tools at run time.
 
 | Server | What your agent gets | Used by |
 |--------|----------------------|---------|
@@ -28,8 +26,6 @@ The installer asks before it installs Serena. It skips Serena when it is already
 uv tool install -p 3.13 serena-agent
 claude mcp add --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd
 ```
-
-This needs no plugin marketplace. Do not start Claude Code from your home directory, because `--project-from-cwd` can then scan all of it.
 
 **Codex**
 
@@ -55,7 +51,3 @@ Edit code         → Serena     precise, symbol-level changes
 ```
 
 Without Context7, library API questions go to WebSearch.
-
-## Upgrading from an earlier version
-
-Earlier versions of speq-skill configured Serena and Context7 inside the plugin and registered them in Codex. The installer leaves existing Serena and Context7 registrations as they are, and offers to install Serena if it is missing.

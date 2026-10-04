@@ -13,6 +13,7 @@ Analyze implementation quality and identify issues for the implementer agents to
 ## First: Invoke Required Skills
 
 - `/speq-code-review`: the review tag taxonomy and output format. Follow it exactly.
+- `/speq-writing-guardrails`: prose style for `review-findings.md`
 - `/speq-code-guardrails`: quality standards the taxonomy is built on
 - `/speq-design-philosophy`: complexity-management principles behind the Design Depth category
 - `/speq-code-tools`: you must use the provided code tools

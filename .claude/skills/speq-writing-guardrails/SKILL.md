@@ -1,6 +1,6 @@
 ---
 name: speq-writing-guardrails
-description: Nine prose rules covering conclusion-first order, one idea per sentence, named actors, consistent names, plain explanations, no filler, neutral tone, current results only, and no em dashes. Triggered by /speq-mission, /speq-audit, /speq-implement, /speq-plan-pr, /speq-implement-pr, planner-agent, plan-reviewer, recorder-agent, and architecture-agent.
+description: Nine prose rules covering conclusion-first order, one idea per sentence, named actors, consistent names, plain explanations, no filler, neutral tone, current results only, and no em dashes. Triggered by /speq-mission, /speq-audit, /speq-implement, /speq-plan-pr, /speq-implement-pr, planner-agent, plan-reviewer, recorder-agent, architecture-agent, and code-reviewer.
 ---
 
 # Writing Guardrails
@@ -9,7 +9,7 @@ Follow these rules for governed prose.
 
 ## Scope
 
-- Govern: prose in `plan.md`, `spec.md`, `mission.md`, decision logs, verification reports, GitHub PRs, issues, and comments.
+- Govern: prose in `plan.md`, `spec.md`, `mission.md`, `architecture.md` (project and plan level), decision logs, ADR fragments in `specs/_decision/`, `review-findings.md`, verification reports, implementation summaries, GitHub PRs, issues, and comments.
 - Leave unchanged: Gherkin, Background bullets, tables, ASCII diagrams, delta markers, and validator-owned RFC keyword casing.
 
 ## Rules

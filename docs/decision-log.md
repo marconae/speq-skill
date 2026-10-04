@@ -31,55 +31,64 @@ To drop a candidate, set the entry to `Promotes to ADR: no` and run `/speq:plan`
 
 ## Promotion rules
 
-`/speq:adr-rules` owns the rules. In short, the default is `no`, a `yes` needs a named criterion and a prior `speq decision-log show` search, and one ADR records one decision without paths, signatures, or flags.
+`/speq:adr-rules` owns the rules. In short, the default is `no`, a `yes` needs a named criterion and a prior `speq decision-log show` search.
 
 ## Plan-level log
 
 ```markdown
-# Decision Log: <plan-name>
+# Decision Log: add-prose-delta-anchors
 
 ## Interview
 
-**Q:** <question>
-**A:** <answer>
+**Q:** Should a delta need new marker syntax to target a Background?
+**A:** No. Wrap the existing heading.
 
 ## Design Decisions
 
-### [N] <short title>
+### [1] Anchor a delta block by its first non-empty line
 
-- **Decision:** What was decided
-- **Alternatives:** What was rejected (may read `none`)
-- **Rationale:** Why
-- **Consequences:** (optional) Effects and folded-in corollaries
-- **Supersedes:** (optional) Slug of the ADR this replaces
-- **Promotes to ADR:** yes / no
+- **Decision:** A delta block's anchor is its first non-empty line.
+- **Alternatives:** Scan the whole block for the first heading
+- **Rationale:** A heading quoted inside the prose can take over the anchor.
+- **Consequences:** Plans need no new marker syntax.
+- **Promotes to ADR:** yes
 ```
 
-The file is optional. If present, `speq plan validate` requires the H1 `# Decision Log: <plan-name>` and at least one `##` section. A `Promotes to ADR:` value other than `yes` or `no` produces a warning.
+`Alternatives` may read `none`. `Consequences` and `Supersedes` (the slug of the ADR this replaces) are optional.
+
+The file is optional. If present, `speq plan validate` verifies its structure.
 
 ## Permanent log
 
+A fragment is one Markdown file. This one comes from the plan `add-prose-delta-anchors`:
+
 ```markdown
-# Decisions: <plan-name>
+# Decisions: add-prose-delta-anchors
 
-## ADR: <Title>
+## ADR: Anchor a delta block by its first non-empty line
 
-**ID:** <slug>
-**Plan:** <plan-name>
+**ID:** anchor-first-nonempty-line
+**Plan:** add-prose-delta-anchors
 **Status:** Accepted
-**Supersedes:** <slug>
 
 ### Context
+
+A delta block must name the section it targets without ambiguity.
+
 ### Decision
+
+A delta block's anchor is its first non-empty line. A Background or description delta wraps the existing heading in place, with no new marker syntax.
+
 ### Options Considered
+
+- Scan the whole block for the first heading: rejected, a heading quoted inside the prose can take over the anchor.
+
 ### Consequences
+
+- Plans need no new marker syntax to target a Background or description.
 ```
 
-- `**ID:**` is a kebab-case slug, unique across all fragments. Slugs identify ADRs, not numbers.
-- `**Status:**` is `Accepted`, `Deprecated`, or `Superseded by <slug>`.
-- `**Supersedes:**`, `### Options Considered`, and `### Consequences` are optional. `recorder-agent` writes the last two only when the plan entry has real content for them.
-- To change an ADR, record a new one with `**Supersedes:**`. The old fragment is never edited.
-- Each plan writes its own fragment, so parallel plans do not conflict. The `NNN-` prefix is a record-time sequence number, not an identity.
+Each ADR needs `**ID:**`, `**Plan:**`, `**Status:**`, `### Context`, and `### Decision`. A later plan can replace this ADR by adding a line `**Supersedes:** anchor-first-nonempty-line` to its own ADR. The old fragment is never edited. `### Options Considered` and `### Consequences` are optional.
 
 ## Commands
 

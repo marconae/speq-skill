@@ -1,7 +1,9 @@
 # Changelog
 
-## 0.24.0
+## 0.25.0
 
+- `speq search query` prints a notice on stderr when it builds a missing index first.
+- Agents read the accepted ADRs before they plan; ADR text stays short.
 - `/speq:implement-pr` keeps rotation hand-off notes (`notes/`) out of its commits.
 - Plan review treats a plan as small when its verb is `fix`, its decision log has no design decisions, and it has no architecture delta.
 

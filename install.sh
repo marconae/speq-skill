@@ -24,7 +24,6 @@ NC='\033[0m'
 info() { echo -e "${GREEN}==>${NC} $1"; }
 warn() { echo -e "${YELLOW}Warning:${NC} $1"; }
 error() { echo -e "${RED}Error:${NC} $1"; exit 1; }
-error_noexit() { echo -e "${RED}Error:${NC} $1"; }
 step() { echo -e "${BLUE}[${1}/${2}]${NC} $3"; }
 
 # Get latest release tag from GitHub API
@@ -36,60 +35,6 @@ get_latest_version() {
         return
     }
     echo "$response" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
-}
-
-# Check Linux build dependencies (OpenSSL dev headers, pkg-config)
-check_linux_deps() {
-    local os
-    os=$(uname -s)
-    [[ "$os" == "Linux" ]] || return 0
-
-    local missing=()
-
-    if ! command -v pkg-config &> /dev/null; then
-        missing+=("pkg-config")
-    fi
-
-    if [[ ${#missing[@]} -eq 0 ]] && ! pkg-config --exists openssl 2>/dev/null; then
-        missing+=("openssl-dev")
-    fi
-
-    if [[ ${#missing[@]} -eq 0 ]]; then
-        local ssl_version
-        ssl_version=$(pkg-config --modversion openssl 2>/dev/null || echo "0")
-        local ssl_major="${ssl_version%%.*}"
-        if [[ "$ssl_major" -lt 3 ]] 2>/dev/null; then
-            echo ""
-            error_noexit "OpenSSL ${ssl_version} found, but version 3.0+ is required (license compatibility)."
-            echo ""
-            echo "  Please upgrade your system's OpenSSL to 3.0 or later."
-            echo "  On Ubuntu 22.04+, this is the default. On older systems, consider upgrading your distro."
-            echo ""
-            exit 1
-        fi
-        return 0
-    fi
-
-    echo ""
-    error_noexit "Missing build dependencies: ${missing[*]}"
-    echo ""
-    echo "  speq requires OpenSSL development headers and pkg-config to build."
-    echo ""
-    echo "  Install them for your distro:"
-    echo "    Debian/Ubuntu:  sudo apt-get install pkg-config libssl-dev"
-    echo "    Fedora/RHEL:    sudo dnf install pkg-config openssl-devel"
-    echo "    Arch:           sudo pacman -S pkg-config openssl"
-    echo ""
-    exit 1
-}
-
-# Check for Rust toolchain
-check_rust() {
-    if command -v cargo &> /dev/null; then
-        info "Rust toolchain found: $(cargo --version)"
-        return 0
-    fi
-    return 1
 }
 
 register_codex_plugin() {
@@ -147,33 +92,6 @@ install_codex_skills() {
     info "Installed Codex /speq:* skills into $CODEX_SKILLS_DIR"
 }
 
-# Offer to install Rust
-install_rust() {
-    warn "Rust toolchain not found."
-    echo ""
-    echo "speq requires Rust to build from source."
-    echo "Would you like to install Rust via rustup? (recommended)"
-    echo ""
-
-    if [[ -e /dev/tty ]]; then
-        read -p "Install Rust? [y/N] " -n 1 -r < /dev/tty
-        echo ""
-    else
-        # Non-interactive (CI/Docker) — auto-install
-        REPLY="y"
-    fi
-
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        info "Installing Rust via rustup..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-        # Source cargo env for this session
-        source "$HOME/.cargo/env" || true
-        info "Rust installed successfully!"
-    else
-        error "Rust is required. Install manually: https://rustup.rs"
-    fi
-}
-
 # Detect platform triple understood by the release archive naming convention
 detect_platform() {
     local arch os
@@ -197,7 +115,7 @@ detect_platform() {
 
 # Download a pre-built release archive and install it directly (no compilation).
 # Returns 0 on success, 1 if no pre-built binary is available for this platform
-# or if the download fails — caller should fall back to build_from_source.
+# or if the download fails.
 install_from_prebuilt() {
     local version="$1"
 
@@ -218,7 +136,7 @@ install_from_prebuilt() {
 
     info "Downloading pre-built binary for ${platform}..."
     if ! curl -fsSL "$download_url" -o "$tmp_dir/release.tar.gz" 2>/dev/null; then
-        warn "No pre-built binary available for ${platform} (${version}). Building from source..."
+        warn "No pre-built binary available for ${platform} (${version})."
         return 1
     fi
 
@@ -510,15 +428,13 @@ main() {
     info "Installing version: $version"
     echo ""
 
-    # Try pre-built binary first; fall back to compiling from source
+    # Pre-built binary only. The local tarball is the Docker test hook.
     if ! install_from_prebuilt "$version"; then
-        if [[ -z "${SPEQ_PREBUILT:-}" ]]; then
-            check_linux_deps
-            if ! check_rust; then
-                install_rust
-            fi
+        if [[ -n "${SPEQ_LOCAL_TARBALL:-}" ]]; then
+            build_from_source "$version"
+        else
+            error "No pre-built binary for this platform. Build speq-skill from source: https://github.com/$REPO/blob/main/docs/installation.md#install-from-source"
         fi
-        build_from_source "$version"
     fi
 
     # Serena comes from the global install

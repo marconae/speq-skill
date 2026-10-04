@@ -6,7 +6,7 @@
 
 ## What are semantic anchors
 
-Semantic anchors are named references to established methodologies, frameworks, and practices, embedded directly in skill instructions. A skill does not re-explain a methodology from scratch. Instead, the skill names the methodology, for example "London School TDD" or "BLUF". The skill then relies on the training data that the model already has for that practice. A single anchor like "Socratic Method" activates more detailed behavior than paragraphs of custom instruction.
+Semantic anchors are named references to established methodologies, frameworks, and practices, embedded directly in skill instructions. A skill does not re-explain a methodology from scratch. Instead, the skill names the methodology, for example "London School TDD" or "BLUF". The skill then relies on the training data that the model already has for that practice.
 
 For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/LLM-Coding/Semantic-Anchors) catalog on GitHub.
 

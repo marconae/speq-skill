@@ -28,7 +28,7 @@ specs/
         └── spec.md
 ```
 
-`specs/architecture.md` holds the current architecture of the project. It is one file at the root and the library commands do not list it. Plans change it through an optional `architecture.md` delta, and `/speq:record` merges it.
+`specs/architecture.md` holds the current architecture of the project. Plans change it through an optional `architecture.md` delta, and `/speq:record` merges it.
 
 Every `spec.md` has five required parts:
 
@@ -90,8 +90,6 @@ Each step is a Markdown bullet with the keyword in italic:
 * *AND* the system SHALL log the deletion event
 ```
 
-*AND* inherits the type of the step before it. In the example above, the first AND is another GIVEN. The last AND is another THEN.
-
 ## RFC 2119 keywords
 
 Specs use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords to express requirement levels. Keywords MUST be UPPERCASE.
@@ -109,26 +107,8 @@ Rules for keyword usage:
 - *GIVEN* and *WHEN* steps can omit keywords. These steps describe context and actions, not requirements.
 - Keywords must appear in UPPERCASE so that the validator recognizes them.
 
-## Structure and AI coding agents
-
-- GIVEN/WHEN/THEN explicitly establishes state, action, and expected outcome, instead of leaving intent to prose that the agent must interpret.
-- SHALL and SHALL NOT mark what is mandatory and what is prohibited. This includes negative requirements that an agent otherwise adds by default, for example retries or fallback logic.
-- SHOULD and MAY mark what is recommended or optional, so that the agent does not over-implement.
-- Edge cases, for example empty input, null values, or timeouts, need their own scenario. An agent will not infer behavior for cases that the spec omits.
-
-## Fine-grained context via the speq CLI
-
-The `speq` CLI retrieves specs at three levels of granularity:
-
-- **Domain** — `speq domain list` shows all spec domains
-- **Feature** — `speq feature get <domain>/<feature>` retrieves a single feature spec
-- **Scenario** — `speq search query "..."` returns matching scenarios, not whole files
-
-Agents operate within a context window. Loading the full library wastes tokens.
 
 ## Validation
-
-The `speq` CLI enforces all the structural rules that this page describes:
 
 ```
 speq feature validate

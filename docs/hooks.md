@@ -32,7 +32,6 @@ Commit `.speq/` to the repository. Hook files are project-level configuration an
 
 ## Behavior
 
-- Hook content is authoritative. It can override any step of a skill workflow: the clarifying interview, the `plan-reviewer` loop, or TDD.
+- Hook content is authoritative. It can override any step of a skill workflow.
 - The skill always announces when it loads a hook file.
 - `/speq:audit` lists active hook files as an informational check.
-- `/speq:plan-pr` and `/speq:implement-pr` delegate whole steps to `/speq:plan`, `/speq:implement`, and `/speq:record`. Each of these skills loads its own hook file independently.

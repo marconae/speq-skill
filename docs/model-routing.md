@@ -4,7 +4,7 @@
 
 # Model Routing
 
-speq-skill routes work between a main session, workflow skills, and specialist sub-agents. The generated Claude and Codex plugin artifacts fix this routing.
+speq-skill routes work between a main session, workflow skills, and specialist sub-agents.
 
 ---
 
@@ -38,10 +38,6 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `adr-audit-agent` | `fable` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
 
-`/speq:plan-pr` and `/speq:implement-pr` run every git/`gh` operation directly, per `/speq:git-operations`, at their own orchestrator row above. No separate agent tier exists for git/GitHub operations.
-
-Agent colors follow the workflow phase: planning is blue (`planner-agent`) and cyan (`architecture-agent`), review is orange (`plan-reviewer`) and pink (`code-reviewer`), implementation is red (`implementer-agent`) and purple (`implementer-expert-agent`), recording is green (`recorder-agent`), and audit is yellow (`audit-agent` and `adr-audit-agent`, the one shared color because both are read-only workers of `/speq:audit`).
-
 ---
 
 ## Codex routing
@@ -65,8 +61,6 @@ Agent colors follow the workflow phase: planning is blue (`planner-agent`) and c
 | `architecture-agent` | `gpt-5.5` | `high` | Brownfield draft of `specs/architecture.md` for `/speq:mission` |
 | `adr-audit-agent` | `gpt-5.5` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
-
-`/speq:plan-pr` and `/speq:implement-pr` run every git/`gh` operation directly, per `/speq:git-operations`, at their own orchestrator row above. No separate agent tier exists for git/GitHub operations.
 
 ---
 

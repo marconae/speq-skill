@@ -22,14 +22,13 @@
 curl -fsSL https://raw.githubusercontent.com/marconae/speq-skill/main/install.sh | bash
 ```
 
-Then open Claude Code or Codex and start with the matching trigger: `/speq:mission` in Claude Code, or `$` in Codex.
+Then open Claude Code or Codex and start with the matching trigger: `/speq:mission` in Claude Code, or `$speq:mission` in Codex.
 
 <details>
 <summary>What does the installer do?</summary>
 
-- Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon); other platforms fall back to a source build
-- If building from source: installs the Rust toolchain if missing (via [rustup](https://rustup.rs/)) and builds `speq`
-- Provisions the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
+- Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon). On other platforms it stops and points to the [source build](./docs/installation.md#install-from-source)
+- Downloads the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
 - Registers `/speq:*` skills for Claude Code and `$`-triggered skill suggestions for Codex when available
@@ -91,7 +90,9 @@ It introduces a lightweight workflow for spec-driven development. It adds a CLI 
 
 Specs live in `specs/<domain>/<feature>/spec.md`. `specs/architecture.md` holds the current architecture. Plans stage in `specs/_plans/<plan-name>/`. The separation keeps your spec library clean while work is in progress.
 
-For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the same cycle headlessly against a `feat/<plan-name>` branch and PR — see [Headless PR Pipeline](./docs/headless-workflow.md).
+## Building Blocks for Agentic Workflows
+
+`/speq:plan-pr` and `/speq:implement-pr` are two building blocks for agentic workflows centered on pull requests. Each one orchestrates the planning, implementing, and recording skills: `/speq:plan-pr` runs planning and opens a draft PR on a `feat/<plan-name>` branch, and `/speq:implement-pr` runs implementing and recording on that branch. Humans stay on the loop by commenting on the pull request. See [Headless PR Pipeline](./docs/headless-workflow.md).
 
 ---
 
@@ -118,7 +119,7 @@ For autonomous pipelines use, `/speq:plan-pr` and `/speq:implement-pr` run the s
 
 ## Companions
 
-speq-skill works best with [Serena](https://github.com/oraios/serena) for code navigation, but both Serena and [Context7](https://github.com/upstash/context7) are optional. The skills work without them. The skills use each one when it is installed and skip it when it is not. speq-skill does not bundle either one. The installer only offers to set up Serena. See [MCP Servers](./docs/mcp-servers.md).
+speq-skill works well with [Serena](https://github.com/oraios/serena) for code navigation and [Context7](https://github.com/upstash/context7) for library documentation. Both are optional. The skills use each one when it is installed and skip it when it is not. See [MCP Servers](./docs/mcp-servers.md).
 
 > [!NOTE]
 > Serena and Context7 are separate open-source projects with their own licenses and terms available in the linked repositories. Context7 sends your documentation queries to a hosted service and offers a free-tier.

@@ -39,11 +39,11 @@
 - If the change touches behavior with no spec yet, the plan writes that feature's spec, including what the code does today
 - The library grows where you work
 
-## What if the plan turns out wrong while I implement it?
+## What if I want to revise a plan?
 
-- Run `/speq:plan <plan-name>` again to revise it before you record
-- `/speq:record` requires the verification report that `/speq:implement` writes
-- A plan that stays unrecorded does not change the permanent specs
+- Run `/speq:plan <plan-name>` again to revise a plan
+- Run `/speq:implement` to address the changes and update the verification report
+- Run `/speq:record` if the plan is complete
 
 ## Is the architecture documented?
 
@@ -51,7 +51,7 @@
 - `/speq:mission` creates it, and `/speq:record` keeps it current by merging architecture deltas from plans
 - Change the architecture through `/speq:plan`, not by editing the file
 
-## Where do I find the decisions taken?
+## Where do I find decisions?
 
 - Run `speq decision-log show` to print every accepted ADR. The files live in `specs/_decision/`
 - A plan in progress keeps its design choices in `specs/_plans/<plan-name>/decision-log.md`
@@ -63,8 +63,12 @@
 - Run `speq search query "<terms>"`, then `speq feature get <domain>/<feature>`
 - After you change a spec, run `speq feature validate`
 
-## How do I check that the library is healthy?
+## How do I check that the spec library is healthy?
 
 - Run `/speq:audit`
 - It reports problems with structure, ADRs, the mission, and unrecorded plans
 - It asks before each fix
+
+## How do I upgrade to a newer version?
+
+- Run `/speq:audit`

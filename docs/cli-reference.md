@@ -166,21 +166,13 @@ This command validates every fragment under `specs/_decision/`.
 speq decision-log validate
 ```
 
+See [Decision Log](./decision-log.md) for the full format reference.
+
 **Example**
 ```bash
 $ speq decision-log validate
 Permanent decision log validation passed.
 ```
-
-Checks:
-- The H1 of each fragment is `# Decisions: <plan-name>`
-- ADR headings follow `## ADR: <Title>`
-- Each ADR contains all required fields: `**ID:**`, `**Plan:**`, `**Status:**`, `### Context`, `### Decision`
-- `**ID:**` is a kebab-case slug, unique across every fragment
-- `**Status:**` is one of: `Accepted`, `Deprecated`, `Superseded by <slug>`
-- Every `**Supersedes:**` and `Superseded by <slug>` reference resolves to a slug defined somewhere in `specs/_decision/`
-- `### Options Considered` and `### Consequences` are optional. Their absence does not trigger errors
-- An absent or empty `specs/_decision/` directory passes
 
 ### `speq decision-log show`
 
@@ -203,7 +195,7 @@ $ speq decision-log show
 ...
 ```
 
-The command orders fragments by their numeric `NNN-` prefix. It breaks ties by filename. It prints ADRs within a fragment in the order that the fragment defines them.
+The command orders fragments by their numeric `NNN-` prefix and order within files.
 
 See [Decision Log](./decision-log.md) for the full format reference.
 
@@ -252,7 +244,7 @@ Indexed 42 scenarios.
 
 ### `speq search query`
 
-This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command prints an info notice on stderr, builds the index, and then prints the results on stdout.
+This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command triggers an index build and prints a notification.
 
 ```bash
 speq search query "<query>" [--limit <n>]
