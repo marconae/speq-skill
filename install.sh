@@ -13,6 +13,8 @@ CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 CODEX_SERENA_ADD="codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex"
 CLAUDE_SERENA_ADD="claude mcp add --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd"
 SERENA_CLI_INSTALL="uv tool install -p 3.13 serena-agent"
+# Commit id of the model repository that the installer downloads. Change it to change the model.
+EMBEDDING_MODEL_REVISION="d8c86521100d3556476a063fc2342036d45c106f"
 
 # Colors
 RED='\033[0;31m'
@@ -351,7 +353,7 @@ offer_mcp_servers() {
 }
 
 provision_embedding_model() {
-    local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main"
+    local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/$EMBEDDING_MODEL_REVISION"
 
     if [[ -n "${SPEQ_CACHE_DIR:-}" ]]; then
         local MODEL_DIR="${SPEQ_CACHE_DIR}/models"
@@ -362,43 +364,53 @@ provision_embedding_model() {
     fi
 
     local files=("model.onnx" "tokenizer.json")
+    local stamp="$MODEL_DIR/revision"
 
     local all_cached=true
     for filename in "${files[@]}"; do
         [[ -f "$MODEL_DIR/$filename" ]] || { all_cached=false; break; }
     done
-    if [[ "$all_cached" == true ]]; then
+    if [[ "$all_cached" == true && -f "$stamp" ]] \
+        && [[ "$(cat "$stamp")" == "$EMBEDDING_MODEL_REVISION" ]]; then
         info "Embedding model already provisioned in $MODEL_DIR"
         return 0
-    fi
-
-    # Drop any previously provisioned model files so upgrades always get a fresh copy
-    if [[ -d "$MODEL_DIR" ]]; then
-        for filename in "${files[@]}"; do
-            rm -f "$MODEL_DIR/$filename"
-        done
     fi
 
     info "Provisioning embedding model into $MODEL_DIR..."
     mkdir -p "$MODEL_DIR"
 
+    local urls=()
     for filename in "${files[@]}"; do
-        local dest="$MODEL_DIR/$filename"
-        local url
         case "$filename" in
-            model.onnx) url="$HUGGINGFACE_BASE/onnx/model.onnx" ;;
-            *)          url="$HUGGINGFACE_BASE/$filename" ;;
+            model.onnx) urls+=("$HUGGINGFACE_BASE/onnx/model.onnx") ;;
+            *)          urls+=("$HUGGINGFACE_BASE/$filename") ;;
         esac
-        if ! curl -fsSL "$url" -o "${dest}.tmp"; then
-            rm -f "${dest}.tmp"
+    done
+
+    local i
+    for i in "${!files[@]}"; do
+        if ! curl -fsSL "${urls[$i]}" -o "$MODEL_DIR/${files[$i]}.$$.tmp"; then
+            local failed="${files[$i]}"
+            for filename in "${files[@]}"; do
+                rm -f "$MODEL_DIR/$filename.$$.tmp"
+            done
             echo ""
-            echo -e "${RED}Error:${NC} Failed to download $filename from HuggingFace."
-            echo "  To provision manually: curl -fsSL \"$url\" -o \"$MODEL_DIR/$filename\""
+            echo -e "${RED}Error:${NC} Failed to download $failed from HuggingFace."
+            echo "  To provision manually:"
+            for i in "${!files[@]}"; do
+                echo "    curl -fsSL \"${urls[$i]}\" -o \"$MODEL_DIR/${files[$i]}\""
+            done
+            echo "    printf '%s\\n' \"$EMBEDDING_MODEL_REVISION\" > \"$stamp\""
             echo ""
             exit 1
         fi
-        mv "${dest}.tmp" "$dest"
     done
+
+    rm -f "$stamp"
+    for filename in "${files[@]}"; do
+        mv "$MODEL_DIR/$filename.$$.tmp" "$MODEL_DIR/$filename"
+    done
+    printf '%s\n' "$EMBEDDING_MODEL_REVISION" > "$stamp"
 
     info "Embedding model provisioned in $MODEL_DIR"
 }

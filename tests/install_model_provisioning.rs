@@ -31,7 +31,8 @@ fn model_stub_dir() -> PathBuf {
 /// The fake honors the exact argument shape `provision_embedding_model` uses
 /// (`curl -fsSL <url> -o <output>`). It resolves the requested file by URL
 /// basename inside `$FAKE_CURL_FIXTURE_DIR`. When the fixture file is absent it
-/// exits non-zero without creating the output path, mirroring `curl -f`.
+/// exits non-zero without creating the output path, mirroring `curl -f`. When
+/// `$FAKE_CURL_LOG` is set, the fake appends each requested URL to that file.
 fn install_fake_curl(dir: &Path) {
     let script = r#"#!/usr/bin/env bash
 url=""
@@ -51,6 +52,9 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+if [[ -n "${FAKE_CURL_LOG:-}" ]]; then
+    echo "$url" >> "$FAKE_CURL_LOG"
+fi
 filename=$(basename "$url")
 src="${FAKE_CURL_FIXTURE_DIR}/${filename}"
 if [[ -f "$src" ]]; then
@@ -91,6 +95,16 @@ esac
 /// `fixture_dir` is the directory the fake curl copies from; pointing it at a
 /// directory without the model files makes downloads fail.
 fn run_provisioning(cache_dir: &Path, fixture_dir: &Path) -> std::process::Output {
+    run_provisioning_logged(cache_dir, fixture_dir, None)
+}
+
+/// Like [`run_provisioning`], and when `curl_log` is given the fake `curl`
+/// appends every requested URL to that file.
+fn run_provisioning_logged(
+    cache_dir: &Path,
+    fixture_dir: &Path,
+    curl_log: Option<&Path>,
+) -> std::process::Output {
     let fake_bin = TempDir::new().unwrap();
     install_fake_curl(fake_bin.path());
 
@@ -102,14 +116,62 @@ fn run_provisioning(cache_dir: &Path, fixture_dir: &Path) -> std::process::Outpu
         install_script().display()
     );
 
-    Command::new("bash")
-        .args(["-c", &command])
+    let mut cmd = Command::new("bash");
+    cmd.args(["-c", &command])
         .env("PATH", patched_path)
         .env("FAKE_CURL_FIXTURE_DIR", fixture_dir)
-        .env("SPEQ_CACHE_DIR", cache_dir)
-        .output()
-        .expect("run provisioning")
+        .env("SPEQ_CACHE_DIR", cache_dir);
+    match curl_log {
+        Some(log) => cmd.env("FAKE_CURL_LOG", log),
+        None => cmd.env_remove("FAKE_CURL_LOG"),
+    };
+    cmd.output().expect("run provisioning")
 }
+
+/// Source `install.sh` and read the `EMBEDDING_MODEL_REVISION` it defines.
+fn pinned_revision() -> String {
+    let command = format!(
+        "source {} && printf '%s' \"$EMBEDDING_MODEL_REVISION\"",
+        install_script().display()
+    );
+    let output = Command::new("bash")
+        .args(["-c", &command])
+        .output()
+        .expect("read pinned revision");
+    assert!(output.status.success(), "sourcing install.sh failed");
+    String::from_utf8(output.stdout).expect("revision is utf-8")
+}
+
+/// Copy the stub model files into `<cache>/models/` and write `stamp` (when
+/// given) into `models/revision`. Returns the model directory.
+fn cache_stub_model(cache: &Path, stamp: Option<&str>) -> PathBuf {
+    let model_dir = cache.join("models");
+    fs::create_dir_all(&model_dir).unwrap();
+    for filename in ["model.onnx", "tokenizer.json"] {
+        fs::copy(model_stub_dir().join(filename), model_dir.join(filename)).unwrap();
+    }
+    if let Some(stamp) = stamp {
+        fs::write(model_dir.join("revision"), format!("{stamp}\n")).unwrap();
+    }
+    model_dir
+}
+
+fn read_stamp(model_dir: &Path) -> String {
+    fs::read_to_string(model_dir.join("revision"))
+        .expect("read revision stamp")
+        .trim()
+        .to_string()
+}
+
+fn requested_urls(log: &Path) -> Vec<String> {
+    fs::read_to_string(log)
+        .unwrap_or_default()
+        .lines()
+        .map(str::to_string)
+        .collect()
+}
+
+const OTHER_REVISION: &str = "0123456789abcdef0123456789abcdef01234567";
 
 /// Run `provision_embedding_model` with `curl` and `uname` faked, `$HOME`
 /// pinned to `home_dir`, and `$SPEQ_CACHE_DIR` left unset so the installer's
@@ -166,11 +228,7 @@ fn installer_provisions_model_on_clean_machine() {
 #[test]
 fn installer_skips_provisioning_when_model_cached() {
     let cache = TempDir::new().unwrap();
-    let model_dir = cache.path().join("models");
-    fs::create_dir_all(&model_dir).unwrap();
-    for filename in ["model.onnx", "tokenizer.json"] {
-        fs::copy(model_stub_dir().join(filename), model_dir.join(filename)).unwrap();
-    }
+    cache_stub_model(cache.path(), Some(&pinned_revision()));
 
     // Point the fake curl at an empty dir so any download attempt would fail —
     // the test passes only if provisioning is skipped entirely.
@@ -289,4 +347,117 @@ fn installer_provisions_model_into_linux_cache_dir() {
     let model_dir = home.path().join(".cache").join("speq").join("models");
     assert!(model_dir.join("model.onnx").exists());
     assert!(model_dir.join("tokenizer.json").exists());
+}
+
+#[test]
+fn installer_downloads_model_from_pinned_revision() {
+    let cache = TempDir::new().unwrap();
+    let log_dir = TempDir::new().unwrap();
+    let log = log_dir.path().join("curl.log");
+    let pin = pinned_revision();
+
+    let output = run_provisioning_logged(cache.path(), &model_stub_dir(), Some(&log));
+
+    assert!(
+        output.status.success(),
+        "provisioning failed: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(pin.len(), 40, "pin must be a 40-character commit id: {pin}");
+    assert!(
+        pin.chars()
+            .all(|c| c.is_ascii_digit() || ('a'..='f').contains(&c)),
+        "pin must be lowercase hexadecimal: {pin}"
+    );
+
+    let urls = requested_urls(&log);
+    assert_eq!(urls.len(), 2, "expected two downloads, got: {urls:?}");
+    for url in &urls {
+        assert!(
+            url.contains(&format!("/resolve/{pin}/")),
+            "URL is not pinned to the revision: {url}"
+        );
+    }
+    assert_eq!(read_stamp(&cache.path().join("models")), pin);
+}
+
+#[test]
+fn installer_redownloads_model_when_revision_stamp_is_missing_or_differs() {
+    let pin = pinned_revision();
+
+    for stamp in [None, Some(OTHER_REVISION)] {
+        let cache = TempDir::new().unwrap();
+        let log_dir = TempDir::new().unwrap();
+        let log = log_dir.path().join("curl.log");
+        let model_dir = cache_stub_model(cache.path(), stamp);
+
+        let output = run_provisioning_logged(cache.path(), &model_stub_dir(), Some(&log));
+
+        assert!(
+            output.status.success(),
+            "provisioning failed for stamp {stamp:?}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let urls = requested_urls(&log);
+        assert!(
+            urls.iter().any(|u| u.ends_with("/onnx/model.onnx")),
+            "model.onnx was not requested for stamp {stamp:?}: {urls:?}"
+        );
+        assert!(
+            urls.iter().any(|u| u.ends_with("/tokenizer.json")),
+            "tokenizer.json was not requested for stamp {stamp:?}: {urls:?}"
+        );
+        assert_eq!(read_stamp(&model_dir), pin);
+    }
+}
+
+#[test]
+fn installer_keeps_cached_model_when_download_fails() {
+    let cache = TempDir::new().unwrap();
+    let model_dir = cache_stub_model(cache.path(), Some(OTHER_REVISION));
+    fs::write(model_dir.join("model.onnx"), "cached model").unwrap();
+    fs::write(model_dir.join("tokenizer.json"), "cached tokenizer").unwrap();
+
+    let partial_source = TempDir::new().unwrap();
+    fs::copy(
+        model_stub_dir().join("model.onnx"),
+        partial_source.path().join("model.onnx"),
+    )
+    .unwrap();
+
+    let output = run_provisioning(cache.path(), partial_source.path());
+
+    assert!(
+        !output.status.success(),
+        "provisioning should fail when tokenizer.json cannot be downloaded"
+    );
+    assert_eq!(
+        fs::read_to_string(model_dir.join("model.onnx")).unwrap(),
+        "cached model"
+    );
+    assert_eq!(
+        fs::read_to_string(model_dir.join("tokenizer.json")).unwrap(),
+        "cached tokenizer"
+    );
+    assert_eq!(read_stamp(&model_dir), OTHER_REVISION);
+
+    let leftover: Vec<_> = fs::read_dir(&model_dir)
+        .unwrap()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_name().to_string_lossy().ends_with(".tmp"))
+        .collect();
+    assert!(
+        leftover.is_empty(),
+        "temporary file left behind: {leftover:?}"
+    );
+
+    let combined = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        combined.contains("printf '%s\\n'") && combined.contains("/revision"),
+        "expected manual stamp command, got: {combined}"
+    );
 }
