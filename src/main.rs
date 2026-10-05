@@ -35,8 +35,13 @@ fn handle_search_command(command: cli::SearchCommands) -> ExitCode {
             }
         }
         cli::SearchCommands::Query { query, limit } => {
-            let announce_build = || {
-                eprintln!("Info: no search index found. Building it now, this may take a while.")
+            let announce_build = |reason| match reason {
+                search::BuildReason::MissingIndex => eprintln!(
+                    "Info: no search index found. Building it now, this may take a while."
+                ),
+                search::BuildReason::OutdatedIndex => eprintln!(
+                    "Info: search index is outdated. Rebuilding it now, this may take a while."
+                ),
             };
             match search::search_specs(&query, limit, announce_build) {
                 Ok(results) => {

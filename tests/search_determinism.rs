@@ -1,7 +1,8 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
 use serial_test::serial;
-use std::sync::OnceLock;
+
+mod common;
 
 /// Fixture with three features whose scenario content is byte-identical, so
 /// their embeddings — and thus their cosine-similarity scores against any
@@ -12,41 +13,6 @@ const QUERY: &str = "identical setup action responds identically";
 
 fn cmd() -> Command {
     Command::new(assert_cmd::cargo::cargo_bin!("speq"))
-}
-
-static MODEL_CACHED: OnceLock<()> = OnceLock::new();
-
-/// Provision the embedding-model files into the system model cache once per
-/// test process, mirroring `tests/cli_integration.rs::ensure_model_cached`.
-/// The search path uses the real model — there is no mock.
-fn ensure_model_cached() {
-    MODEL_CACHED.get_or_init(|| {
-        let model_dir = speq_skill::search::get_model_dir();
-        std::fs::create_dir_all(&model_dir).expect("create model dir");
-        let files = [
-            (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/onnx/model.onnx",
-                "model.onnx",
-            ),
-            (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/tokenizer.json",
-                "tokenizer.json",
-            ),
-        ];
-        for (url, filename) in files {
-            let dest = model_dir.join(filename);
-            if dest.exists() {
-                continue;
-            }
-            let tmp = format!("{}.tmp", dest.display());
-            let status = std::process::Command::new("curl")
-                .args(["-fsSL", url, "-o", &tmp])
-                .status()
-                .expect("invoke curl");
-            assert!(status.success(), "Failed to download {filename}");
-            std::fs::rename(&tmp, &dest).expect("rename model file into place");
-        }
-    });
 }
 
 /// Resolve the system cache path as a `String` for passing via `SPEQ_CACHE_DIR`.
@@ -65,7 +31,7 @@ fn system_cache_dir() -> String {
 #[test]
 #[serial]
 fn search_ranking_is_deterministic() {
-    ensure_model_cached();
+    common::ensure_model_cached();
     let cache_dir = system_cache_dir();
 
     cmd()

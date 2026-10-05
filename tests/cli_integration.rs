@@ -3,8 +3,9 @@ use predicates::prelude::*;
 use serial_test::serial;
 use std::fs;
 use std::path::Path;
-use std::sync::OnceLock;
 use tempfile::TempDir;
+
+mod common;
 
 fn setup_test_specs() -> TempDir {
     let tmp = TempDir::new().unwrap();
@@ -62,48 +63,6 @@ The system SHALL validate documents.
 
 fn cmd() -> Command {
     Command::new(assert_cmd::cargo::cargo_bin!("speq"))
-}
-
-static MODEL_CACHED: OnceLock<()> = OnceLock::new();
-
-/// Provision the embedding-model files into the system model cache once per
-/// test process.
-///
-/// On the first call it downloads `model.onnx` and `tokenizer.json` from
-/// HuggingFace into `speq_skill::search::get_model_dir()` (the same path the
-/// binary reads), mirroring what `install.sh`'s `provision_embedding_model`
-/// does during installation. Subsequent calls and runs are a no-op because the
-/// files persist on disk. The download is intentionally written to the system
-/// cache, not a TempDir, so tract-backed search tests find a model without
-/// per-test downloads.
-fn ensure_model_cached() {
-    MODEL_CACHED.get_or_init(|| {
-        let model_dir = speq_skill::search::get_model_dir();
-        std::fs::create_dir_all(&model_dir).expect("create model dir");
-        let files = [
-            (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/onnx/model.onnx",
-                "model.onnx",
-            ),
-            (
-                "https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/main/tokenizer.json",
-                "tokenizer.json",
-            ),
-        ];
-        for (url, filename) in files {
-            let dest = model_dir.join(filename);
-            if dest.exists() {
-                continue;
-            }
-            let tmp = format!("{}.tmp", dest.display());
-            let status = std::process::Command::new("curl")
-                .args(["-fsSL", url, "-o", &tmp])
-                .status()
-                .expect("invoke curl");
-            assert!(status.success(), "Failed to download {filename}");
-            std::fs::rename(&tmp, &dest).expect("rename model file into place");
-        }
-    });
 }
 
 /// Resolve the system cache path as a `String` for passing via `SPEQ_CACHE_DIR`.
@@ -358,7 +317,7 @@ mod search {
     #[test]
     #[serial]
     fn auto_indexes_on_first_search() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
 
@@ -376,7 +335,7 @@ mod search {
     #[test]
     #[serial]
     fn index_builds_successfully() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
 
@@ -393,7 +352,7 @@ mod search {
     #[test]
     #[serial]
     fn search_finds_similar_scenarios() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
 
@@ -418,7 +377,7 @@ mod search {
     #[test]
     #[serial]
     fn search_with_limit() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
 
@@ -442,7 +401,7 @@ mod search {
     #[test]
     #[serial]
     fn search_no_matches() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
 
@@ -487,7 +446,7 @@ mod search {
     #[test]
     #[serial]
     fn search_model_and_index_cache_layout() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let tmp = setup_test_specs();
         let cache_dir = system_cache_dir();
         let model_dir = speq_skill::search::get_model_dir();
@@ -514,7 +473,7 @@ mod search {
     #[test]
     #[serial]
     fn index_keeps_inline_code_in_scenario_text() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let cache_dir = system_cache_dir();
         let tmp = TempDir::new().unwrap();
         let feature_dir = tmp.path().join("specs/demo/char-type");
@@ -667,7 +626,7 @@ A test feature.
     #[test]
     #[serial]
     fn record_rebuilds_search_index() {
-        ensure_model_cached();
+        common::ensure_model_cached();
         let cache_dir = system_cache_dir();
         let tmp = TempDir::new().unwrap();
         let specs = tmp.path().join("specs");
