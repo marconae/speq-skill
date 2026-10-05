@@ -76,11 +76,12 @@ The CLI SHALL provide a command to record approved plan deltas into permanent fe
 
 ### Scenario: Rebuild index after recording
 
-* *GIVEN* a successful recording of plan `my-plan`
-* *AND* a search index exists
-* *WHEN* the recording completes
-* *THEN* the system SHALL rebuild the search index
-* *AND* the system SHALL display the number of scenarios indexed
+* *GIVEN* a search index exists whose index format and model revision equal the current ones
+* *WHEN* a recording of plan `my-plan` that changes one scenario, adds one scenario, and removes one scenario completes successfully
+* *THEN* the system SHALL rebuild the search index, generating embeddings only for the scenario the recording changed and the scenario it added
+* *AND* the system SHALL keep the stored embedding of every other scenario
+* *AND* the index MUST NOT contain the scenario the recording removed
+* *AND* the system SHALL display the total number of scenarios in the index
 
 ### Scenario: Leave every target spec unchanged when one delta spec fails
 

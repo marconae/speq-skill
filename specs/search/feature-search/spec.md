@@ -6,29 +6,14 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 
 * Command syntax: `speq search query <query>` for searching, `speq search index` for rebuilding
 * Search uses vector embeddings for semantic similarity
-* The cache directory is `$SPEQ_CACHE_DIR` when it is set. Otherwise it is the platform cache directory joined with `speq`: `${XDG_CACHE_HOME:-$HOME/.cache}/speq` on Linux
-* The cache directory contains:
-  - `models/` - the embedding model files `model.onnx` and `tokenizer.json`
-  - `indexes/` - binary index files, one per project
-* Index file named after project path slug (e.g., `-home-user-code-my-project.idx`)
-* Slug format: absolute project path with `/` replaced by `-` (e.g., `/home/user/code/my-project` → `-home-user-code-my-project`)
-* Searchable units: scenarios (domain/feature/scenario granularity)
+* The `search/search-index` feature defines the cache directory, the reusable index, and the outdated index
+* The cache directory contains `models/`, which holds the embedding model files `model.onnx` and `tokenizer.json`
 * Results ranked by cosine similarity
 * If no index exists when searching, the system SHALL automatically build it
 * Exit code 0 regardless of match count
 * The embedding model runs entirely in pure Rust with no runtime dependency, so behavior is identical on every supported platform
 
 ## Scenarios
-
-### Scenario: Build search index
-
-* *GIVEN* a specs directory with feature specifications
-* *WHEN* the user runs `speq search index`
-* *THEN* the system SHALL parse all spec files
-* *AND* the system SHALL generate embeddings for each scenario
-* *AND* the system SHALL store vectors in binary index file named after project slug
-* *AND* the system SHALL display the number of scenarios indexed
-* *AND* the system SHALL exit with code 0
 
 ### Scenario: Search semantically similar scenarios
 
@@ -99,16 +84,20 @@ The CLI SHALL provide semantic search for feature specifications using vector em
 * *AND* the system MUST NOT require, load, or dynamically link an ONNX Runtime library
 * *AND* the system SHALL exit with code 0
 
-### Scenario: Index inline code in scenario text
-
-* *GIVEN* a scenario whose name and steps contain inline code spans
-* *WHEN* the user runs `speq search index`
-* *THEN* the indexed text of that scenario SHALL contain each inline code span wrapped in backticks
-
 ### Scenario: Existing index prints no build notice
 
-* *GIVEN* a search index exists for the project
+* *GIVEN* a reusable search index exists for the project
 * *WHEN* the user runs `speq search query "validation"`
 * *THEN* the system MUST NOT print the `Info: no search index found.` notice
+* *AND* the system MUST NOT print the `Info: search index is outdated.` notice
 * *AND* the system SHALL execute the search query against the existing index
+* *AND* the system SHALL exit with code 0
+
+### Scenario: Outdated index is rebuilt before searching
+
+* *GIVEN* an outdated search index exists for the project
+* *WHEN* the user runs `speq search query "validation"`
+* *THEN* the system SHALL print the notice `Info: search index is outdated. Rebuilding it now, this may take a while.` to stderr instead of the `Info: no search index found.` notice
+* *AND* the system SHALL rebuild the search index and execute the search query
+* *AND* the system SHALL print the results to stdout without the notice
 * *AND* the system SHALL exit with code 0
