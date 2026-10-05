@@ -28,7 +28,7 @@ Then open Claude Code or Codex and start with the matching trigger: `/speq:missi
 <summary>What does the installer do?</summary>
 
 - Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon). On other platforms it stops and points to the [source build](./docs/installation.md#install-from-source)
-- Downloads the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
+- Downloads the embedding model (`snowflake-arctic-embed-xs`) into the platform cache directory for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
 - Registers `/speq:*` skills for Claude Code and `$`-triggered skill suggestions for Codex when available

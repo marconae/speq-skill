@@ -27,10 +27,10 @@ Open Claude Code or Codex. Start with `/speq:mission` in Claude Code, or type `$
 | Codex plugin payload | `~/.speq-skill/codex/plugins/speq-skill/` |
 | Codex marketplace registration | `~/.codex/config.toml` (`speq-skill-local`) |
 | Codex skills | `$CODEX_HOME/skills/speq-*` or `~/.codex/skills/speq-*` |
-| Embeddings model ([snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs), ~86MB) | `~/.cache/speq/models/` (or `$SPEQ_CACHE_DIR/models/`) |
+| Embeddings model ([snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs), ~86MB) | `~/Library/Caches/speq/models/` on macOS, `~/.cache/speq/models/` on Linux (or `$SPEQ_CACHE_DIR/models/`) |
 
 - It downloads a pre-built `speq` binary (Linux x86_64/ARM64, macOS Apple Silicon).
-- It downloads the embedding model (`snowflake-arctic-embed-xs`) into `~/.cache/speq/models/` for semantic search
+- It downloads the embedding model (`snowflake-arctic-embed-xs`) into the platform cache directory (`~/Library/Caches/speq/models/` on macOS, `~/.cache/speq/models/` on Linux) for semantic search
 - It installs the plugin for Claude Code and Codex, and registers the local Codex marketplace when Codex is installed.
 - It asks before it installs Serena, when Serena is not registered yet.
 
