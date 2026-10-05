@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.26.0
+
+- Improved semantic search annd performance of index building.
+
 ## 0.25.0
 
 - `speq search query` prints a notice on stderr when it builds a missing index first.

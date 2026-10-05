@@ -16,7 +16,12 @@ Open Claude Code or Codex. Start with `/speq:mission` in Claude Code, or type `$
 
 - macOS or Linux
 - Claude Code CLI or Codex CLI/App, installed and configured
-- Optional: [Serena](https://github.com/oraios/serena), installed globally. See [MCP Servers](./mcp-servers.md). `uv` is needed only if the `serena` command is missing and you let the installer install it. Get it from [astral.sh/uv](https://astral.sh/uv/).
+- At least 1 GB of memory for search index building
+
+## Companions
+
+- Optional: [Serena MCP](https://github.com/oraios/serena), installed globally. See [MCP Servers](./mcp-servers.md). `uv` ([astral.sh/uv](https://astral.sh/uv/)) is needed only if the `serena` command is missing and you let the installer install it.
+- Optional: [Context7 MCP](https://github.com/upstash/context7), installed globally. The installer does not install it. See [MCP Servers](./mcp-servers.md). Context7 sends your documentation queries to a hosted service. Without it, library API questions go to web search.
 
 ## What the installer does
 

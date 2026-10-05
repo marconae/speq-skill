@@ -242,9 +242,13 @@ Building search index...
 Indexed 42 scenarios.
 ```
 
+`Indexed N scenarios.` reports the total number of scenarios in the index. The command exits with code 1 when the `specs/` directory does not exist.
+
+A rebuild embeds only new and changed scenarios. Each unchanged scenario keeps the vector that the index stores for it. speq rebuilds an outdated index in full.
+
 ### `speq search query`
 
-This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command triggers an index build and prints a notification.
+This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command builds the index first and prints `Info: no search index found. Building it now, this may take a while.` on stderr. When the index is outdated, the command rebuilds it first and prints `Info: search index is outdated. Rebuilding it now, this may take a while.` on stderr. [`speq search index`](#speq-search-index) describes when an index is outdated.
 
 ```bash
 speq search query "<query>" [--limit <n>]
