@@ -2,7 +2,7 @@
 
 ## 0.26.0
 
-- Improved semantic search annd performance of index building.
+- Improved semantic search and performance of index building.
 
 ## 0.25.0
 
