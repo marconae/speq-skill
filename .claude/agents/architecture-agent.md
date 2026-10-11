@@ -4,6 +4,10 @@ description: Architecture draft worker for spec-driven development spawned by th
 model: opus
 effort: high
 color: cyan
+skills:
+  - speq-code-tools
+  - speq-cli
+  - speq-writing-guardrails
 ---
 
 # Architecture Draft Sub-Agent

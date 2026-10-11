@@ -13,8 +13,6 @@ CODEX_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills"
 CODEX_SERENA_ADD="codex mcp add serena -- serena start-mcp-server --project-from-cwd --context=codex"
 CLAUDE_SERENA_ADD="claude mcp add --scope user serena -- serena start-mcp-server --context claude-code --project-from-cwd"
 SERENA_CLI_INSTALL="uv tool install -p 3.13 serena-agent"
-# Commit id of the model repository that the installer downloads. Change it to change the model.
-EMBEDDING_MODEL_REVISION="d8c86521100d3556476a063fc2342036d45c106f"
 
 # Colors
 RED='\033[0;31m'
@@ -256,18 +254,6 @@ build_from_source() {
     install_codex_skills
 }
 
-# Resolve the platform-native cache directory, mirroring the `dirs` crate's
-# split used by the speq binary's own get_cache_path(): macOS uses
-# ~/Library/Caches, everything else follows the XDG convention.
-default_cache_dir() {
-    local os
-    os=$(uname -s)
-    case "$os" in
-        Darwin) echo "$HOME/Library/Caches" ;;
-        *)      echo "${XDG_CACHE_HOME:-$HOME/.cache}" ;;
-    esac
-}
-
 # Serena comes from the user's global install. The helpers below detect it and
 # offer to install or enable it. They never install silently. Context7 is not
 # managed here: the skills use it when it is there.
@@ -352,69 +338,6 @@ offer_mcp_servers() {
     return 0
 }
 
-provision_embedding_model() {
-    local HUGGINGFACE_BASE="https://huggingface.co/Snowflake/snowflake-arctic-embed-xs/resolve/$EMBEDDING_MODEL_REVISION"
-
-    if [[ -n "${SPEQ_CACHE_DIR:-}" ]]; then
-        local MODEL_DIR="${SPEQ_CACHE_DIR}/models"
-    else
-        local cache_dir
-        cache_dir=$(default_cache_dir)
-        local MODEL_DIR="${cache_dir}/speq/models"
-    fi
-
-    local files=("model.onnx" "tokenizer.json")
-    local stamp="$MODEL_DIR/revision"
-
-    local all_cached=true
-    for filename in "${files[@]}"; do
-        [[ -f "$MODEL_DIR/$filename" ]] || { all_cached=false; break; }
-    done
-    if [[ "$all_cached" == true && -f "$stamp" ]] \
-        && [[ "$(cat "$stamp")" == "$EMBEDDING_MODEL_REVISION" ]]; then
-        info "Embedding model already provisioned in $MODEL_DIR"
-        return 0
-    fi
-
-    info "Provisioning embedding model into $MODEL_DIR..."
-    mkdir -p "$MODEL_DIR"
-
-    local urls=()
-    for filename in "${files[@]}"; do
-        case "$filename" in
-            model.onnx) urls+=("$HUGGINGFACE_BASE/onnx/model.onnx") ;;
-            *)          urls+=("$HUGGINGFACE_BASE/$filename") ;;
-        esac
-    done
-
-    local i
-    for i in "${!files[@]}"; do
-        if ! curl -fsSL "${urls[$i]}" -o "$MODEL_DIR/${files[$i]}.$$.tmp"; then
-            local failed="${files[$i]}"
-            for filename in "${files[@]}"; do
-                rm -f "$MODEL_DIR/$filename.$$.tmp"
-            done
-            echo ""
-            echo -e "${RED}Error:${NC} Failed to download $failed from HuggingFace."
-            echo "  To provision manually:"
-            for i in "${!files[@]}"; do
-                echo "    curl -fsSL \"${urls[$i]}\" -o \"$MODEL_DIR/${files[$i]}\""
-            done
-            echo "    printf '%s\\n' \"$EMBEDDING_MODEL_REVISION\" > \"$stamp\""
-            echo ""
-            exit 1
-        fi
-    done
-
-    rm -f "$stamp"
-    for filename in "${files[@]}"; do
-        mv "$MODEL_DIR/$filename.$$.tmp" "$MODEL_DIR/$filename"
-    done
-    printf '%s\n' "$EMBEDDING_MODEL_REVISION" > "$stamp"
-
-    info "Embedding model provisioned in $MODEL_DIR"
-}
-
 # Check if ~/.local/bin is in PATH
 check_path() {
     if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
@@ -451,9 +374,6 @@ main() {
 
     # Serena comes from the global install
     offer_mcp_servers
-
-    # Provision embedding model
-    provision_embedding_model
 
     # Post-install checks
     check_path

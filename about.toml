@@ -5,8 +5,6 @@
 accepted = [
     "MIT",
     "Apache-2.0",
-    "Zlib",
-    "MPL-2.0",
     "Unicode-3.0",
 ]
 

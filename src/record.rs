@@ -90,15 +90,6 @@ impl DeltaAnchor {
             DeltaAnchor::Unrecognized => "no recognized anchor".to_string(),
         }
     }
-
-    fn note_heading(&self) -> String {
-        match self {
-            DeltaAnchor::Scenario(title) => format!("Scenario: {title}"),
-            DeltaAnchor::Background => "Background".to_string(),
-            DeltaAnchor::Description => "Feature description".to_string(),
-            DeltaAnchor::Unrecognized => "no recognized anchor".to_string(),
-        }
-    }
 }
 
 /// One `<!-- DELTA:* -->` block parsed out of a delta spec.
@@ -133,9 +124,8 @@ pub fn record_plan(specs_base: &Path, plan_name: &str) -> Result<Vec<String>, Re
     let targets = plan_targets(specs_base, &plan_dir)?;
 
     check_plan_anchors(&targets)?;
-    let (merged_specs, prose_changes) = merge_plan(&targets)?;
+    let merged_specs = merge_plan(&targets)?;
     write_specs(&merged_specs)?;
-    write_prose_realignment_note(&plan_dir, plan_name, &prose_changes)?;
     archive_plan(specs_base, &plan_dir, plan_name)?;
 
     Ok(targets.into_iter().map(|target| target.feature).collect())
@@ -206,31 +196,21 @@ fn check_plan_anchors(targets: &[DeltaTarget]) -> Result<(), RecordError> {
     Err(RecordError::InvalidDeltaAnchor(violations.join("\n")))
 }
 
-/// Every merged spec, paired with the `ProseChange` values found across the plan.
-type MergedPlan = (Vec<(PathBuf, String)>, Vec<ProseChange>);
-
 /// Phase 2: merge every delta spec of the plan into memory, writing nothing.
-///
-/// Also collects every `ProseChange` across the plan, so the caller can write
-/// the prose-realignment note once the merge phase is known to succeed.
-fn merge_plan(targets: &[DeltaTarget]) -> Result<MergedPlan, RecordError> {
+fn merge_plan(targets: &[DeltaTarget]) -> Result<Vec<(PathBuf, String)>, RecordError> {
     let mut merged_specs = Vec::new();
-    let mut prose_changes = Vec::new();
 
     for target in targets {
         let delta = read_spec(&target.delta_path)?;
 
         let merged = if target.target_spec.exists() {
             let existing = read_spec(&target.target_spec)?;
-            let (merged, changes) = merge_delta_tracked(&target.feature, &existing, &delta)
-                .map_err(|error| match error {
-                    RecordError::InvalidDeltaAnchor(message) => RecordError::InvalidDeltaAnchor(
-                        format!("{}: {message}", target.delta_path.display()),
-                    ),
-                    other => other,
-                })?;
-            prose_changes.extend(changes);
-            merged
+            merge_delta(&existing, &delta).map_err(|error| match error {
+                RecordError::InvalidDeltaAnchor(message) => RecordError::InvalidDeltaAnchor(
+                    format!("{}: {message}", target.delta_path.display()),
+                ),
+                other => other,
+            })?
         } else {
             strip_delta_markers(&delta)
         };
@@ -238,7 +218,7 @@ fn merge_plan(targets: &[DeltaTarget]) -> Result<MergedPlan, RecordError> {
         merged_specs.push((target.target_spec.clone(), merged));
     }
 
-    Ok((merged_specs, prose_changes))
+    Ok(merged_specs)
 }
 
 /// Phase 3: commit the merged specs to disk.
@@ -256,49 +236,6 @@ fn write_specs(merged_specs: &[(PathBuf, String)]) -> Result<(), RecordError> {
     }
 
     Ok(())
-}
-
-/// Records Background and Feature-description changes as local evidence.
-///
-/// Writes nothing when the plan changed no prose section, so a plan whose
-/// deltas touch only scenarios leaves no note behind. The note is written
-/// before the plan directory is archived, so the existing `fs::rename` in
-/// `archive_plan` carries it into `specs/_recorded/` with the rest of the plan.
-fn write_prose_realignment_note(
-    plan_dir: &Path,
-    plan_name: &str,
-    changes: &[ProseChange],
-) -> Result<(), RecordError> {
-    if changes.is_empty() {
-        return Ok(());
-    }
-
-    let notes_dir = plan_dir.join("notes");
-    fs::create_dir_all(&notes_dir).map_err(|_| RecordError::DirCreateError {
-        path: notes_dir.display().to_string(),
-    })?;
-
-    let note_path = notes_dir.join("prose-realignment.md");
-    fs::write(
-        &note_path,
-        format_prose_realignment_note(plan_name, changes),
-    )
-    .map_err(|_| RecordError::FileWriteError {
-        path: note_path.display().to_string(),
-    })
-}
-
-fn format_prose_realignment_note(plan_name: &str, changes: &[ProseChange]) -> String {
-    let mut note = format!("# Prose Realignment: {plan_name}\n");
-
-    for change in changes {
-        note.push_str(&format!(
-            "\n## {}: {}\n\n**Before:**\n\n```\n{}\n```\n\n**After:**\n\n```\n{}\n```\n",
-            change.feature, change.anchor, change.before, change.after
-        ));
-    }
-
-    note
 }
 
 /// Phase 4: move the plan directory under the next `_recorded/NNN-<plan>` number.
@@ -562,44 +499,18 @@ fn repeated_anchor_messages(blocks: &[DeltaBlock]) -> Vec<String> {
         .collect()
 }
 
-/// A prose section of a feature spec that a merge replaced, and what replaced it.
-///
-/// Produced for `## Background` and `# Feature` anchors only, because those are
-/// the sections a delta rewrites wholesale rather than adds or drops. The merge
-/// returns these instead of writing them, so the audit trail is the caller's
-/// decision and the merge stays free of I/O.
-///
-/// `anchor` names the replaced section the way a note heading reads it, not the
-/// way the delta file spells it, so a caller writes it out without stripping
-/// heading markup.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ProseChange {
-    pub feature: String,
-    pub anchor: String,
-    pub before: String,
-    pub after: String,
-}
-
-/// Merge every delta block of `delta` into `existing`, naming the prose it replaced.
-///
-/// `feature` is the `<domain>/<feature>` path the delta targets. It identifies the
-/// returned `ProseChange` values and influences no merge decision, so a caller with
-/// no feature path passes an empty one.
+/// Merge every delta block of `delta` into `existing`.
 ///
 /// Which `(DeltaKind, DeltaAnchor)` pairs are legal belongs to `check_anchor_rules`,
 /// which runs over every block before the first block is applied. What is left to
 /// decide per block is therefore one behavior per marker kind: `New` appends,
 /// `Changed` replaces, `Removed` removes. Whether the anchor exists in `existing`
 /// is settled here, because only here is the target text known.
-fn merge_delta_tracked(
-    feature: &str,
-    existing: &str,
-    delta: &str,
-) -> Result<(String, Vec<ProseChange>), RecordError> {
+pub fn merge_delta(existing: &str, delta: &str) -> Result<String, RecordError> {
     let blocks = parse_deltas(delta)?;
 
     if blocks.is_empty() {
-        return Ok((existing.to_string(), Vec::new()));
+        return Ok(existing.to_string());
     }
 
     let violations = check_anchor_rules(&blocks);
@@ -608,53 +519,22 @@ fn merge_delta_tracked(
     }
 
     let mut merged = existing.to_string();
-    let mut changes = Vec::new();
 
     for block in &blocks {
-        let (next, change) = apply_block(feature, &merged, block)?;
-        merged = next;
-        changes.extend(change);
+        merged = apply_block(&merged, block)?;
     }
 
-    Ok((merged, changes))
+    Ok(merged)
 }
 
-fn apply_block(
-    feature: &str,
-    content: &str,
-    block: &DeltaBlock,
-) -> Result<(String, Option<ProseChange>), RecordError> {
+fn apply_block(content: &str, block: &DeltaBlock) -> Result<String, RecordError> {
     match block.kind {
-        DeltaKind::New => Ok((
-            format!("{}\n\n{}\n", content.trim_end(), block.content),
-            None,
-        )),
-        DeltaKind::Changed => {
-            let (merged, before) = replace_section(content, &block.anchor, &block.content);
-            let Some(before) = before else {
-                return Err(anchor_not_found_error(block));
-            };
-            Ok((merged, prose_change(feature, block, before)))
-        }
+        DeltaKind::New => Ok(format!("{}\n\n{}\n", content.trim_end(), block.content)),
+        DeltaKind::Changed => replace_section(content, &block.anchor, &block.content)
+            .ok_or_else(|| anchor_not_found_error(block)),
         DeltaKind::Removed => {
-            let (merged, removed) = remove_section(content, &block.anchor);
-            if removed.is_none() {
-                return Err(anchor_not_found_error(block));
-            }
-            Ok((merged, None))
+            remove_section(content, &block.anchor).ok_or_else(|| anchor_not_found_error(block))
         }
-    }
-}
-
-fn prose_change(feature: &str, block: &DeltaBlock, before: String) -> Option<ProseChange> {
-    match block.anchor {
-        DeltaAnchor::Background | DeltaAnchor::Description => Some(ProseChange {
-            feature: feature.to_string(),
-            anchor: block.anchor.note_heading(),
-            before,
-            after: block.content.trim().to_string(),
-        }),
-        DeltaAnchor::Scenario(_) | DeltaAnchor::Unrecognized => None,
     }
 }
 
@@ -665,13 +545,6 @@ fn anchor_not_found_error(block: &DeltaBlock) -> RecordError {
         marker = block.kind.marker(),
         anchor = block.anchor.label()
     ))
-}
-
-/// Merge every delta block of `delta` into `existing`.
-///
-/// A thin reading of `merge_delta_tracked` for callers that keep no audit trail.
-pub fn merge_delta(existing: &str, delta: &str) -> Result<String, RecordError> {
-    merge_delta_tracked("", existing, delta).map(|(merged, _)| merged)
 }
 
 fn locate_section(content: &str, anchor: &DeltaAnchor) -> Option<(usize, usize)> {
@@ -694,27 +567,17 @@ fn locate_section(content: &str, anchor: &DeltaAnchor) -> Option<(usize, usize)>
     Some((start, end))
 }
 
-fn replace_section(
-    content: &str,
-    anchor: &DeltaAnchor,
-    replacement: &str,
-) -> (String, Option<String>) {
+fn replace_section(content: &str, anchor: &DeltaAnchor, replacement: &str) -> Option<String> {
     let replacement_lines: Vec<&str> = replacement.trim().lines().collect();
     splice_section(content, anchor, &replacement_lines)
 }
 
-fn remove_section(content: &str, anchor: &DeltaAnchor) -> (String, Option<String>) {
+fn remove_section(content: &str, anchor: &DeltaAnchor) -> Option<String> {
     splice_section(content, anchor, &[])
 }
 
-fn splice_section(
-    content: &str,
-    anchor: &DeltaAnchor,
-    replacement: &[&str],
-) -> (String, Option<String>) {
-    let Some((start, end)) = locate_section(content, anchor) else {
-        return (content.to_string(), None);
-    };
+fn splice_section(content: &str, anchor: &DeltaAnchor, replacement: &[&str]) -> Option<String> {
+    let (start, end) = locate_section(content, anchor)?;
 
     let lines: Vec<&str> = content.lines().collect();
     let head = &lines[..start];
@@ -729,8 +592,7 @@ fn splice_section(
         result.push('\n');
     }
 
-    let replaced = lines[start..end].join("\n").trim_end().to_string();
-    (result, Some(replaced))
+    Some(result)
 }
 
 fn append_block<'a>(merged: &mut Vec<&'a str>, block: &[&'a str]) {
@@ -813,11 +675,11 @@ mod tests {
             &DeltaAnchor::Scenario(title.to_string()),
             replacement,
         )
-        .0
+        .unwrap()
     }
 
     fn remove_scenario(content: &str, title: &str) -> String {
-        remove_section(content, &DeltaAnchor::Scenario(title.to_string())).0
+        remove_section(content, &DeltaAnchor::Scenario(title.to_string())).unwrap()
     }
 
     #[test]
@@ -1187,51 +1049,6 @@ Context here.
     }
 
     #[test]
-    fn merge_tracked_records_the_background_text_before_and_after() {
-        let delta =
-            "<!-- DELTA:CHANGED -->\n## Background\n\n* Context two.\n<!-- /DELTA:CHANGED -->\n";
-
-        let (_, changes) = merge_delta_tracked("cli/record", SPEC, delta).unwrap();
-
-        assert_eq!(
-            changes,
-            vec![ProseChange {
-                feature: "cli/record".to_string(),
-                anchor: "Background".to_string(),
-                before: "## Background\n\n* Context one.".to_string(),
-                after: "## Background\n\n* Context two.".to_string(),
-            }]
-        );
-    }
-
-    #[test]
-    fn merge_tracked_records_a_description_change() {
-        let delta =
-            "<!-- DELTA:CHANGED -->\n# Feature: Renamed\n\nNew text.\n<!-- /DELTA:CHANGED -->\n";
-
-        let (_, changes) = merge_delta_tracked("cli/record", SPEC, delta).unwrap();
-
-        assert_eq!(changes.len(), 1);
-        assert_eq!(changes[0].feature, "cli/record");
-        assert_eq!(changes[0].anchor, "Feature description");
-        assert_eq!(
-            changes[0].before,
-            "# Feature: Test Feature\n\nThe system SHALL do things."
-        );
-        assert_eq!(changes[0].after, "# Feature: Renamed\n\nNew text.");
-    }
-
-    #[test]
-    fn merge_tracked_records_no_change_for_scenario_anchors() {
-        let delta = "<!-- DELTA:CHANGED -->\n### Scenario: Login\n\n* *GIVEN* a member\n<!-- /DELTA:CHANGED -->\n\
-                     <!-- DELTA:REMOVED -->\n### Scenario: Login fails\n<!-- /DELTA:REMOVED -->\n";
-
-        let (_, changes) = merge_delta_tracked("cli/record", SPEC, delta).unwrap();
-
-        assert_eq!(changes, Vec::new());
-    }
-
-    #[test]
     fn merge_checks_every_block_before_it_applies_any() {
         let delta = "<!-- DELTA:CHANGED -->\n### Scenario: Login\n\n* *GIVEN* a member\n<!-- /DELTA:CHANGED -->\n\
                      <!-- DELTA:NEW -->\n## Background\n\n* Context two.\n<!-- /DELTA:NEW -->\n";
@@ -1343,11 +1160,12 @@ The system SHALL do things.
 
     #[test]
     fn replace_section_keeps_one_empty_line_before_the_next_heading() {
-        let (merged, _) = replace_section(
+        let merged = replace_section(
             SPEC,
             &DeltaAnchor::Background,
             "## Background\n\n* Context two.",
-        );
+        )
+        .unwrap();
 
         assert!(merged.contains("* Context two.\n\n## Scenarios"));
         assert!(!merged.contains("* Context one."));
@@ -1357,61 +1175,50 @@ The system SHALL do things.
     fn replace_section_inserts_one_empty_line_where_the_source_had_none() {
         let cramped = "# Feature: Cramped\n\nText.\n## Background\n* Context.\n## Scenarios\n";
 
-        let (merged, _) = replace_section(
+        let merged = replace_section(
             cramped,
             &DeltaAnchor::Background,
             "## Background\n\n* New context.",
-        );
+        )
+        .unwrap();
 
         assert!(merged.contains("Text.\n\n## Background\n\n* New context.\n\n## Scenarios"));
     }
 
     #[test]
-    fn replace_section_returns_the_text_it_replaced() {
-        let (_, replaced) = replace_section(
-            SPEC,
-            &DeltaAnchor::Background,
-            "## Background\n\n* Context two.",
-        );
+    fn replace_section_returns_none_when_the_anchor_is_absent() {
+        let merged = replace_section(SPEC, &scenario("Logout"), "### Scenario: Logout");
 
-        assert_eq!(
-            replaced,
-            Some("## Background\n\n* Context one.".to_string())
-        );
-    }
-
-    #[test]
-    fn replace_section_leaves_the_document_alone_when_the_anchor_is_absent() {
-        let (merged, replaced) = replace_section(SPEC, &scenario("Logout"), "### Scenario: Logout");
-
-        assert_eq!(merged, SPEC);
-        assert_eq!(replaced, None);
+        assert_eq!(merged, None);
     }
 
     #[test]
     fn replace_section_preserves_the_trailing_newline() {
-        let (with_newline, _) = replace_section(
+        let with_newline = replace_section(
             SPEC,
             &scenario("Login"),
             "### Scenario: Login\n\n* *GIVEN* a member",
-        );
+        )
+        .unwrap();
         assert!(with_newline.ends_with("a bad password\n"));
 
-        let (without_newline, _) = replace_section(
+        let without_newline = replace_section(
             SPEC.trim_end(),
             &scenario("Login"),
             "### Scenario: Login\n\n* *GIVEN* a member",
-        );
+        )
+        .unwrap();
         assert!(without_newline.ends_with("a bad password"));
     }
 
     #[test]
     fn replace_section_rewrites_the_feature_heading_and_description() {
-        let (merged, _) = replace_section(
+        let merged = replace_section(
             SPEC,
             &DeltaAnchor::Description,
             "# Feature: Renamed Feature\n\nThe system SHALL do other things.",
-        );
+        )
+        .unwrap();
 
         assert!(merged.starts_with("# Feature: Renamed Feature\n"));
         assert!(merged.contains("other things.\n\n## Background"));
@@ -1420,7 +1227,7 @@ The system SHALL do things.
 
     #[test]
     fn remove_section_leaves_one_empty_line_at_the_seam() {
-        let (merged, _) = remove_section(SPEC, &scenario("Login"));
+        let merged = remove_section(SPEC, &scenario("Login")).unwrap();
 
         assert!(merged.contains("## Scenarios\n\n### Scenario: Login fails"));
         assert!(!merged.contains("* *GIVEN* a user"));
@@ -1428,33 +1235,22 @@ The system SHALL do things.
 
     #[test]
     fn remove_section_matches_a_scenario_title_exactly() {
-        let (merged, _) = remove_section(SPEC, &scenario("Login"));
+        let merged = remove_section(SPEC, &scenario("Login")).unwrap();
 
         assert!(merged.contains("### Scenario: Login fails"));
         assert!(merged.contains("* *GIVEN* a bad password"));
     }
 
     #[test]
-    fn remove_section_returns_the_text_it_removed() {
-        let (_, removed) = remove_section(SPEC, &scenario("Login"));
+    fn remove_section_returns_none_when_the_anchor_is_absent() {
+        let merged = remove_section(SPEC, &scenario("Logout"));
 
-        assert_eq!(
-            removed,
-            Some("### Scenario: Login\n\n* *GIVEN* a user".to_string())
-        );
-    }
-
-    #[test]
-    fn remove_section_leaves_the_document_alone_when_the_anchor_is_absent() {
-        let (merged, removed) = remove_section(SPEC, &scenario("Logout"));
-
-        assert_eq!(merged, SPEC);
-        assert_eq!(removed, None);
+        assert_eq!(merged, None);
     }
 
     #[test]
     fn remove_section_at_the_end_of_the_file_leaves_no_trailing_empty_line() {
-        let (merged, _) = remove_section(SPEC, &scenario("Login fails"));
+        let merged = remove_section(SPEC, &scenario("Login fails")).unwrap();
 
         assert!(merged.ends_with("* *GIVEN* a user\n"));
         assert!(!merged.ends_with("\n\n"));
@@ -1464,13 +1260,9 @@ The system SHALL do things.
     fn remove_section_empties_a_document_that_holds_only_that_section() {
         let content = "### Scenario: Only\n\n* *GIVEN* a thing\n";
 
-        let (merged, removed) = remove_section(content, &scenario("Only"));
+        let merged = remove_section(content, &scenario("Only")).unwrap();
 
         assert!(merged.trim().is_empty());
-        assert_eq!(
-            removed,
-            Some("### Scenario: Only\n\n* *GIVEN* a thing".to_string())
-        );
     }
 
     fn block(kind: DeltaKind, content: &str) -> DeltaBlock {

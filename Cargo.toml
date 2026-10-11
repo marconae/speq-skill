@@ -1,6 +1,6 @@
 [package]
 name = "speq-skill"
-version = "0.26.0"
+version = "0.27.0"
 edition = "2024"
 authors = ["marconae"]
 license = "MIT"
@@ -18,15 +18,8 @@ path = "src/main.rs"
 clap = { version = "4.5.54", features = ["derive"] }
 pulldown-cmark = "0.13"
 thiserror = "2.0"
-serde = { version = "1.0", features = ["derive"] }
-dirs = "6.0"
-postcard = { version = "1.1", features = ["alloc"] }
-tract-onnx = "0.22"
-tokenizers = { version = "0.21", default-features = false, features = ["onig"] }
-rayon = "1"
 
 [dev-dependencies]
 assert_cmd = "2"
 predicates = "3"
-serial_test = "3"
 tempfile = "3"

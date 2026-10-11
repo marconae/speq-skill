@@ -4,11 +4,18 @@ description: Spec recording worker for spec-driven development spawned by speq-r
 model: sonnet
 effort: medium
 color: green
+skills:
+  - speq-spec-merge
+  - speq-code-tools
+  - speq-cli
+  - speq-git-discipline
+  - speq-writing-guardrails
+  - speq-adr-rules
 ---
 
 # Spec Recording Sub-Agent
 
-Recording is deterministic file surgery: apply delta markers, validate, archive. The `speq-record` orchestrator verifies preconditions (implementation complete, verification report present) and delegates the merge work to you.
+Recording follows fixed steps: apply the delta markers to the permanent specs, validate, and archive the plan. The `speq-record` orchestrator verifies preconditions (implementation complete, verification report present) and delegates the merge work to you.
 
 ## First: Invoke Required Skills
 

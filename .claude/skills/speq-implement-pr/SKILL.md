@@ -71,7 +71,7 @@ Read the checkpoint and enter at the phase the entry-dispatch table in `referenc
 
 **A3. Bump version**: bump the workspace version per the plan's `workspace/version` spec delta if it specifies one. Otherwise apply the conventional next version per Conventional Commits semantics (`feat` → minor bump; a purely `fix` plan → patch). Run a build to keep the lockfile in sync, redirecting its output to a log: `mkdir -p target && <build-command> > target/speq-build.log 2>&1`. Branch on the exit code. If a report quotes output, quote at most `tail -n 30` of the log. Then mark `[x] version-bumped`.
 
-**A4. Commit evidence**: commit and push now, so the evidence artifacts reach git history before `/speq-record`'s archive `mv` moves the plan directory out of tracked space, and so the branch survives workspace loss:
+**A4. Commit evidence**: commit and push now, so the evidence artifacts reach git history before `/speq-record`'s archive `mv` moves the plan directory out of tracked space, and so the branch survives workspace loss. Derive `<type>(<scope>)` per `/speq-plan-pr`'s PR-title derivation rule:
 
 ```
 Run — operation: commit (per /speq-git-operations)
@@ -81,7 +81,7 @@ Run — operation: commit (per /speq-git-operations)
          specs/_plans/<plan-name>/notes/: it holds local working state
          (planning.md and rotation hand-off notes) and stays out of
          every commit
-  message: <type>(<scope>): implement <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
+  message: <type>(<scope>): implement <plan-name>
 
 Run — operation: push (per /speq-git-operations)
 ```
@@ -105,34 +105,24 @@ If `/speq-record` returns `Recording failed: <reason>` (for example a stale arch
 
 ### Phase C: Ship
 
-**C1. Ship**: one composite call. Phase A already committed the implementation and evidence artifacts, so this commit covers only what `/speq-record` produced: the merge results and the archive's removal of the plan directory:
+**C1. Ship**: one composite call. Phase A already committed the implementation and evidence artifacts, so this commit covers only what `/speq-record` produced: the merge results and the archive's removal of the plan directory. Derive `<type>(<scope>)` and `<slug>` per `/speq-plan-pr`'s PR-title derivation rule. Compose the PR body from `/speq-plan-pr`'s `references/pr-body-template.md`: update Current State and What Changes if implementation diverged from the plan, fold both test-suite results (integration and e2e) into the Test plan checklist, keep the `<details>` pointer, list the accepted ADR slugs on the ADR candidates line (`none` when `recorder-agent` wrote no ADR), and rewrite the Architecture line as `Architecture: merged into specs/architecture.md: <sections>` from the recorder's Architecture report line (keep `none` when the plan had no architecture delta):
 
 ```
 Run — operation: ship-ready (per /speq-git-operations)
   paths: permanent-spec merges (specs/<domain>/...), specs/architecture.md,
          specs/_decision/ additions, deletion of specs/_plans/<plan-name>/
-  message: <type>(<scope>): record <plan-name>    # type + scope per speq-plan-pr's PR-title derivation rule
-  title: <type>(<scope>): <slug>    # same derivation rule as speq-plan-pr
-  body: per /speq-plan-pr's references/pr-body-template.md — update Current
-        State/What Changes if implementation diverged from the plan, fold
-        in both test-suite results (integration + e2e) and the /speq:record
-        outcome into the Test plan checklist, keep the <details> pointer,
-        and list the accepted ADR slugs on the ADR candidates line
-        (`none` when recorder-agent wrote no ADR); rewrite the Architecture
-        line as `Architecture: merged into specs/architecture.md: <sections>`
-        from the recorder's Architecture report line (keep `none` when the
-        plan had no architecture delta)
+  message: <type>(<scope>): record <plan-name>
+  title: <type>(<scope>): <slug>
+  body: <the composed PR body>
 ```
 
 `ship-ready`'s create-pr step returns the draft PR `speq-plan-pr` opened (or opens one if the plan was only implemented locally), and its ready-pr step marks it ready.
 
-**C2. Comment**: post the verification summary, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose it per `/speq-writing-guardrails` before calling `comment-pr`:
+**C2. Comment**: post the verification summary, built from `<archive-path>/verification-report.md` (the `specs/_recorded/NNN-<plan-name>` path `/speq-record` reported). Compose it per `/speq-writing-guardrails` and `/speq-implement`'s `references/implementation-summary-template.md`, ending with "Full evidence: specs/_plans/<plan-name>/verification-report.md (committed in this branch's implementation commit)". Then call `comment-pr`:
 
 ```
 Run — operation: comment-pr (per /speq-git-operations)
-  body: per /speq-implement's references/implementation-summary-template.md,
-        ending "Full evidence: specs/_plans/<plan-name>/verification-report.md
-        (committed in this branch's implementation commit)"
+  body: <the composed verification summary>
 ```
 
 **C3. Finish**: mark `[x] pr-ready` at `specs/_recorded/*-<plan-name>/tasks.md`, then report the finished PR and leave it for human review. Re-entry after a crash between C1 and C3 is safe: `ship-ready`'s commit no-ops on nothing-to-commit, and its create-pr/ready-pr steps reuse the existing PR.

@@ -1,39 +1,37 @@
 # Mission: speq
 
-> A CLI tool to get, list, search, and validate feature specifications for spec-driven development with AI coding agents.
+> A CLI tool to get, list, and validate feature specifications for spec-driven development with AI coding agents.
 
 ## Problem Statement
 
 AI coding agents work more effectively with structured, consistent specifications. Without tooling, feature specs:
 - Lack structural consistency (missing sections, malformed scenarios)
 - Cannot be verified programmatically
-- Are difficult to discover and navigate across large codebases
 
-speq provides structural verification and exploration tools so AI agents can reliably read and update specs that follow a predictable format.
+speq provides structural verification and exploration tools for software specifications based on Markdown files.
 
 ## Target Users
 
-| Persona | Goal | Key Workflow |
-|---------|------|--------------|
-| AI coding agent | Read/write consistent specs during development | Plan → Implement → Record: create delta specs, implement features, record to permanent specs |
-| Developer | Investigate and maintain specs | List specs, validate structure, review changes |
+| Persona | Goal |
+|---------|------|
+| AI coding agent | Read/write consistent specs during development |
+| Developer | Investigate and maintain specs |
 
 ## Core Capabilities
 
 1. **Retrieve spec content** — Fetch a full feature spec or a single scenario by path (`speq feature get <domain>/<feature>[/<scenario>]`)
 2. **List features and domains** — Display specs in a tree view organized by domain, or list domains alone (`speq domain list`)
 3. **Validate spec structure** — Check specs for required sections (Feature, Background, Scenarios), RFC2119 keyword usage, and scenario format
-4. **Search specs** — Semantic search over scenarios using pure-Rust ONNX inference (tract-onnx) with a locally cached embedding model; no external runtime required
-5. **Inspect plans in flight** — List active plans under `_plans/` and validate a plan's delta specs before recording (`speq plan list` / `speq plan validate <plan>`)
-6. **Record plan deltas** — Merge approved delta specs from `_plans/` into permanent specs and archive the plan
-7. **Track architecture decisions** — Validate and assemble per-plan ADR fragments in `specs/_decision/` into a stable decision record (`speq decision-log validate` / `show`)
+4. **Inspect plans in flight** — List active plans under `_plans/` and validate a plan's delta specs before recording (`speq plan list` / `speq plan validate <plan>`)
+5. **Record plan deltas** — Merge approved delta specs from `_plans/` into permanent specs and archive the plan
+6. **Track architecture decisions** — Validate and assemble per-plan ADR fragments in `specs/_decision/` into a stable decision record (`speq decision-log validate` / `show`)
 
 ## Out of Scope
 
 - Execution engine — Does not run or execute specifications like a test runner
 - Code generation — Does not generate implementation code from specs
 - Version control — Does not manage spec history beyond archiving recorded plans
-- Installation — Does not cover the installer or plugin tooling, such as model download and MCP server registration
+- Installation — Does not cover the installer or plugin tooling
 
 Architecture: see specs/architecture.md.
 
@@ -58,16 +56,9 @@ Architecture: see specs/architecture.md.
 |-------|------------|---------|
 | Language | Rust (edition 2024) | Performance, reliability, single binary distribution |
 | CLI | clap 4.5 | Command-line argument parsing with derive macros |
-| Parsing | pulldown-cmark 0.13 | Markdown parsing for spec analysis |
-| Inference | tract-onnx | Pure-Rust ONNX inference for semantic search (no native runtime required) |
-| Tokenization | tokenizers | Fast tokenization for embedding inputs |
+| Parsing | pulldown-cmark | Markdown parsing for spec analysis |
 | Errors | thiserror 2 | Ergonomic error type definitions |
-| Serialization | serde | Serialize embedding-index and metadata structures |
-| Serialization | postcard | Compact binary format for the cached embedding index |
-| Platform paths | dirs | Resolve the platform cache directory for the embedding model and index |
-| Parallelism | rayon | Parallel iteration for search indexing and query |
 | Testing | assert_cmd, predicates, tempfile | CLI integration testing |
-| Testing | serial_test | Serialize tests that share process-global state (e.g. the cache directory) |
 
 ## Commands
 

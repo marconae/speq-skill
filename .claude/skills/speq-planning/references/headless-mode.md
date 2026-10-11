@@ -1,0 +1,8 @@
+## Headless / Non-Interactive Mode
+
+If the orchestrator's prompt states `Interview Mode: headless` (used by `speq-plan-pr`, never by the interactive `speq-plan`), there is no human to ask mid-planning. Adjust the escalation bar:
+
+- **Assume.** For conventions, naming, implementation details, and any choice with a clearly conventional default: make the conventional call. Log it as a `decision-log.md` entry only if a reviewer would otherwise question it. This is the common case; most headless plans finish without escalating.
+- **Escalate only irreducible decisions**: irreversible ones, changes to what the feature does for a user, genuinely incompatible architectural designs, or security/compliance. Before escalating, save every file completed so far (plan.md, delta specs, decision-log.md) exactly as it stands. The orchestrator persists this partial state for human review, so it must be usable as-is.
+- **Escalation format.** Return the response prefixed with the exact sentinel `OPEN QUESTIONS:` followed by a markdown bullet list of concrete questions. Headless mode changes when to escalate, not the quality bar: same bar as the interactive path's "signal back with a concrete question". Do not mix this sentinel into a normal completion report.
+- **Split large plans.** If the work spans more than one independent phase, or more than about 4 features, plan only the first phase. Record the split as a `decision-log.md` entry. End `plan.md` Context with a `Follow-up plans` list (name and one-line scope each). Each later plan names this plan in its Existing Context. If the user's intent says to keep it as one plan, do not split and state that override in the decision-log entry.

@@ -11,7 +11,7 @@ This skill is a thin orchestrator. It runs the clarifying interview, collects co
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
-- `/speq-cli`: spec discovery and search
+- `/speq-cli`: spec discovery
 
 `planner-agent` and `plan-reviewer` invoke their own required skills.
 
@@ -30,12 +30,12 @@ Run the speq CLI:
 ```bash
 speq domain list
 speq feature list
-speq search query "<relevant terms>"
-speq search query "<exact term>"   # per /speq-cli's absence check, repeated for each exact term in the request
-speq decision-log show
+grep -rhE -A3 '^## ADR:|^\*\*(ID|Status):\*\*' specs/_decision/ 2>/dev/null || echo none   # ADR digest, per /speq-cli
 ```
 
-Read `specs/architecture.md` if it exists.
+Name the features in the list that relate to the request, per `/speq-cli`'s absence check.
+
+Note whether `specs/architecture.md` exists. Pass its path, do not read it.
 
 Collect only enough context for good interview questions, not a full exploration.
 
@@ -47,11 +47,16 @@ Apply the Socratic Method via `AskUserQuestion`. Never assume. Decompose the pro
 - **Partition**: present alternative solutions as MECE options
 - **Challenge**: test design tradeoffs with counterexamples
 
-Record the answers in a concise summary for the sub-agent.
+Keep each exchange as one line: `- Q: <question> → A: <answer>`, a few words each. This is the only copy of the interview: step 3 writes it into `decision-log.md` and the briefs point to it.
 
 ### 3. Plan Name (orchestrator)
 
+**Split check.** If the work spans more than one independent phase, or more than about 4 features, propose one plan per phase in the interview. Plan the first phase now. Each later plan names the earlier plan in its Existing Context.
+
+
 Pattern: `<verb>-<feature-scope>[-<qualifier>]`
+
+Once the name is set, write `specs/_plans/<plan-name>/decision-log.md` with the H1 `# Decision Log: <plan-name>` and an `## Interview` section holding the step 2 lines. Do not paste the interview into any brief.
 
 | Verb | When |
 |------|------|
@@ -75,10 +80,10 @@ Delegate to planner-agent — Plan <plan-name>
 <1-3 sentence summary of what the user wants>
 
 ## Clarifying Interview Results
-<verbatim Q&A from the AskUserQuestion exchanges>
+Read `## Interview` in `specs/_plans/<plan-name>/decision-log.md`. Keep it as is. Do not copy it into other files.
 
 ## Existing Context
-<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq feature get` / `speq decision-log show` calls you ran, each followed by its output, plus the content of `specs/architecture.md` when it exists — name the query, not just the result>
+<the exact `speq domain list` / `speq feature list` / `speq feature get` calls you ran, each followed by its output (the ADR digest, not the full `speq decision-log show`; name features you want read, do not paste `speq feature get` output); name `specs/architecture.md` by path when it exists, do not paste it>
 
 ## External Research
 <any research already conducted, or "none — agent to research as needed">
@@ -116,7 +121,7 @@ Delegate to plan-reviewer — Review <plan-name> (round 1)
 <verbatim original request>
 
 ## Clarifying Interview Results
-<verbatim Q&A>
+Read `## Interview` in `specs/_plans/<plan-name>/decision-log.md`.
 
 ## Plan Artifacts
 plan.md, decision-log.md, every specs/_plans/<plan-name>/**/spec.md delta, and specs/_plans/<plan-name>/architecture.md when present
@@ -131,7 +136,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **If `INTENT == 0` and BLOCKER findings exist:**
 
-1. Respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings from that file, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-run `speq plan validate`, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
+1. Respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings from that file, execute each `Fix:` line, log a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md` only for a blocker whose fix changed a design decision or settled a HUMAN finding (no entry for MECHANICAL fixes), re-run `speq plan validate`, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
 2. **Round 2 runs only if round 1's `HUMAN` count was greater than 0.** A `HUMAN: 0` round 1 means every BLOCKER was `MECHANICAL` — the reviewer already judged none needed adversarial re-checking, only a fix. Skip to the ship decision below without respawning `plan-reviewer`.
 3. **`HUMAN > 0`:** compute Plan Size (the plan is `small` when all three hold: the plan-name's verb, per the verb table, is `fix`; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`; otherwise `full`), then respawn `plan-reviewer` for round 2 with the path to `review/round-1.md` plus `Plan Size: small | full`, so it confirms each round-1 BLOCKER is resolved before checking for new ones (or, on `small`, confirms and stops there). Do not run a third adversarial round, even if round 2 raises new BLOCKERs.
 

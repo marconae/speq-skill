@@ -77,10 +77,12 @@ case "$1" in
         echo "Usage: speq <COMMAND>"
         echo ""
         echo "Commands:"
-        echo "  tree      Show spec tree"
-        echo "  search    Search specs"
-        echo "  validate  Validate specs"
-        echo "  help      Print this message"
+        echo "  domain        Manage domains"
+        echo "  feature       Manage feature specifications"
+        echo "  plan          Manage plans"
+        echo "  record        Record approved plan deltas to permanent specs"
+        echo "  decision-log  Manage the permanent decision records"
+        echo "  help          Print this message"
         ;;
     *)
         echo "speq: mock command '$1' executed"

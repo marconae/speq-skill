@@ -89,7 +89,7 @@ Report to user:
 | Step | Performed by | Why |
 |------|--------------|-----|
 | Precondition checks, user questions | This skill (pins Sonnet) | Lightweight orchestration |
-| Delta merge, validation, archive | `recorder-agent` sub-agent | Mechanical file surgery |
+| Delta merge, validation, archive | `recorder-agent` sub-agent | Fixed steps: apply markers, validate, archive |
 
 The split preserves rotation discipline: the orchestrator can respawn the sub-agent with a fresh context and keep its own state.
 

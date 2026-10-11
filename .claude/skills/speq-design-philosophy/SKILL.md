@@ -1,6 +1,6 @@
 ---
 name: speq-design-philosophy
-description: Complexity-management design principles — deep modules, information hiding and leakage, module boundaries, dependency direction, strategic vs. tactical tradeoffs. Triggered by planner-agent, plan-reviewer, implementer-agent, implementer-expert-agent, and code-reviewer before any design, implementation, or review work.
+description: Complexity-management design principles — deep modules, information hiding and leakage, module boundaries, dependency direction, strategic vs. tactical tradeoffs. Used by speq planner, reviewer, and implementer agents during a speq run. Not for general design work.
 ---
 
 # Design Philosophy

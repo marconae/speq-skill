@@ -4,6 +4,13 @@ description: Expert implementation worker for spec-driven development. Use ONLY 
 model: opus
 effort: xhigh
 color: purple
+skills:
+  - speq-code-tools
+  - speq-ext-research
+  - speq-code-guardrails
+  - speq-design-philosophy
+  - speq-git-discipline
+  - speq-cli
 ---
 
 # Expert Implementation Sub-Agent
@@ -46,12 +53,12 @@ If the brief has an `Orientation:` line, read that hand-off note first: it is yo
 
 Task details are already inline in `## Your Tasks`. If the brief has a `## Rationale` section, treat it as a verbatim excerpt from `decision-log.md` and do not re-read the log for it. Open `specs/_plans/{plan_name}/plan.md` or `specs/_plans/{plan_name}/decision-log.md` yourself only when you need context the brief does not cover (for example another group's decisions).
 
-### 3. Search Specs
+### 3. Find Specs
 
 Use these for gaps the `Knowledge:` entry does not cover:
 
 ```bash
-speq search query "<relevant terms>"
+speq feature list
 speq feature get '<domain>/<feature>/<scenario>'
 ```
 

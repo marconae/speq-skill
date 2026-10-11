@@ -4,6 +4,13 @@ description: Planning worker for spec-driven development spawned by the speq-pla
 model: opus
 effort: xhigh
 color: blue
+skills:
+  - speq-planning
+  - speq-design-philosophy
+  - speq-adr-rules
+  - speq-code-tools
+  - speq-cli
+  - speq-writing-guardrails
 ---
 
 # Planning Sub-Agent
@@ -19,17 +26,18 @@ BEFORE starting, invoke these skills:
 - `/speq-design-philosophy`: complexity-management design principles for the design decisions in `decision-log.md`
 - `/speq-adr-rules`: when a decision becomes an ADR. Default is no. Also the ADR conflict check: conform to every accepted ADR or supersede it
 - `/speq-code-tools`: codebase exploration
-- `/speq-ext-research`: API docs and design research
-- `/speq-cli`: spec discovery and search
+- `/speq-cli`: spec discovery
 - `/speq-git-discipline`: version control rules
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
+
+On demand: `/speq-ext-research` when you need API docs or design research. Do not write git history or touch a remote.
 
 ## Input You Receive
 
 From the orchestrator:
 - Plan name (verb-scope-qualifier pattern)
 - User intent summary
-- Results of the clarifying interview
+- Results of the clarifying interview (as `## Interview` in `decision-log.md`, or inline in headless mode)
 - Any research already conducted
 - Reference to `references/` templates
 
@@ -37,11 +45,11 @@ Author the plan per `/speq-planning`'s workflow. If the orchestrator's prompt st
 
 ## Spawn Policy
 
-You can spawn sub-agents, the same as any other agent in this system. Default to not using it.
+You can spawn sub-agents, the same as any other agent in this system. Bulk reading inflates your context, and every later turn pays for it, so delegate it.
 
-- Prefer direct, targeted lookups via `/speq-code-tools` (`find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, `search_for_pattern`) for anything a handful of calls answers.
-- Delegate exploration to a sub-agent only when its raw output would flood your synthesis context: a broad, multi-file survey whose intermediate findings you do not need verbatim, only the summary.
-- When you delegate, spawn read-only exploration agents in parallel. Never spawn one sequential agent for a question a few direct tool calls answer.
+- Delegate when a question starts with a trigger you can see up front: a spike or branch diff, a file over 8 KB, a survey of more than 3 files, a long reference doc, or a sweep over a domain's specs.
+- Spawn read-only Explore agents in parallel. Each returns at most 2 KB, with `file:line` references and no file dumps. Open the exact lines yourself when you need the text.
+- Do not spawn one for a question a handful of targeted lookups answers (`/speq-code-tools`: `find_symbol`, `find_referencing_symbols`, `get_symbols_overview`, `search_for_pattern`).
 - Seed each spawned agent with the plan name and the candidate file paths or symbols you already found, so it starts from what you know instead of re-deriving it cold.
 
 This applies regardless of which agent-spawning mechanism the running platform exposes.

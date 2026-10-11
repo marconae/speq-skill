@@ -44,7 +44,7 @@ pub struct Scenario {
 pub struct Step {
     pub kind: StepKind,
     /// The step with each inline code span in single backticks. `speq feature
-    /// get` and the search index read it.
+    /// get` reads it.
     pub display_text: String,
     /// The step without its inline code spans. The RFC 2119 and keyword-casing
     /// checks read it, so a keyword inside inline code never counts.

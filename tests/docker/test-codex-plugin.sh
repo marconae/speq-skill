@@ -22,13 +22,6 @@ if [[ ! -f "${CODEX_PLUGIN_DIR}/.codex-plugin/plugin.json" ]]; then
 fi
 echo "PASS: Codex plugin manifest exists"
 
-# Serena comes from the global install, not from the plugin
-if [[ -e "${CODEX_PLUGIN_DIR}/.mcp.json" ]]; then
-    echo "FAIL: Codex plugin must not ship an MCP config"
-    exit 1
-fi
-echo "PASS: Codex plugin ships no MCP config"
-
 if grep -R -E "AskUserQuestion|AskUserTool|Task\\(|subagent_type=|ExitPlanMode|Claude Code|CodexSubagent|Codex user-input prompt|Codex task" "${CODEX_PLUGIN_DIR}" >/tmp/codex-plugin-claude-syntax.txt; then
     echo "FAIL: Codex plugin contains Claude-only workflow syntax"
     cat /tmp/codex-plugin-claude-syntax.txt

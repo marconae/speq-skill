@@ -1,6 +1,6 @@
 ---
 name: speq-adr-rules
-description: The rules for when a decision becomes an ADR. The default is no, only durable decisions qualify, search first, one decision per ADR, and a human accepts an ADR when they record the plan. Triggered by planner-agent, plan-reviewer, recorder-agent, and adr-audit-agent.
+description: The rules for when a decision becomes an ADR. The default is no, only durable decisions qualify, search first, one decision per ADR, and a human accepts an ADR when they record the plan. Use only inside a speq plan, record, or audit workflow, when deciding whether a decision becomes an ADR. Not for general decision records.
 ---
 
 # ADR Rules
@@ -41,7 +41,7 @@ The entry's Rationale names the criterion that applies and states the result of 
 |---------|-------------|
 | Conventions that bind contributors or agents | `CLAUDE.md`, `AGENTS.md`, a `.speq/*-hook.md` file, or `specs/mission.md` Constraints |
 | WHAT the system is: components and boundaries | `specs/architecture.md`, changed through an architecture delta |
-| HOW this plan builds it | `decision-log.md` `## Design Decisions`, an entry with `Promotes to ADR: no` |
+| HOW this plan builds it | A phrase in the `plan.md` task line. Only a choice with a rejected alternative gets a `decision-log.md` `## Design Decisions` entry with `Promotes to ADR: no` |
 | Execution steps | `plan.md` `## Implementation Tasks` |
 
 An ADR records why. specs/architecture.md records what is.
@@ -50,7 +50,7 @@ To change an existing ADR, write a new ADR with `Supersedes: <slug>`. Do not edi
 
 ## 5. Search First
 
-Before you set `yes`, run `speq decision-log show` and read the result. If an ADR already covers the decision, do not promote a duplicate. Either set `no`, or supersede that ADR when the decision has changed. State the search result in Rationale.
+Before you set `yes`, read the ADR digest (`/speq-cli`) and any fragment that matches the decision. If an ADR already covers the decision, do not promote a duplicate. Either set `no`, or supersede that ADR when the decision has changed. State the search result in Rationale.
 
 Every plan reads the accepted ADRs before it records design decisions. A plan whose decision, spec delta, or architecture delta contradicts an accepted ADR either conforms to it or supersedes it through a decision-log entry with `Supersedes: <slug>` and `Promotes to ADR: yes`. A silent contradiction is a defect.
 
@@ -59,7 +59,7 @@ Every plan reads the accepted ADRs before it records design decisions. A plan wh
 - One ADR records one decision.
 - Decision states the choice in plain words. It holds no function signatures, file paths, or flags.
 - An ADR names a library but never pins its version. A version number lives in the manifest or lockfile. The Decision states the policy instead, for example "use the registry release, not a git tag".
-- If the Decision needs a list of paths, signatures, or version numbers to make sense, the content is implementation detail. Move it to a `decision-log.md` `## Design Decisions` entry with `Promotes to ADR: no`.
+- If the Decision needs a list of paths, signatures, or version numbers to make sense, the content is implementation detail. Move it to the `plan.md` task line, or to a `decision-log.md` `## Design Decisions` entry with `Promotes to ADR: no` if it has a rejected alternative.
 
 ## 7. Shape
 

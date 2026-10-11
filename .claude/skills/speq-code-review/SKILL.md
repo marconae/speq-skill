@@ -1,6 +1,6 @@
 ---
 name: speq-code-review
-description: Code review tag taxonomy and findings output format — guardrail violations, dead code, test quality, bad comments, optimizations, YAGNI/over-engineering, error handling, and design depth. Triggered by code-reviewer.
+description: Code review tag taxonomy and findings output format — guardrail violations, dead code, test quality, bad comments, optimizations, YAGNI/over-engineering, error handling, and design depth. Used by the speq code-reviewer agent during a speq implement run. Not for general code review.
 ---
 
 # Code Review Taxonomy

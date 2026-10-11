@@ -1,6 +1,6 @@
 ---
 name: speq-code-tools
-description: Semantic code navigation and editing via Serena MCP — symbol-level tools required over grep/find/manual edits. Triggered by planner-agent, implementer-agent, implementer-expert-agent, code-reviewer, recorder-agent, and architecture-agent.
+description: Semantic code navigation and editing via Serena MCP — symbol-level tools required over grep/find/manual edits. Used by speq agents during a speq plan, implement, or record run. Not for general coding.
 ---
 
 # Code Tools
@@ -9,9 +9,8 @@ Semantic code navigation and editing via Serena MCP, if available. The user inst
 
 ## Before First Use Each Session
 
-1. Call `initial_instructions` first, before any other Serena tool.
-2. These tools are deferred in this harness — a bare tool name has no loaded schema yet. Call `ToolSearch` with the query `serena` to find them, then load the ones you need (`select:<full tool name>`, comma-separated for several) before calling them.
-3. If `ToolSearch` finds no Serena tools, carry on with the generic tools (`Read`, `Grep`, `Edit`). Do not warn and do not stop.
+1. These tools are deferred in this harness — a bare tool name has no loaded schema yet. Call `ToolSearch` with the query `serena` to find them, then load the ones you need (`select:<full tool name>`, comma-separated for several) before calling them.
+2. If `ToolSearch` finds no Serena tools, carry on with the generic tools (`Read`, `Grep`, `Edit`). Do not warn and do not stop.
 
 ## Tool Preference
 

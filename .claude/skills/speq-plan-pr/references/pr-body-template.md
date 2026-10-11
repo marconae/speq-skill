@@ -36,9 +36,9 @@ Test plan
 
 ## Rules
 
-- **`ADR candidates` is one line.** Write `none` when no entry promotes, which is the usual case. Otherwise list the entry titles. Each title is a proposed ADR. Running `/speq-implement-pr` accepts them. To reject one, comment on the PR and run `/speq-plan-pr` again with the entry set to `Promotes to ADR: no`. After recording, `/speq-implement-pr` replaces the line with the accepted slugs.
+- **`ADR candidates` is one line.** Write `none` when no entry promotes, which is the usual case. Otherwise list the entry titles. Each title is a proposed ADR. Implementing the plan accepts them. To reject one, comment on the PR and re-plan with the entry set to `Promotes to ADR: no`. After recording, the line lists the accepted slugs.
 
-- **`Architecture` is one line.** Write `none` when the plan has no architecture delta, or `none (specs/architecture.md absent)` in a repo without that file. Otherwise list each changed section with `changed`, `new`, or `removed`. Never paste section content. The delta file holds it. After recording, `/speq-implement-pr` rewrites the line as `Architecture: merged into specs/architecture.md: <sections>`.
+- **`Architecture` is one line.** Write `none` when the plan has no architecture delta, or `none (specs/architecture.md absent)` in a repo without that file. Otherwise list each changed section with `changed`, `new`, or `removed`. Never paste section content. The delta file holds it. After recording, the line reads `Architecture: merged into specs/architecture.md: <sections>`.
 
 - **`Current State` / `What Changes` replace a task-list dump.** State the problem, then the mechanism that fixes it. Never a step-by-step of what got implemented — that is `tasks.md`'s job, not the PR body's.
 - **`Impact` is plan.md's own `## Impact` section, trimmed**, not copied verbatim: keep only the bullets a user must weigh to approve. Omit the whole section when plan.md says "None".

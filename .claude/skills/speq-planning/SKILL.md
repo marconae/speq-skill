@@ -1,6 +1,6 @@
 ---
 name: speq-planning
-description: Plan-authoring workflow — spec delta authoring, test mapping, plan.md/decision-log.md generation, expert-task tagging, headless escalation, and revision mode. Triggered by planner-agent.
+description: Plan-authoring workflow — spec delta authoring, test mapping, plan.md/decision-log.md generation, expert-task tagging, headless escalation, and revision mode. Use when authoring a plan.
 ---
 
 # Plan Authoring
@@ -8,23 +8,33 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 ## Guiding Principles
 
 - **BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN; integration tests by default, unit tests only for isolated pure computation
-- **EARS syntax**: spec narratives use unambiguous behavioral clauses
 - **RFC 2119 keywords**: THEN steps use MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY (uppercase)
 
 ## Workflow
 
+### 0. Read Budget
+
+Context is re-sent on every turn, so every byte you read costs again on each later call. Find before you read:
+
+- Run `speq feature list` to see which feature is described where. Then read only the needed lines (`Read` with offset and limit, or `speq feature get '<domain>/<feature>/<scenario>'`).
+- Do not read a file over about 8 KB whole. Read long docs (`testing.md`, `architecture.md`) by heading.
+- Do not read a file twice. Write what you need to `notes/planning.md` the first time (create it now, append as you go, and consult it instead of re-reading).
+- This applies to `cat` and `sed` in Bash too. Never `Read` a tool-output file the harness saved for you in full. Use offset and limit, or search it.
+- For a branch diff, run `git diff --stat` first, then `git diff -- <path>` for the files that matter.
+- Quote only the lines of an external spec that the plan cites.
+- A project hook (`.speq/plan-hook.md` or `.speq/plan-pr-hook.md`) can require specific reads. The hook wins.
+
 ### 1. Discover Existing Specs
 
-The orchestrator already ran `speq domain list` / `speq feature list` / `speq search query` (once per exact term in the request, per `/speq-cli`'s absence check), and `speq decision-log show`, and read `specs/architecture.md` if present. It passed the calls and their output as this brief's `## Existing Context` section. Treat that as the baseline. Do not re-run the same queries. Re-query only for gaps it does not answer:
+The orchestrator already ran `speq domain list` and `speq feature list`, named the features that relate to the request (per `/speq-cli`'s absence check), ran the ADR digest (`/speq-cli`), and named `specs/architecture.md` if present. It passed the calls and their output as this brief's `## Existing Context` section. Treat that as the baseline. Do not re-run the same queries. Re-query only for gaps it does not answer:
 
 ```bash
 speq feature get <domain>/<feature>   # a specific feature's full spec, if Existing Context only named it
-speq search query "<narrower terms>"  # only if Existing Context's results do not cover a sub-area you need
 ```
 
-Existing Context holds the content of `specs/architecture.md`, the current architecture that step 2a changes. If Existing Context lacks it and the file exists, read the file. Step 2a reads the file itself only to copy the sections a delta changes.
+Existing Context names `specs/architecture.md`, the current architecture that step 2a changes. Read it once by heading (list the headings, then read the sections the plan touches), and keep what you need in `notes/planning.md`. Step 2a copies only the sections a delta changes.
 
-Check the plan against every accepted ADR in the `speq decision-log show` output from Existing Context, per `/speq-adr-rules` rule 5. Run the command only if Existing Context lacks it.
+Check the plan against every accepted ADR in the ADR digest from Existing Context, per `/speq-adr-rules` rule 5. Read the full fragment of any ADR the plan touches. Build the digest only if Existing Context lacks it.
 
 Before you author a NEW feature spec or state that no spec covers a behavior, run `/speq-cli`'s absence check.
 
@@ -40,7 +50,7 @@ specs/<domain>/<feature>/spec.md exists?
 Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 ```
 
-**Prose drift check**: after drafting a scenario delta for an existing feature, re-read that feature's `## Background` and `# Feature: <name>` description (`speq feature get <domain>/<feature>`). When the scenario change makes either inaccurate, author a `DELTA:CHANGED` block for that section too, per `/speq-plan`'s `references/delta-template.md`.
+**Prose drift check**: after drafting a scenario delta for an existing feature, check that feature's `## Background` and `# Feature: <name>` description, reusing what you read the first time; never re-read per scenario (read once with `speq feature get <domain>/<feature>` if you have not). When the scenario change makes either inaccurate, author a `DELTA:CHANGED` block for that section too, per `/speq-plan`'s `references/delta-template.md`.
 
 ### 2a. Author Architecture Delta
 
@@ -65,6 +75,8 @@ Every scenario requires two forms of external proof. No claims, only evidence.
 
 ### 4. Generate plan.md
 
+Write each artifact once, then change it with `Edit`. Do not re-read a file you wrote this run. Draft per feature and do not restate spec delta text in `plan.md` or `decision-log.md`.
+
 Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
 1. **Context**: per the template's Context section. Decisions go in `decision-log.md` (step 5)
@@ -85,12 +97,12 @@ If two clusters would contend on one shared file, split the module per feature (
 Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `references/decision-log-plan-template.md`.
 
 **What to capture:**
-- **Interview section**: verbatim or close paraphrase of every Q&A exchange passed from the orchestrator
-- **Design Decisions section**: one entry per significant choice made while authoring spec deltas or plan.md (how this plan builds the change, patterns and local interfaces, rejected alternatives, scope boundaries). For a new abstraction or module boundary, justify it in the entry's Rationale against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
+- **Interview section**: when `decision-log.md` already has it (interactive `speq-plan` writes it), keep it unchanged and do not copy it elsewhere. Otherwise (headless), write one line per Q&A from the brief, `- Q: <question> → A: <answer>`, a few words each; omit the section when the brief holds only a feature intent and no Q&A
+- **Design Decisions section**: log a choice only when a reviewer or implementer cannot infer it from the deltas and tasks: a plausible alternative you rejected, or a constraint that is not obvious. Expect 0 to 3 entries. Never log naming, file placement, task order, or anything the deltas already state. Alternatives and Consequences are optional. For a new abstraction or module boundary, justify it in the entry's Rationale against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 - **Architecture field**: an entry with `Promotes to ADR: yes` whose Rationale names `/speq-adr-rules` rule-2 criterion 1, 2, or 3 needs an `- **Architecture:** <§ Section[, § Section] | no change: <reason>>` line. Every named section needs a block in the architecture delta
-- **Review Findings section**: leave empty; populated in Revision Mode after `plan-reviewer` blockers, and by `speq-implement` after code review
+- **Review Findings section**: leave empty; populated in Revision Mode only for fixes that changed a design decision or settled a HUMAN finding
 
-**Promotion gate.** Apply `/speq-adr-rules` to every Design Decisions and Review Findings entry. Default `Promotes to ADR: no`. For `yes`, name the rule-2 criterion and the `speq decision-log show` result in Rationale. A promoted entry's Decision and Rationale are short and state facts, not history: the recorder derives the ADR from them (`/speq-adr-rules` rule 7a). A `[plan-review]` entry almost always stays `no`.
+**Promotion gate.** Apply `/speq-adr-rules` to every Design Decisions and Review Findings entry. Default `Promotes to ADR: no`. For `yes`, name the rule-2 criterion and the ADR digest result in Rationale. A promoted entry's Decision and Rationale are short and state facts, not history: the recorder derives the ADR from them (`/speq-adr-rules` rule 7a). A `[plan-review]` entry almost always stays `no`.
 
 ### 6. Expert-Task Tagging
 
@@ -129,12 +141,12 @@ Fix any failures. Common fixes:
 - Uppercase RFC 2119 keywords
 - Fix step formatting (bold keywords: `*GIVEN*`, `*WHEN*`, `*THEN*`, `*AND*`)
 
-### 8. Write Planning Hand-off Note
+### 8. Finalize Planning Hand-off Note
 
-Before you return to the orchestrator, write `specs/_plans/<plan-name>/notes/planning.md` (create the `notes/` directory if absent). Write a plain list, not a narrative:
+You started `specs/_plans/<plan-name>/notes/planning.md` in step 0 and appended to it while exploring. Before you return to the orchestrator, make sure it is a plain list, not a narrative:
 
 - Files and symbols you checked
-- Searches you ran (`speq search`, Serena queries), each with its target
+- Lookups you ran (speq CLI calls, Serena queries), each with its target
 
 Do not write: why, invariants as prose, conventions commentary, or decisions. Those already live in `decision-log.md`. This note is a map of what you checked, not a story about it. A map stays true even after a later revision changes a decision; a story does not.
 
@@ -144,7 +156,7 @@ This note stays out of every commit. It is local scratch, never evidence.
 
 ### 9. Pre-Return Self-Check
 
-Before you return to the orchestrator, run this checklist once against your own `plan.md`, `decision-log.md`, and spec deltas. Answer each line against the artifacts on disk, not from memory. Fix anything that answers "no" before you return.
+Before you return to the orchestrator, run this checklist once against your own `plan.md`, `decision-log.md`, and spec deltas. Answer each line against your own writes in this run. Do not re-read the files. Fix anything that answers "no" before you return.
 
 This is prevention, not the review gate. `plan-reviewer` still runs next at full strength.
 
@@ -160,20 +172,8 @@ Open `/speq-plan-review` for a tag's full definition if you are unsure it applie
 
 ## Headless / Non-Interactive Mode
 
-If the orchestrator's prompt states `Interview Mode: headless` (used by `speq-plan-pr`, never by the interactive `speq-plan`), there is no human to ask mid-planning. Adjust the escalation bar:
-
-- **Assume and document.** For conventions, naming, implementation details, and any choice with a clearly conventional default: make the call and record it as a `decision-log.md` entry (Rationale explains why this default). This is the common case; most headless plans finish without escalating.
-- **Escalate only irreducible decisions**: irreversible ones, changes to what the feature does for a user, genuinely incompatible architectural designs, or security/compliance. Before escalating, save every file completed so far (plan.md, delta specs, decision-log.md) exactly as it stands. The orchestrator persists this partial state for human review, so it must be usable as-is.
-- **Escalation format.** Return the response prefixed with the exact sentinel `OPEN QUESTIONS:` followed by a markdown bullet list of concrete questions. Headless mode changes when to escalate, not the quality bar: same bar as the interactive path's "signal back with a concrete question". Do not mix this sentinel into a normal completion report.
+Only if the orchestrator's prompt states `Interview Mode: headless`: read `/speq-planning`'s `references/headless-mode.md` and follow it.
 
 ## Revision Mode
 
-If the orchestrator respawns `planner-agent` with the path to a `plan-reviewer` findings file instead of a fresh planning brief:
-
-- Read `specs/_plans/<plan-name>/notes/planning.md` first, if present. This is your own prior-pass hand-off note. It orients you before you re-read anything else.
-- Read the BLOCKER list from the path given in the prompt: `specs/_plans/<plan-name>/review/round-<N>.md`. The findings never arrive inline; the file is the only source.
-- Address only the BLOCKER findings. Execute each one's `Fix:` line: an imperative naming the artifact, section, and concrete change. Revise exactly what it points to. Do not rewrite unrelated content. Do not act on ADVISORY findings.
-- For each blocker resolved, add a `## Review Findings` entry to `decision-log.md` titled `[plan-review] <short finding title>`, with **Finding** (what `plan-reviewer` flagged), **Direction change** (what changed), and **Promotes to ADR** (per `/speq-adr-rules`; almost always `no`).
-- Re-run `speq plan validate <plan-name>` before returning.
-- Return one line per blocker you addressed: `Resolved: <title> — <evidence>` or `Could not resolve: <title> — <why>`. The orchestrator uses this to decide whether a further review round is needed — do not omit it, even when every finding resolved cleanly.
-- If resolving a blocker surfaces a genuinely irreducible new decision, escalate it exactly as during initial planning (interactive: signal back with a concrete question; headless: `OPEN QUESTIONS:` sentinel).
+Only if the orchestrator respawns you with the path to a `plan-reviewer` findings file: read `/speq-planning`'s `references/revision-mode.md` and follow it. Read `notes/planning.md` first.

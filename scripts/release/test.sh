@@ -163,29 +163,26 @@ echo ""
 echo "=== THIRD_PARTY_LICENSES preview (first 30 lines) ==="
 head -30 "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"
 
-# 10. Check for required licenses
+# 10. Every crate linked into the binary must be listed with its license text
 echo ""
-echo "=== Checking for required licenses ==="
-if grep -q "Apache" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
-    echo "OK Apache license found"
-else
-    echo "ERROR: Apache license NOT found"
+echo "=== Checking third-party licenses cover all runtime dependencies ==="
+LICENSES="$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"
+MISSING=0
+while read -r name ver _; do
+    if ! grep -qF -- "- $name $ver " "$LICENSES"; then
+        echo "MISSING license entry: $name $ver"
+        MISSING=1
+    fi
+done < <(cargo tree -e normal --prefix none --format '{p}' | sort -u | grep -v '^speq ')
+if [ "$MISSING" -ne 0 ]; then
+    echo "ERROR: THIRD_PARTY_LICENSES does not cover all runtime dependencies"
     exit 1
 fi
-
-if grep -q "Downloaded Assets" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
-    echo "OK Downloaded Assets section found"
-else
-    echo "ERROR: THIRD_PARTY_LICENSES missing 'Downloaded Assets' section"
+if ! grep -q "Permission is hereby granted" "$LICENSES"; then
+    echo "ERROR: no license text found in THIRD_PARTY_LICENSES"
     exit 1
 fi
-
-if grep -q "snowflake-arctic-embed-xs" "$EXTRACT_DIR/bin/THIRD_PARTY_LICENSES"; then
-    echo "OK snowflake-arctic-embed-xs attribution found"
-else
-    echo "ERROR: THIRD_PARTY_LICENSES missing snowflake-arctic-embed-xs attribution"
-    exit 1
-fi
+echo "OK all runtime dependencies listed with license text"
 
 echo ""
 echo "=== All tests passed ==="

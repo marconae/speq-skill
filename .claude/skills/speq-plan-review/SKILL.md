@@ -1,6 +1,6 @@
 ---
 name: speq-plan-review
-description: Adversarial plan-review method and challenge taxonomy — premortem framing, multi-axis challenge taxonomy, severity discipline, and findings output format. Triggered by plan-reviewer.
+description: Adversarial plan-review method and challenge taxonomy — premortem framing, multi-axis challenge taxonomy, severity discipline, and findings output format. Use when reviewing a plan.
 ---
 
 # Adversarial Plan Review
@@ -28,7 +28,7 @@ Tag every finding. Group findings by axis in the output.
 
 - `[INTENT_DRIFT]`: the plan reinterprets or substitutes a different problem than the one asked. *Quote the original request; quote the plan line that diverges.*
 - `[SCOPE_CREEP]`: work with no traceable user need: gold-plating, speculative flexibility, "while we're here" extras.
-- `[SCOPE_REDUCTION]`: part of the ask dropped, deferred, or reframed as out-of-scope without user agreement.
+- `[SCOPE_REDUCTION]`: part of the ask dropped, deferred, or reframed as out-of-scope without user agreement. A declared `Follow-up plans` list in `plan.md` from a split is agreed scope, not a reduction.
 
 ### Feasibility: can this be built as described?
 
@@ -52,15 +52,15 @@ Tag every finding. Group findings by axis in the output.
 
 ### Design Depth: does the plan manage complexity well? (per `/speq-design-philosophy`)
 
-`decision-log.md` is the input surface for `[ADR_OVERPROMOTION]`: check every `Promotes to ADR: yes` entry against `/speq-adr-rules`. `decision-log.md`, `plan.md`, and `architecture.md` (the delta, if present) are the input surface for `[ARCHITECTURE_DRIFT]`. The `speq decision-log show` output, the accepted ADRs, is the input surface for `[ADR_CONFLICT]`.
+`decision-log.md` is the input surface for `[ADR_OVERPROMOTION]`: check every `Promotes to ADR: yes` entry against `/speq-adr-rules`. `decision-log.md`, `plan.md`, and `architecture.md` (the delta, if present) are the input surface for `[ARCHITECTURE_DRIFT]`. The accepted ADRs (the ADR digest from `/speq-cli`, plus any fragment you open) are the input surface for `[ADR_CONFLICT]`.
 
 - `[SHALLOW_DESIGN]`: a planned module/interface is shallow relative to the complexity it should hide.
 - `[INFORMATION_LEAKAGE]`: a design decision (format, protocol, temporal split) reflected across multiple planned modules.
 - `[TACTICAL_SHORTCUT]`: a tactical shortcut with no scheduled strategic follow-up.
 - `[BOUNDARY_VIOLATION]`: planned business logic depends directly on a delivery mechanism, storage engine, or framework.
-- `[ADR_OVERPROMOTION]`: a `Promotes to ADR: yes` entry that fails `/speq-adr-rules`. Flag an entry when any of these holds: Rationale names no rule-2 criterion; Rationale states no `speq decision-log show` search result; the content is on the never-an-ADR list (rule 3); Decision holds implementation detail such as signatures, paths, or flags (rule 6). Fix: set it to `no`, or, if it is a corollary of another promoted decision, fold it into that parent entry's `Consequences` line. Escalation: `MECHANICAL`.
+- `[ADR_OVERPROMOTION]`: a `Promotes to ADR: yes` entry that fails `/speq-adr-rules`. Flag an entry when any of these holds: Rationale names no rule-2 criterion; Rationale states no ADR search result; the content is on the never-an-ADR list (rule 3); Decision holds implementation detail such as signatures, paths, or flags (rule 6). Fix: set it to `no`, or, if it is a corollary of another promoted decision, fold it into that parent entry's `Consequences` line. Escalation: `MECHANICAL`.
 - `[ARCHITECTURE_DRIFT]` (BLOCKER): the plan changes the architecture but the delta does not say so. Flag it when any of these holds: (1) a `Promotes to ADR: yes` entry whose Rationale names rule-2 criterion 1, 2, or 3 has no `Architecture:` line, names a section the delta lacks, or says `no change` without a reason; (2) `plan.md` states a component, boundary, interface, data flow, constraint, or external dependency that the delta lacks; (3) the delta breaks `/speq-plan`'s `references/architecture-delta-template.md`. Fix: add or correct the delta block, move the fact into the delta, or write `Architecture: no change: <reason>`. Escalation: `MECHANICAL`. Content in `plan.md` that only duplicates the delta is ADVISORY.
-- `[ADR_CONFLICT]` (BLOCKER): a decision, spec delta, or architecture delta contradicts an accepted ADR from `speq decision-log show` without a superseding entry (`Supersedes: <slug>`). Escalation: `MECHANICAL`, or `HUMAN` when conforming to the ADR would drop or change part of the user's request. Fix: conform to the ADR, or add a superseding decision-log entry.
+- `[ADR_CONFLICT]` (BLOCKER): a decision, spec delta, or architecture delta contradicts an accepted ADR without a superseding entry (`Supersedes: <slug>`). Escalation: `MECHANICAL`, or `HUMAN` when conforming to the ADR would drop or change part of the user's request. Fix: conform to the ADR, or add a superseding decision-log entry.
 
 ### Prose quality: does the writing meet `/speq-writing-guardrails`?
 

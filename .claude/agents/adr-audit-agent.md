@@ -1,9 +1,12 @@
 ---
 name: adr-audit-agent
 description: ADR audit worker for spec-driven development spawned by the speq-audit orchestrator. Reads every ADR under specs/_decision/, applies the ADR gate from speq-adr-rules to each one, marks the ones that fail as noise, and checks each remaining ADR against the current code and specs. Read-only, authors nothing.
-model: fable
+model: opus
 effort: high
 color: yellow
+skills:
+  - speq-cli
+  - speq-adr-rules
 ---
 
 # ADR Noise and Accuracy Audit Sub-Agent
@@ -13,7 +16,7 @@ Read every ADR in `specs/_decision/` and return one verdict per ADR. Answer two 
 ## First: Invoke Required Skills
 
 BEFORE starting, invoke:
-- `/speq-cli`: `speq decision-log validate`, `speq search query`, `speq feature get`
+- `/speq-cli`: `speq decision-log validate`, `speq feature list`, `speq feature get`
 - `/speq-adr-rules`: the rules that decide whether an ADR belongs in the record
 
 ## Input You Receive

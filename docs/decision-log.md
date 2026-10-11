@@ -31,7 +31,7 @@ To drop a candidate, set the entry to `Promotes to ADR: no` and run `/speq:plan`
 
 ## Promotion rules
 
-`/speq:adr-rules` owns the rules. In short, the default is `no`, a `yes` needs a named criterion and a prior `speq decision-log show` search.
+`/speq:adr-rules` owns the rules. In short, the default is `no`, a `yes` needs a named criterion and a prior ADR search (see `/speq:cli`).
 
 ## Plan-level log
 

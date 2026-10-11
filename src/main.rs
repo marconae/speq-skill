@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::Parser;
-use speq_skill::{cli, feature, plan, record, search, tree, validate};
+use speq_skill::{cli, feature, plan, record, tree, validate};
 
 fn main() -> ExitCode {
     let cli = cli::Cli::parse();
@@ -12,62 +12,7 @@ fn main() -> ExitCode {
         cli::Commands::Feature { command } => handle_feature_command(command),
         cli::Commands::Plan { command } => handle_plan_command(command),
         cli::Commands::Record { plan_name } => handle_record_command(&plan_name),
-        cli::Commands::Search { command } => handle_search_command(command),
         cli::Commands::DecisionLog { command } => handle_decision_log_command(command),
-    }
-}
-
-fn handle_search_command(command: cli::SearchCommands) -> ExitCode {
-    let base = PathBuf::from("specs");
-
-    match command {
-        cli::SearchCommands::Index => {
-            println!("Building search index...");
-            match search::index_specs(&base) {
-                Ok(count) => {
-                    println!("Indexed {} scenarios.", count);
-                    ExitCode::SUCCESS
-                }
-                Err(e) => {
-                    println!("Error: {}", e);
-                    ExitCode::from(1)
-                }
-            }
-        }
-        cli::SearchCommands::Query { query, limit } => {
-            let announce_build = |reason| match reason {
-                search::BuildReason::MissingIndex => eprintln!(
-                    "Info: no search index found. Building it now, this may take a while."
-                ),
-                search::BuildReason::OutdatedIndex => eprintln!(
-                    "Info: search index is outdated. Rebuilding it now, this may take a while."
-                ),
-            };
-            match search::search_specs(&query, limit, announce_build) {
-                Ok(results) => {
-                    if results.is_empty() {
-                        println!("No matches found.");
-                    } else {
-                        for result in results {
-                            println!(
-                                "{}/{}/{} (score: {:.3})",
-                                result.domain, result.feature, result.scenario, result.score
-                            );
-                            // Show first line of content as snippet
-                            if let Some(first_line) = result.content.lines().next() {
-                                println!("  {}", first_line);
-                            }
-                            println!();
-                        }
-                    }
-                    ExitCode::SUCCESS
-                }
-                Err(e) => {
-                    println!("{}", e);
-                    ExitCode::from(1)
-                }
-            }
-        }
     }
 }
 
@@ -413,18 +358,7 @@ fn handle_record_command(plan_name: &str) -> ExitCode {
             if has_errors {
                 ExitCode::from(1)
             } else {
-                // Rebuild search index after successful recording
-                println!("\nRebuilding search index...");
-                match search::index_specs(&base) {
-                    Ok(count) => {
-                        println!("Indexed {} scenarios.", count);
-                        ExitCode::SUCCESS
-                    }
-                    Err(e) => {
-                        println!("Warning: Failed to rebuild index: {}", e);
-                        ExitCode::SUCCESS // Still return success since recording succeeded
-                    }
-                }
+                ExitCode::SUCCESS
             }
         }
         Err(e) => {

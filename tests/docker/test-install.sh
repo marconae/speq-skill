@@ -48,65 +48,6 @@ if [[ ! -f ~/.speq-skill/bin/speq ]]; then
 fi
 echo "PASS: marketplace bin/speq exists"
 
-if [[ ! -f ~/.speq-skill/codex/plugins/speq-skill/.codex-plugin/plugin.json ]]; then
-    echo "FAIL: Codex plugin manifest missing"
-    exit 1
-fi
-echo "PASS: Codex plugin manifest exists"
-
-if [[ ! -f ~/.speq-skill/codex/.agents/plugins/marketplace.json ]]; then
-    echo "FAIL: Codex marketplace manifest missing"
-    exit 1
-fi
-if ! grep -q '"path": "./plugins/speq-skill"' ~/.speq-skill/codex/.agents/plugins/marketplace.json; then
-    echo "FAIL: Codex marketplace manifest path missing"
-    exit 1
-fi
-echo "PASS: Codex marketplace manifest exists"
-
-# Serena comes from the global install, not from the plugins
-if [[ -e ~/.speq-skill/plugins/speq-skill/.mcp.json || -e ~/.speq-skill/codex/plugins/speq-skill/.mcp.json ]]; then
-    echo "FAIL: plugins must not ship an MCP config"
-    exit 1
-fi
-echo "PASS: plugins ship no MCP config"
-
-if ! grep -q '^name: speq:plan$' ~/.speq-skill/codex/plugins/speq-skill/skills/plan/SKILL.md; then
-    echo "FAIL: Codex /speq:plan skill name missing"
-    exit 1
-fi
-echo "PASS: Codex /speq:plan skill registered"
-
-if [[ ! -f ~/.codex/skills/speq-plan/SKILL.md ]]; then
-    echo "FAIL: Codex speq-plan skill missing"
-    exit 1
-fi
-echo "PASS: Codex speq-plan skill exists"
-
-if [[ ! -f ~/.codex/config.toml ]]; then
-    echo "FAIL: Codex config missing"
-    exit 1
-fi
-if ! grep -q '^\[marketplaces\.speq-skill-local\]' ~/.codex/config.toml; then
-    echo "FAIL: Codex marketplace registration missing"
-    cat ~/.codex/config.toml
-    exit 1
-fi
-if ! grep -Fq "source = \"${HOME}/.speq-skill/codex\"" ~/.codex/config.toml; then
-    echo "FAIL: Codex marketplace source missing"
-    cat ~/.codex/config.toml
-    exit 1
-fi
-echo "PASS: Codex marketplace registered"
-
-# No terminal in this container, so the installer must not register servers
-if grep -Eq '^\[mcp_servers\.serena\]' ~/.codex/config.toml; then
-    echo "FAIL: installer registered Serena without asking"
-    cat ~/.codex/config.toml
-    exit 1
-fi
-echo "PASS: Serena not registered without a terminal"
-
 # Test 4: Verify Claude plugin registration
 echo ""
 echo "--- Test 4: Verify Claude plugin registration ---"

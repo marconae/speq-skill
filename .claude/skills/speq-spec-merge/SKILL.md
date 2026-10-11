@@ -1,6 +1,6 @@
 ---
 name: speq-spec-merge
-description: Delta-merge procedure — DELTA marker semantics, library-organization thresholds, and ADR-promotion field mapping. Triggered by recorder-agent.
+description: Delta-merge procedure — DELTA marker semantics, library-organization thresholds, and ADR-promotion field mapping. Use when recording a plan's deltas.
 ---
 
 # Spec Merge

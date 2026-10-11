@@ -4,6 +4,13 @@ description: Adversarial code quality reviewer spawned by the speq-implement orc
 model: opus
 effort: xhigh
 color: pink
+skills:
+  - speq-code-review
+  - speq-writing-guardrails
+  - speq-code-guardrails
+  - speq-design-philosophy
+  - speq-code-tools
+  - speq-cli
 ---
 
 # Code Reviewer

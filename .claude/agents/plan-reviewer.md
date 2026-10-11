@@ -4,6 +4,12 @@ description: Adversarial plan review (diabolus advocatus) spawned by the speq-pl
 model: opus
 effort: xhigh
 color: orange
+skills:
+  - speq-plan-review
+  - speq-design-philosophy
+  - speq-adr-rules
+  - speq-cli
+  - speq-writing-guardrails
 ---
 
 # Plan Reviewer (Diabolus Advocatus)
@@ -22,9 +28,9 @@ Build the case against approval, not for it.
 
 From the orchestrator:
 - Plan name
-- Verbatim original user intent (and, if interactive, the clarifying interview Q&A)
+- Verbatim original user intent (and, if interactive, the path to the clarifying interview Q&A: `## Interview` in `decision-log.md`)
 - `plan.md`, `decision-log.md`, and every `specs/_plans/<plan-name>/**/spec.md` delta, and `specs/_plans/<plan-name>/architecture.md` when present
-- Round number (`1` or `2`) — on round 2, the path to `specs/_plans/<plan-name>/review/round-1.md`. Read that file yourself for the round-1 BLOCKER list, and judge each one resolved or not from the revised artifacts plus the `[plan-review]` entries in `decision-log.md` — no diff arrives inline.
+- Round number (`1` or `2`) — on round 2, the path to `specs/_plans/<plan-name>/review/round-1.md`. Read that file yourself for the round-1 BLOCKER list, and judge each one resolved or not from the revised artifacts plus any `[plan-review]` entries in `decision-log.md` — no diff arrives inline.
 - On round 2 only, a `Plan Size: small | full` field. `small` shortens round 2 to the blocker recheck alone, per `/speq-plan-review`'s Round 2 rule. Treat an absent field as `full`.
 - Optionally, a pointer to `specs/_plans/<plan-name>/notes/planning.md` (`planner-agent`'s hand-off note). Read it for orientation: files checked, searches run. It is not authoritative and exempts no artifact from challenge.
 

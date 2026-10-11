@@ -18,7 +18,7 @@ Rules:
 ## Required Skills (for the orchestrator)
 
 Invoke before starting:
-- `/speq-cli`: spec discovery and search
+- `/speq-cli`: spec discovery
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
 - `/speq-git-operations`: the git/gh operation-to-command mapping, safety rules, and return formats — you run every operation directly
 
@@ -68,7 +68,7 @@ Derive the PR title from `<plan-name>` as a conventional-commit title `<type>(<s
 - **scope**: the `<feature-scope>` segment (the token after the verb).
 - **slug**: the humanized `<plan-name>` (hyphens → spaces).
 
-Example: `add-search-candle` ⇒ `feat(search): add search candle`. With no scope segment, emit `<type>: <slug>`.
+Example: `add-plan-export` ⇒ `feat(plan): add plan export`. With no scope segment, emit `<type>: <slug>`.
 
 ### 2. Fetch Answers — resume only
 
@@ -88,12 +88,12 @@ Gather enough context to brief `planner-agent`, the same lightweight calls `speq
 ```bash
 speq domain list
 speq feature list
-speq search query "<relevant terms>"
-speq search query "<exact term>"   # per /speq-cli's absence check, repeated for each exact term in the request
-speq decision-log show
+grep -rhE -A3 '^## ADR:|^\*\*(ID|Status):\*\*' specs/_decision/ 2>/dev/null || echo none   # ADR digest, per /speq-cli
 ```
 
-Read `specs/architecture.md` if it exists.
+Name the features in the list that relate to the request, per `/speq-cli`'s absence check.
+
+Note whether `specs/architecture.md` exists. Pass its path, do not read it.
 
 ### 4. Delegate to planner-agent
 
@@ -115,7 +115,7 @@ headless
 <the free-text feature intent (new plan), or the Q&A text step 2 fetched (resume) — this stands in for a live interview>
 
 ## Existing Context
-<the exact `speq domain list` / `speq feature list` / `speq search query "..."` / `speq decision-log show` calls you ran, each followed by its output, plus the content of `specs/architecture.md` when it exists — name the query, not just the result>
+<the exact `speq domain list` / `speq feature list` calls you ran, each followed by its output (the ADR digest, not the full `speq decision-log show`; name features you want read, do not paste `speq feature get` output); name `specs/architecture.md` by path when it exists, do not paste it>
 
 ## External Research
 none — agent to research as needed
@@ -125,6 +125,8 @@ none — agent to research as needed
 
 ## Your Task
 Produce spec deltas, plan.md, and the architecture delta (when the plan changes the architecture) per your normal workflow. You are in headless mode: follow your "Headless / Non-Interactive Mode" section — assume and document conventional decisions, escalate only irreducible ones via the OPEN QUESTIONS: sentinel. Tag deep-reasoning tasks with [expert].
+
+If the work is too large for one plan, split it per your headless split rule and name the follow-up plans in the PR body.
 
 Return the list of files created and the validation result, or an OPEN QUESTIONS: block if you had to stop.
 ```
@@ -143,7 +145,7 @@ Delegate to plan-reviewer — Review <plan-name> (round 1)
 <the feature intent text / resume Q&A used in step 4>
 
 ## Clarifying Interview Results
-<same text passed to planner-agent in step 4 — headless mode has no live interview>
+Read `## Interview` in `specs/_plans/<plan-name>/decision-log.md` when it exists. Headless mode has no live interview, so a new plan may have none; the User Intent above stands in.
 
 ## Plan Artifacts
 plan.md, decision-log.md, every specs/_plans/<plan-name>/**/spec.md delta, and specs/_plans/<plan-name>/architecture.md when present
@@ -158,7 +160,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
 
 **Plan Size classification** (compute before respawning `plan-reviewer` for round 2): the plan is `small` when all three hold: the plan-name's verb (per the verb table) is `fix`; `decision-log.md`'s `## Design Decisions` section is empty; the plan directory has no `architecture.md`. Otherwise `full`.
 
-**If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log each resolved blocker as a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md`, re-validate, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
+**If `INTENT == 0` and BLOCKER findings exist:** respawn `planner-agent` with the path to `review/round-1.md`. Instruct it to read the BLOCKER findings, execute each `Fix:` line, log a `[plan-review]`-prefixed `## Review Findings` entry in `decision-log.md` only for a blocker whose fix changed a design decision or settled a HUMAN finding (no entry for MECHANICAL fixes), re-validate, and return its per-finding `Resolved:`/`Could not resolve:` report per `/speq-planning`'s Revision Mode.
 
 **Round 2 runs only if round 1's `HUMAN` count was greater than 0.** A round 1 with `HUMAN: 0` means every BLOCKER was `MECHANICAL` — the reviewer already judged none of them needed adversarial re-checking, only a fix. Skip straight to the ship decision below; do not respawn `plan-reviewer`.
 
@@ -181,8 +183,7 @@ It writes its findings to `specs/_plans/<plan-name>/review/round-1.md` and retur
      message: spec(plan): <plan-name>
      title: <the derived <type>(<scope>): <slug>>
      body: per references/pr-body-template.md, ending "Draft pending
-           implementation. Run /speq:implement-pr <plan-name> to implement
-           and mark ready."
+           implementation."
    ```
 3. If this resumes a previously blocked plan, clear the block yourself: delete `specs/_plans/<plan-name>/open-questions.md` and the `> **Status:** blocked …` banner line from `plan.md`, then:
    ```
@@ -204,7 +205,7 @@ Keep each question short: state the decision in 1-2 sentences and point to the r
    ```markdown
    # Open Questions: <plan-name>
 
-   speq-plan-pr could not complete this plan without human input. What's done so far is committed on this branch. Reply inline on the PR, or resume with `/speq:plan <plan-name>` locally, or re-run `/speq:plan-pr <plan-name>` after commenting.
+   This plan needs input. What's done so far is committed on this branch. Reply inline on the PR.
 
    - [ ] <question 1 in 1-2 sentences, or a HUMAN-tagged BLOCKER folded in from step 5 — round-1 Intent-Fidelity, or unresolved after round 2 — link: review/round-<N>.md#<anchor>>
    - [ ] <question 2>

@@ -35,12 +35,6 @@ pub enum Commands {
         plan_name: String,
     },
 
-    /// Semantic search for specifications
-    Search {
-        #[command(subcommand)]
-        command: SearchCommands,
-    },
-
     /// Manage the permanent decision records under specs/_decision
     DecisionLog {
         #[command(subcommand)]
@@ -55,22 +49,6 @@ pub enum DecisionLogCommands {
 
     /// Assemble the permanent decision records and print them to stdout
     Show,
-}
-
-#[derive(Subcommand)]
-pub enum SearchCommands {
-    /// Build or rebuild the search index
-    Index,
-
-    /// Search for scenarios matching a query (use: speq search query "your query")
-    Query {
-        /// The search query
-        query: String,
-
-        /// Maximum number of results
-        #[arg(long, default_value = "10")]
-        limit: usize,
-    },
 }
 
 #[derive(Subcommand)]

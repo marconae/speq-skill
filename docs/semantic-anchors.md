@@ -14,7 +14,6 @@ For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/L
 
 | Anchor | Skill | Category |
 |--------|-------|----------|
-| Information Foraging | speq-cli | Search strategy |
 | Clean Code | speq-code-guardrails | Code quality |
 | London School TDD | speq-code-guardrails | Testing |
 | SOLID | speq-code-guardrails | Design principles |
@@ -33,7 +32,6 @@ For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/L
 | Socratic Method | speq-plan | Interview |
 | MECE Partitioning | speq-plan | Problem structuring |
 | BDD (Gherkin syntax) | speq-planning | Specification |
-| EARS Syntax | speq-planning | Requirements |
 | RFC 2119 / 8174 | speq-planning | Requirements |
 | Premortem | speq-plan-review | Risk analysis |
 | Devil's Advocate (diabolus advocatus) | plan-reviewer (agent) | Adversarial review |

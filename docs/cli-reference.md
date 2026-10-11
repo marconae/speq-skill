@@ -4,7 +4,7 @@
 
 # CLI reference
 
-The `speq` CLI provides spec discovery, semantic search, and validation for spec-driven development.
+The `speq` CLI provides spec discovery and validation for spec-driven development.
 
 ---
 
@@ -21,7 +21,6 @@ speq <command> [subcommand] [options]
 | `plan` | List and validate implementation plans |
 | `decision-log` | Validate and show the permanent decision log |
 | `record` | Merge plan deltas into permanent specs |
-| `search` | Semantic search across scenarios |
 
 ---
 
@@ -187,10 +186,10 @@ speq decision-log show
 $ speq decision-log show
 # Architecture Decision Records
 
-## ADR: Adopt pure-Rust inference to remove the ONNX Runtime dependency
+## ADR: Store decisions as one fragment per plan
 
-**ID:** pure-rust-inference
-**Plan:** refactor-search-pure-rust-inference
+**ID:** per-plan-decision-fragments
+**Plan:** avoid-decision-log-conflicts
 **Status:** Accepted
 ...
 ```
@@ -222,49 +221,6 @@ This command:
 2. Merges deltas into permanent specs in `specs/<domain>/<feature>/`
 3. Strips DELTA markers
 4. Archives the plan to `specs/_recorded/NNN-<plan-name>/`, where `NNN` is a record-time sequence number
-
----
-
-## Search commands
-
-### `speq search index`
-
-This command builds or rebuilds the semantic search index. The index builds automatically on the first search. Run this command to rebuild the index manually after spec changes.
-
-```bash
-speq search index
-```
-
-**Example**
-```bash
-$ speq search index
-Building search index...
-Indexed 42 scenarios.
-```
-
-`Indexed N scenarios.` reports the total number of scenarios in the index. The command exits with code 1 when the `specs/` directory does not exist.
-
-A rebuild embeds only new and changed scenarios. Each unchanged scenario keeps the vector that the index stores for it. speq rebuilds an outdated index in full.
-
-### `speq search query`
-
-This command runs a semantic search across all scenarios. It covers scenario names and steps. When no index exists, the command builds the index first and prints `Info: no search index found. Building it now, this may take a while.` on stderr. When the index is outdated, the command rebuilds it first and prints `Info: search index is outdated. Rebuilding it now, this may take a while.` on stderr. [`speq search index`](#speq-search-index) describes when an index is outdated.
-
-```bash
-speq search query "<query>" [--limit <n>]
-```
-
-**Example**
-```bash
-$ speq search query "validation" --limit 3
-cli/feature-validate/Validate single feature (score: 0.856)
-  Validate single feature
-
-cli/feature-validate/Summary at end (score: 0.853)
-  Summary at end
-```
-
-Each result includes the feature path, scenario name, relevance score, and matching context.
 
 ---
 

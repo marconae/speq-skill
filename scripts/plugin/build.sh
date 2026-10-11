@@ -205,6 +205,8 @@ copy_agents_for_platform() {
             log_info "  [$platform] $filename"
             cp "$agent_file" "$plugin_dir/agents/$filename"
             namespace_slash_commands "$plugin_dir/agents/$filename"
+            # Frontmatter `skills:` entries are skill names, not slash commands.
+            sed_in_place 's/^  - speq-/  - speq:/' "$plugin_dir/agents/$filename"
 
             if [[ "$platform" == "codex" ]]; then
                 transform_codex_markdown "$plugin_dir/agents/$filename"

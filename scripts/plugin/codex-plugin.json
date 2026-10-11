@@ -13,7 +13,7 @@
   "interface": {
     "displayName": "speq-skill",
     "shortDescription": "Spec-driven development workflow for Codex.",
-    "longDescription": "speq-skill provides Codex-friendly $-triggered skills, spec search, planning, implementation orchestration, and recording workflows for Codex.",
+    "longDescription": "speq-skill provides Codex-friendly $-triggered skills, spec discovery, planning, implementation orchestration, and recording workflows for Codex.",
     "developerName": "AUTHOR_PLACEHOLDER",
     "category": "Development",
     "capabilities": ["Interactive", "Write"],

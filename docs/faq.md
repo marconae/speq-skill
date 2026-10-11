@@ -14,7 +14,7 @@
 ## How do I change or remove existing behavior?
 
 - Run `/speq:plan change <behavior>` or `/speq:plan remove <behavior>`, for example `/speq:plan change token expiry to 15 minutes`
-- The agent searches the specs for the affected scenarios and proposes the deltas
+- The agent reads the specs to find the affected scenarios and proposes the deltas
 - Then run `/speq:implement` and `/speq:record`, as for a new feature
 
 ## How do I fix a bug?
@@ -60,7 +60,7 @@
 
 ## How do I find the right spec?
 
-- Run `speq search query "<terms>"`, then `speq feature get <domain>/<feature>`
+- Run `speq feature list` to see every feature, then `speq feature get <domain>/<feature>` for the relevant ones
 - After you change a spec, run `speq feature validate`
 
 ## How do I check that the spec library is healthy?

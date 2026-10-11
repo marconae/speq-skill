@@ -4,6 +4,8 @@ description: Audit worker for spec-driven development spawned by the speq-audit 
 model: opus
 effort: high
 color: yellow
+skills:
+  - speq-cli
 ---
 
 # Mission-Sync Audit Sub-Agent
@@ -13,7 +15,7 @@ Diff `specs/mission.md` against the real spec library: map prose capabilities to
 ## First: Invoke Required Skills
 
 BEFORE starting, invoke:
-- `/speq-cli` — `speq domain list`, `speq feature list`, `speq search query`
+- `/speq-cli` — `speq domain list`, `speq feature list`, `speq feature get`
 
 ## Input You Receive
 

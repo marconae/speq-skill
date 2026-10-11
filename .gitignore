@@ -33,7 +33,6 @@ target
 
 # Project specific
 _ideas
-.cache/
 
 # Build output (regenerate with scripts/plugin/build.sh or scripts/release/build.sh)
 # Contains: plugin/, marketplace/, and release archives

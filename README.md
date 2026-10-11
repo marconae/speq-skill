@@ -28,7 +28,6 @@ Then open Claude Code or Codex and start with the matching trigger: `/speq:missi
 <summary>What does the installer do?</summary>
 
 - Downloads a pre-built `speq` binary for your platform (Linux x86_64/ARM64, macOS Apple Silicon). On other platforms it stops and points to the [source build](./docs/installation.md#install-from-source)
-- Downloads the embedding model (`snowflake-arctic-embed-xs`) into the platform cache directory for semantic search
 - Installs the CLI to `~/.local/bin/speq`
 - Installs plugin files to `~/.speq-skill/`
 - Registers `/speq:*` skills for Claude Code and `$`-triggered skill suggestions for Codex when available
@@ -42,7 +41,7 @@ To uninstall, see [Installation — Uninstall](./docs/installation.md#uninstall)
 
 ## Why I Built It
 
-I want to leverage AI coding agents such as Claude Code and Codex as effective tools to write software.
+I want to leverage AI coding agents such as Claude Code and Codex as effective tools for software engineering.
 
 There are many other spec-driven development tools out there... 
 
@@ -57,7 +56,7 @@ There are many other spec-driven development tools out there...
 
 So I built `speq-skill`. 
 
-It combines skills with a simple CLI called `speq` that adds a semantical search layer to the permanent spec library. The search empowers the coding agent to find the right feature or scenarios during planning, but also during the implementation. This avoids reading unnecessary specs into the context window.
+It combines skills with a simple CLI called `speq` that lists and reads the permanent spec library. The coding agent lists the features, then reads only the relevant ones during planning and during the implementation. This avoids reading unnecessary specs into the context window.
 
 New to spec-driven development? Read ["Spec-driven development: an introduction"](https://deliberate.codes/blog/2026/spec-driven-development-an-introduction/) and ["Writing specs for AI coding agents"](https://deliberate.codes/blog/2026/writing-specs-for-ai-coding-agents/) on my blog.
 
@@ -67,9 +66,7 @@ Each skill is grounded in [semantic anchors](./docs/semantic-anchors.md) — nam
 
 Vibe Coding does not scale. `speq-skill` adds the missing workflow and guardrails.
 
-If you want to describe what you want and have a coding agent generate the code for you, then you should give `speq-skill` a try!
-
-It introduces a lightweight workflow for spec-driven development. It adds a CLI to enable the coding agent to search the permanent spec library.
+It introduces a lightweight workflow for spec-driven development. It adds a CLI to enable the coding agent to list and read the permanent spec library.
 
 ---
 
@@ -84,7 +81,7 @@ It introduces a lightweight workflow for spec-driven development. It adds a CLI 
 ```
 
 1. **Mission** — Do it once. The coding agent explores your codebase (or interviews you for a greenfield project) and generates `specs/mission.md` and `specs/architecture.md`.
-2. **Plan** — Describe what you want. The coding agent searches existing specs, asks clarifying questions, and creates a plan with spec deltas.
+2. **Plan** — Describe what you want. The coding agent reads the existing specs, asks clarifying questions, and creates a plan with spec deltas.
 3. **Implement** — The coding agent implements the plan, guided by guardrails for code quality, testing and more.
 4. **Record** — The coding agent merges implemented spec deltas, and the architecture delta if the plan has one, into the permanent spec library.
 
@@ -106,7 +103,7 @@ Specs live in `specs/<domain>/<feature>/spec.md`. `specs/architecture.md` holds 
 | [Headless PR Pipeline](./docs/headless-workflow.md) | Autonomous plan/implement via a feat/ branch + PR |
 | [Decision Log](./docs/decision-log.md) | Design decisions, ADR fragment format, validation, and show |
 | [CLI Reference](./docs/cli-reference.md) | All CLI commands |
-| [MCP Servers](./docs/mcp-servers.md) | Serena setup, Context7 optional |
+| [MCP Servers](./docs/mcp-servers.md) | Optional Serena and Context7 setup |
 | [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
 | [Model Routing](./docs/model-routing.md) | How workflow skills and sub-agents are routed across models |
 | [Hooks](./docs/hooks.md) | Repo-local `.speq/<name>-hook.md` customizations |
@@ -123,10 +120,6 @@ speq-skill works well with [Serena](https://github.com/oraios/serena) for code n
 
 > [!NOTE]
 > Serena and Context7 are separate open-source projects with their own licenses and terms available in the linked repositories. Context7 sends your documentation queries to a hosted service and offers a free-tier.
-
-## Dependencies
-
-The `speq` CLI uses [snowflake-arctic-embed-xs](https://huggingface.co/Snowflake/snowflake-arctic-embed-xs) for semantic search. The [installer](./docs/installation.md) downloads the model files automatically onto your machine so inference runs fully offline.
 
 ## Acknowledgments
 

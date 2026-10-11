@@ -12,7 +12,7 @@ One-paragraph description of what this plan achieves (max two sentences).
 
 ## Context
 
-Required for new features and significant changes. Skip for small fixes. A bullet list of the problem and the forces behind this change, one fact per bullet. No decisions: decisions go in `decision-log.md`. Structural changes to the system (components, boundaries, data flow, interfaces, constraints, external dependencies) go in the architecture delta, `architecture.md` in the plan directory, not here. Point to the delta from a bullet.
+Required for new features and significant changes. Skip for small fixes. A bullet list of the problem and the forces behind this change, one fact per bullet. No decisions: a choice with a rejected alternative goes in `decision-log.md`; a small local choice is a phrase in a task line. Structural changes to the system (components, boundaries, data flow, interfaces, constraints, external dependencies) go in the architecture delta, `architecture.md` in the plan directory, not here. Point to the delta from a bullet.
 
 - <fact about the problem or a force behind this change>
 - <fact>

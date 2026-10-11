@@ -3,29 +3,15 @@
 exclude-dev = true
 
 [advisories]
-ignore = [
-    # Unmaintained crates (not security vulnerabilities)
-    "RUSTSEC-2024-0436",  # paste - transitive dep, no security impact
-    "RUSTSEC-2023-0089",  # atomic-polyfill - transitive via postcard/heapless, no security impact
-    # Unmaintained, no safe upgrade yet; build-time only, pulled in by liquid-core via tract-linalg. Revisit when tract moves to anymap3.
-    "RUSTSEC-2026-0319",  # anymap2 - unmaintained, build-only transitive via tract-linalg → liquid-core
-]
+ignore = []
 
 # Allow list
 [licenses]
 allow = [
     "MIT",
     "Apache-2.0",
-    "Zlib",
-    "MPL-2.0",
     "Unicode-3.0",
 ]
-
-[[licenses.clarify]]
-# r-efi declares MIT OR Apache-2.0 OR LGPL-2.1-or-later; MIT satisfies the check
-name = "r-efi"
-expression = "MIT OR Apache-2.0 OR LGPL-2.1-or-later"
-license-files = []
 
 # Deny list
 [bans]
