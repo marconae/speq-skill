@@ -128,7 +128,7 @@ speq-skill works well with [Serena](https://github.com/oraios/serena) for code n
 
 ## License
 
-Free, open-source, and community-supported. [MIT](LICENSE).
+[MIT License](LICENSE).
 
 ---
 
