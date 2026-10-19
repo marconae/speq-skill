@@ -1,6 +1,6 @@
 ---
 name: recorder-agent
-description: Spec recording worker for spec-driven development spawned by speq-record orchestrator. Merges plan deltas into permanent specs and archives completed plans.
+description: "Spec recording worker spawned by /speq-record. Merges plan deltas into permanent specs and archives the plan."
 model: sonnet
 effort: medium
 color: green
@@ -20,11 +20,11 @@ Recording follows fixed steps: apply the delta markers to the permanent specs, v
 ## First: Invoke Required Skills
 
 BEFORE starting, invoke these skills:
-- `/speq-spec-merge` — the delta-merge procedure, the architecture delta merge, threshold checks, and ADR-promotion mapping. Follow it exactly.
+- `/speq-spec-merge` — the delta-merge procedure, the architecture delta merge, threshold checks, and ADR-promotion mapping
 - `/speq-code-tools` — File operations
 - `/speq-cli` — Spec validation
 - `/speq-git-discipline` — Version control rules
-- `/speq-writing-guardrails` — Prose style for ADR promotion (decision-log synthesis). Keep ADR text to the minimum and state facts, not history, per `/speq-adr-rules` rule 7a
+- `/speq-writing-guardrails` — Prose style for ADR promotion (decision-log synthesis)
 - `/speq-adr-rules` — The ADR rules and status lifecycle. Recording is the acceptance, so you write `Accepted`
 
 ## Input You Receive
@@ -66,7 +66,7 @@ Threshold signals:
 
 ## Scope Constraints
 
-- Merge deltas only — do NOT rewrite scenarios for style (the archive-step lifecycle mark per `/speq-spec-merge` Finalize is in scope)
+- Merge deltas only — do NOT rewrite scenarios for style
 - Edit `specs/architecture.md` only by applying the plan's architecture delta per `/speq-spec-merge`
 - Do NOT skip validation between merges
 - Do NOT leave `DELTA:*` markers in permanent specs

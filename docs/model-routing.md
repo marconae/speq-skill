@@ -24,8 +24,8 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `/speq:implement` | `sonnet` | inherited | Thin orchestration |
 | `/speq:record` | `sonnet` | inherited | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
-| `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration (headless) |
-| `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration (headless) |
+| `/speq:plan-pr` | `sonnet` | inherited | Thin orchestration (PR flow) |
+| `/speq:implement-pr` | `sonnet` | inherited | Thin orchestration (PR flow) |
 | `/speq:audit` | `sonnet` | inherited | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `opus` | `xhigh` | Spec deltas, context, task decomposition |
@@ -35,7 +35,6 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `code-reviewer` | `opus` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `opus` | `high` | Mission ↔ spec-library sync |
 | `architecture-agent` | `opus` | `high` | Brownfield draft of `specs/architecture.md` for `/speq:mission` |
-| `adr-audit-agent` | `fable` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `sonnet` | `medium` | Deterministic spec merge and archive |
 
 ---
@@ -48,8 +47,8 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `/speq:implement` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:record` | `gpt-5.4` | `medium` | Thin orchestration |
 | `/speq:mission` | inherited | inherited | Interactive bootstrap |
-| `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration (headless) |
-| `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration (headless) |
+| `/speq:plan-pr` | `gpt-5.4` | `medium` | Thin orchestration (PR flow) |
+| `/speq:implement-pr` | `gpt-5.4` | `medium` | Thin orchestration (PR flow) |
 | `/speq:audit` | `gpt-5.4` | `medium` | Thin orchestration (health check) |
 | Utility skills | inherited | inherited | Reference material for the caller |
 | `planner-agent` | `gpt-5.5` | `xhigh` | Spec deltas, context, task decomposition |
@@ -59,7 +58,6 @@ Workflow skills coordinate the work. They gather context, ask clarifying questio
 | `code-reviewer` | `gpt-5.5` | `xhigh` | Adversarial implementation review |
 | `audit-agent` | `gpt-5.5` | `high` | Mission ↔ spec-library sync |
 | `architecture-agent` | `gpt-5.5` | `high` | Brownfield draft of `specs/architecture.md` for `/speq:mission` |
-| `adr-audit-agent` | `gpt-5.5` | `high` | ADR noise and accuracy review |
 | `recorder-agent` | `gpt-5.4` | `medium` | Deterministic spec merge and archive |
 
 ---

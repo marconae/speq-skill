@@ -1,6 +1,6 @@
 ---
 name: speq-cli
-description: Query specs via the speq CLI: feature listing and reading, structure validation, and the absence check. Every speq orchestrator and sub-agent invokes this first for spec discovery or validation.
+description: "Queries specs via the speq CLI: list and read features, validate structure, run the absence check. Invoke first for any spec discovery or validation."
 ---
 
 # speq CLI

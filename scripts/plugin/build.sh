@@ -173,7 +173,7 @@ set_codex_agent_model() {
     local filename="$2"
 
     case "$filename" in
-        planner-agent.md|plan-reviewer.md|implementer-expert-agent.md|code-reviewer.md|audit-agent.md|adr-audit-agent.md|architecture-agent.md)
+        planner-agent.md|plan-reviewer.md|implementer-expert-agent.md|code-reviewer.md|audit-agent.md|architecture-agent.md)
             sed_in_place 's/^model: .*/model: gpt-5.5/' "$file"
             ;;
         implementer-agent.md|recorder-agent.md)
@@ -293,8 +293,8 @@ main() {
     log_info "Claude test: claude --plugin-dir $CLAUDE_PLUGIN_DIR"
     log_info "Codex plugin: $CODEX_PLUGIN_DIR"
     log_info "Workflow skills: /speq:plan, /speq:implement, /speq:record, /speq:mission, /speq:audit"
-    log_info "Headless PR pipeline: /speq:plan-pr, /speq:implement-pr"
-    log_info "Utility skills: /speq:code-tools, /speq:ext-research, /speq:code-guardrails, /speq:design-philosophy, /speq:git-discipline, /speq:cli, /speq:writing-guardrails, /speq:planning, /speq:plan-review, /speq:code-review, /speq:spec-merge, /speq:git-operations, /speq:adr-rules"
+    log_info "PR pipeline: /speq:plan-pr, /speq:implement-pr"
+    log_info "Utility skills: /speq:code-tools, /speq:ext-library, /speq:code-guardrails, /speq:design-philosophy, /speq:git-discipline, /speq:cli, /speq:writing-guardrails, /speq:planning, /speq:plan-review, /speq:code-review, /speq:spec-merge, /speq:git-operations, /speq:adr-rules"
     log_info "Codex model routing: orchestration gpt-5.4/medium, heavy agents gpt-5.5/xhigh, standard implementation gpt-5.4/high, recording gpt-5.4/medium"
     log_info "Marketplace structure built at: $MARKETPLACE_DIR"
 }

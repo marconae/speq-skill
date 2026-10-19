@@ -33,7 +33,6 @@ For more information, see the [LLM-Coding/Semantic-Anchors](https://github.com/L
 | MECE Partitioning | speq-plan | Problem structuring |
 | BDD (Gherkin syntax) | speq-planning | Specification |
 | RFC 2119 / 8174 | speq-planning | Requirements |
-| Premortem | speq-plan-review | Risk analysis |
 | Devil's Advocate (diabolus advocatus) | plan-reviewer (agent) | Adversarial review |
 | BLUF (Bottom Line Up Front) | speq-audit | Reporting |
 | A Philosophy of Software Design (Ousterhout) | speq-design-philosophy | Design principles |

@@ -11,7 +11,7 @@
 | [Installation](./installation.md)              | Install the CLI and the plugin                                     |
 | [Workflow](./workflow.md)                      | One-time project setup, then the Plan, Implement, and Record cycle |
 | [FAQ](./faq.md)                                | Add features, fix bugs, start greenfield or brownfield             |
-| [Headless PR Pipeline](./headless-workflow.md) | Headless planning and implementation loops on a PR                 |
+| [PR Pipeline](./pr-workflow.md) | Planning and implementation on a PR                                |
 | [Spec Library](./spec-library.md)              | Spec format, BDD, and RFC keywords                                 |
 | [Decision Log](./decision-log.md)              | Design decisions, ADRs, validation, and the display command        |
 | [Model Routing](./model-routing.md)            | Orchestrator skills, specialist sub-agents, and effort tiers       |

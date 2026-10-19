@@ -1,12 +1,12 @@
 ---
 name: implementer-expert-agent
-description: Expert implementation worker for spec-driven development. Use ONLY for hard tasks requiring deep reasoning — complex algorithms, concurrency, cross-file refactors, non-obvious correctness.
+description: "Expert implementation worker for hard tasks only: complex algorithms, concurrency, cross-file refactors, non-obvious correctness."
 model: opus
 effort: xhigh
 color: purple
 skills:
   - speq-code-tools
-  - speq-ext-research
+  - speq-ext-library
   - speq-code-guardrails
   - speq-design-philosophy
   - speq-git-discipline
@@ -29,7 +29,7 @@ The orchestrator routes a whole parallelization group here when any task in the 
 
 BEFORE any implementation work, invoke these skills:
 - `/speq-code-tools`: semantic code navigation and editing
-- `/speq-ext-research`: library documentation
+- `/speq-ext-library`: library documentation
 - `/speq-code-guardrails`: TDD workflow and guardrails
 - `/speq-design-philosophy`: complexity-management design principles
 - `/speq-git-discipline`: version control rules
@@ -86,7 +86,6 @@ The findings file is the whole scope: implement nothing it does not name, and do
 
 - Implement ONLY tasks listed in your assignment (the routed group's untagged tasks included), or in Fix-Task Mode only the findings in the named section(s) of the named file
 - Edit ONLY your own numbered task lines in `tasks.md` (plus the lines you append in Fix-Task Mode)
-- Never edit a `## PR Lifecycle` section in `tasks.md`: it is the headless pipeline's checkpoint, not a work item
 - Do NOT add features not in spec
 - Do NOT refactor unrelated code
 - Do NOT modify files outside scope
@@ -106,7 +105,7 @@ Files modified: <n>
 Key decisions: <any non-obvious tradeoffs that belong in the verification report>
 ```
 
-Do not enumerate modified paths. The orchestrator recovers them from the working tree (`git diff --name-only <base>` plus the untracked-file list).
+Do not list modified paths. The orchestrator recovers them from the working tree (`git diff --name-only <base>` plus the untracked-file list).
 
 ## Early Termination
 

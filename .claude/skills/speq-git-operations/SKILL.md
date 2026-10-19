@@ -1,11 +1,11 @@
 ---
 name: speq-git-operations
-description: The git/gh operation-to-command mapping, safety rules, and return formats — invoked directly by the headless orchestrators speq-plan-pr and speq-implement-pr, the only components permitted to write git history or touch a remote.
+description: The git/gh operation-to-command mapping and return formats — invoked directly by /speq-plan-pr and /speq-implement-pr.
 ---
 
 # Git Operations
 
-This skill documents the git/gh write commands available to `speq-plan-pr` and `speq-implement-pr`, the only two components in this system permitted to write git history or touch a remote. Every other skill and agent stays read-only toward git, per `/speq-git-discipline`.
+This skill documents the git/gh write commands available to `speq-plan-pr` and `speq-implement-pr`.
 
 ## Rules
 
@@ -96,11 +96,11 @@ Comment: <url>
 
 ## `read-comments`
 Params: `target` (PR or issue number/URL; default: PR for current branch), `since` (optional ISO timestamp: return only comments and reviews posted at or after it).
-`gh pr view --json comments,reviews` or `gh issue view --json comments` (or `gh api`). Concatenate each body as plain text with author and timestamp. An empty result is valid.
+For a PR, collect all three comment kinds: conversation comments and review summaries (`gh pr view --json comments,reviews`), and inline review comments on files (`gh api repos/{owner}/{repo}/pulls/<n>/comments`, which carry `path` and `line`). For an issue, `gh issue view --json comments`. Concatenate each body as plain text with author, timestamp, and for inline comments the file and line. An empty result is valid.
 Returns:
 ```
 Comments found: N
-<author> @ <timestamp>:
+<author> @ <timestamp> [<path>:<line> for inline comments]:
 <body>
 ...
 ```
@@ -127,12 +127,4 @@ Sequence: `commit`(paths, message) → `push` → `create-pr`(draft: true, title
 Returns:
 ```
 Committed: <sha|no-op> / Pushed: <ref> / PR: #<n> (draft) — <url> / Ready: true
-```
-
-## `flag-blocked`
-Params: `paths` (files/globs to stage), `message` (exact commit message), `title`, `body`, `comment_body` (exact comment text).
-Sequence: `commit`(paths, message) → `push` → `create-pr`(draft: true, title, body) → `comment-pr`(comment_body).
-Returns:
-```
-Committed: <sha|no-op> / Pushed: <ref> / PR: #<n> (draft) — <url> / Commented: <comment-url>
 ```

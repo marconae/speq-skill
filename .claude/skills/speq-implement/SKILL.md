@@ -1,6 +1,6 @@
 ---
 name: speq-implement
-description: "Orchestrate implementation of a reviewed plan: task breakdown, TDD sub-agents, code review, and verification report. Use when the user asks to implement, build, or execute a plan under specs/_plans/ — after /speq-plan, before /speq-record. Arg: <plan-name>."
+description: "Implements a reviewed plan: task breakdown, TDD sub-agents, code review, and a verification report. Use to build or execute a plan under specs/_plans/, after /speq-plan and before /speq-record. Arg: plan-name."
 model: sonnet
 ---
 
@@ -22,7 +22,7 @@ Invoke before starting:
 - `/speq-cli`: spec discovery
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
 
-Do not invoke coding skills (`/speq-code-tools`, `/speq-ext-research`, `/speq-code-guardrails`) yourself: the orchestrator never writes code. Sub-agents invoke their own required skills.
+Do not invoke coding skills (`/speq-code-tools`, `/speq-ext-library`, `/speq-code-guardrails`) yourself: the orchestrator never writes code. Sub-agents invoke their own required skills.
 
 ## Orchestrator Role
 
@@ -50,8 +50,6 @@ Add a `Project Hook:` line (path only, not content) to every sub-agent brief bel
 
 ### Phase 1: Load Plan
 
-**Open-questions gate:** read `specs/_plans/<plan-name>/open-questions.md`. If it exists and is non-empty: **stop** and report that the plan has unresolved open questions pending human answers (resolve with `/speq-plan <plan-name>`, or via PR comments and `/speq-plan-pr <plan-name>` for a headless plan). This is the human-in-the-loop point, the same gate as `speq-implement-pr`'s blocker check.
-
 ```
 Read: specs/_plans/<plan-name>/plan.md
 Read: specs/_plans/<plan-name>/decision-log.md
@@ -63,7 +61,7 @@ Extract: feature specs, implementation tasks, parallelization groups, verificati
 
 Decompose the plan into a **Work Breakdown Structure** in `specs/_plans/<plan-name>/tasks.md`.
 
-**Lifecycle guard:** if `tasks.md` exists and contains a `## PR Lifecycle` section, `speq-implement-pr` pre-created it as its checkpoint (per its `references/checkpoint-protocol.md`). Preserve that section verbatim at the top and write the `## Phase N` sections below it. Never edit `## PR Lifecycle`: its writers are fixed by that protocol. Standalone runs get no lifecycle section. Create the file as below.
+If `tasks.md` already exists, resume per Context Recovery instead of creating it again.
 
 **Format:**
 
@@ -226,7 +224,7 @@ Ready for: /speq-record <plan-name>
 If context is lost or compacted:
 
 1. Read `specs/_plans/<plan-name>/tasks.md`
-2. Find incomplete tasks (`[ ]` or `[~]`). Scan only `## Phase N` sections, never `## PR Lifecycle` (its unnumbered entries are `speq-implement-pr` checkpoints, not work items)
+2. Find incomplete tasks (`[ ]` or `[~]`)
 3. Resume from the first incomplete task. A `[~]` task means its sub-agent was interrupted: respawn that group's agent
 4. Continue the orchestration workflow
 
@@ -243,7 +241,6 @@ If context is lost or compacted:
 |---------|-----------|
 | Orchestrator invokes coding skills | The orchestrator never writes code, and that text dilutes the most expensive session for work it never does |
 | Splitting one group between two agents by tag | The group is one knowledge cluster; each extra agent re-derives the same mental model |
-| Proceeding past a non-empty open-questions.md | The plan is blocked on human answers |
 | Marking `[x]` without a sub-agent completion return | Only verified completions are done |
 | Skipping the verification report | `/speq-record` gates on it |
 | Pointing a sub-agent at decision-log.md for rationale instead of inlining the group's excerpt | Full-file reads repeat per sub-agent; the orchestrator already read the decision log once in Phase 1 |

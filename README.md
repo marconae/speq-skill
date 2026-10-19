@@ -4,7 +4,7 @@
 
 # speq-skill
 
-**A light-weight and straightforward system for spec-driven development with Claude Code and Codex**
+**A light-weight and straightforward workflow for spec-driven development with Claude Code or Codex**
 
 [![spec|driven](https://img.shields.io/badge/spec-driven-blue)](specs/)
 [![Rust](https://img.shields.io/badge/rust-stable-brightgreen.svg)](https://www.rust-lang.org/)
@@ -47,11 +47,11 @@ There are many other spec-driven development tools out there...
 
 ...but I wanted the following:
 
-1. A system that is not primped on one language or framework (e.g., Python or TypeScript)
+1. A workflow that is not primped on one language or framework (e.g., Python or TypeScript)
 2. A straightforward repeatable workflow (`plan → implement → record`)
 3. A **permanent** and growing spec-library
-4. A system that keeps the specs **small** to avoid context cluttering
-5. A system that keeps **asking me instead of making assumptions**
+4. A workflow that keeps the specs **small** to avoid context cluttering
+5. A workflow that keeps **asking me instead of making assumptions**
 6. **Semantic anchors** that ground AI behavior in established methodologies
 
 So I built `speq-skill`. 
@@ -89,30 +89,30 @@ Specs live in `specs/<domain>/<feature>/spec.md`. `specs/architecture.md` holds 
 
 ## Building Blocks for Agentic Workflows
 
-`/speq:plan-pr` and `/speq:implement-pr` are two building blocks for agentic workflows centered on pull requests. Each one orchestrates the planning, implementing, and recording skills: `/speq:plan-pr` runs planning and opens a draft PR on a `feat/<plan-name>` branch, and `/speq:implement-pr` runs implementing and recording on that branch. Humans stay on the loop by commenting on the pull request. See [Headless PR Pipeline](./docs/headless-workflow.md).
+`/speq:plan-pr` and `/speq:implement-pr` are two building blocks for agentic workflows centered on pull requests. Each one orchestrates the planning, implementing, and recording skills: `/speq:plan-pr` runs planning and opens a draft PR on a `feat/<plan-name>` branch, and `/speq:implement-pr` runs implementing and recording on that branch. You stay in the loop by commenting on the pull request. See [PR Pipeline](./docs/pr-workflow.md).
 
 ---
 
 ## Documentation
 
-| Guide | Description |
-|-------|-------------|
-| [Installation](./docs/installation.md) | Setup CLI and plugin |
-| [Workflow](./docs/workflow.md) | One-time mission setup, then Plan → Implement → Record cycle |
-| [FAQ](./docs/faq.md) | Add features, fix bugs, start greenfield or brownfield |
-| [Headless PR Pipeline](./docs/headless-workflow.md) | Autonomous plan/implement via a feat/ branch + PR |
-| [Decision Log](./docs/decision-log.md) | Design decisions, ADR fragment format, validation, and show |
-| [CLI Reference](./docs/cli-reference.md) | All CLI commands |
-| [MCP Servers](./docs/mcp-servers.md) | Optional Serena and Context7 setup |
-| [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill |
-| [Model Routing](./docs/model-routing.md) | How workflow skills and sub-agents are routed across models |
-| [Hooks](./docs/hooks.md) | Repo-local `.speq/<name>-hook.md` customizations |
+| Guide                                          | Description                                                  |
+|------------------------------------------------|--------------------------------------------------------------|
+| [Installation](./docs/installation.md)         | Setup CLI and plugin                                         |
+| [Workflow](./docs/workflow.md)                 | One-time mission setup, then Plan → Implement → Record cycle |
+| [FAQ](./docs/faq.md)                           | Add features, fix bugs, start greenfield or brownfield       |
+| [PR Workflow](./docs/pr-workflow.md)           | Plan and implement via a feat/ branch + Pull Request         |
+| [Decision Log](./docs/decision-log.md)         | Design decisions, ADR fragment format, validation, and show  |
+| [CLI Reference](./docs/cli-reference.md)       | All CLI commands                                             |
+| [MCP Servers](./docs/mcp-servers.md)           | Optional Serena and Context7 setup                           |
+| [Semantic Anchors](./docs/semantic-anchors.md) | Named methodologies grounding each skill                     |
+| [Model Routing](./docs/model-routing.md)       | How workflow skills and sub-agents are routed across models  |
+| [Hooks](./docs/hooks.md)                       | Repo-local `.speq/<name>-hook.md` customizations             |
 
 ---
 
 ## Important
 
-`speq-skill` is a plugin for Claude Code, Codex, and other compatible AI coding agents. This tool provides workflow structure and spec management only—**the AI / coding agent generates all code, specs, or other artifacts**.
+`speq-skill` is a plugin for Claude Code, Codex, and other compatible AI coding agents. This project provides workflow structure and spec management only—**the coding agent generates all code, specs, other artifacts, and tool calls**.
 
 ## Companions
 
@@ -128,7 +128,7 @@ speq-skill works well with [Serena](https://github.com/oraios/serena) for code n
 
 ## License
 
-[MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 

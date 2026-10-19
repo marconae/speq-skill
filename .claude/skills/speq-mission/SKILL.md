@@ -1,6 +1,6 @@
 ---
 name: speq-mission
-description: "Create or update specs/mission.md and the first specs/architecture.md through a Socratic interview; detects brownfield vs greenfield. Use when the user asks to bootstrap or initialize a speq project, write or revise the project mission, or when /speq-audit reports mission drift and seeds this skill with its findings."
+description: "Creates or updates specs/mission.md and specs/architecture.md through an interview, for brownfield or greenfield projects. Use to bootstrap a speq project, revise the mission, or when /speq-audit reports mission drift."
 ---
 
 # Mission Creator
@@ -12,7 +12,7 @@ You are creating a project mission file (`specs/mission.md`) and the first archi
 ## Required Skills
 
 Invoke before starting:
-- `/speq-ext-research`: tech stack research
+- `/speq-ext-library`: library docs
 - `/speq-cli`: spec structure
 - `/speq-writing-guardrails`: prose style for artifacts and GitHub text
 
@@ -80,11 +80,11 @@ For existing projects, gather context BEFORE interviewing:
 
 ### 3. Research Phase
 
-Research the technologies discovered or mentioned per `/speq-ext-research`. Use the results to inform interview questions and validate user choices.
+Look up the libraries discovered or mentioned per `/speq-ext-library`. Use the results to inform interview questions and validate user choices.
 
 ### 4. Clarifying Interview
 
-Conduct a Socratic interview via `AskUserQuestion` for EVERY section below. Never fill in content without asking. Each question reveals assumptions, surfaces contradictions, or narrows scope. Brownfield: present what step 2 discovered and ask the user to confirm or correct it ("I found [X]. Is this accurate? What would you add or change?") instead of asking cold.
+Conduct a Socratic interview by asking the user about every section below. Never fill in content without asking. Each question reveals assumptions, surfaces contradictions, or narrows scope. Brownfield: present what step 2 discovered and ask the user to confirm or correct it ("I found [X]. Is this accurate? What would you add or change?") instead of asking cold.
 
 #### 4.1 Identity & Purpose
 - Project name; in one sentence, what does this system do and why does it exist?
@@ -120,7 +120,7 @@ Apply **User Story Mapping** (Patton): identify activities, then decompose into 
 
 #### 4.9 Architecture
 Answers go to `specs/architecture.md`.
-- With a draft: tell the user the draft path and ask them to review it there. Ask one `AskUserQuestion` per `Conflicts` item and replace the cold question with each `Questions` item. Tell the user what `Not explored` lists and ask about it. Corrections: the user edits the draft file, or you resume the same agent with the correction. Never rewrite the draft yourself.
+- With a draft: tell the user the draft path and ask them to review it there. Ask the user one question per `Conflicts` item and replace the cold question with each `Questions` item. Tell the user what `Not explored` lists and ask about it. Corrections: the user edits the draft file, or you resume the same agent with the correction. Never rewrite the draft yourself.
 - Without a draft: high-level architecture pattern (layered, hexagonal, event-driven, etc.)? Key components and their responsibilities? How does data flow through the system?
 
 #### 4.10 Constraints
@@ -151,7 +151,7 @@ With an `architecture-agent` draft, the user approves the draft file. Then move 
 
 ### Question Batching
 
-Group questions into MECE partitions (max 3-4 per `AskUserQuestion` call). Each group covers one dimension without overlap:
+Group questions into MECE partitions (max 3-4 per question round). Each group covers one dimension without overlap:
 
 | Phase | Questions to Group |
 |-------|-------------------|

@@ -1,6 +1,6 @@
 ---
 name: speq-code-tools
-description: Semantic code navigation and editing via Serena MCP — symbol-level tools required over grep/find/manual edits. Used by speq agents during a speq plan, implement, or record run. Not for general coding.
+description: "Semantic code navigation and editing via Serena MCP, required over grep and manual edits. Used by speq agents like /speq-implement. Not for general coding."
 ---
 
 # Code Tools

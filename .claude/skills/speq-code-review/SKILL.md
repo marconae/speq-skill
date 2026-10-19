@@ -1,13 +1,11 @@
 ---
 name: speq-code-review
-description: Code review tag taxonomy and findings output format — guardrail violations, dead code, test quality, bad comments, optimizations, YAGNI/over-engineering, error handling, and design depth. Used by the speq code-reviewer agent during a speq implement run. Not for general code review.
+description: "Code review tag taxonomy and findings format for the code-reviewer agent during /speq-implement. Not for general code review."
 ---
 
 # Code Review Taxonomy
 
 Analyze each changed file for the categories below.
-
-**Non-goal:** a deviation the brief notes as authorized by an active project hook (a skipped guardrail, a relaxed convention) is a settled, intentional choice. Do not raise it as a finding under any category.
 
 ## 1. Guardrail Violations
 
@@ -22,7 +20,7 @@ Per `/speq-code-guardrails`:
 - `[OUTPUT_PARAMETER]`: a value returned via a mutated argument instead of the return value
 - `[MIXED_ABSTRACTION_LEVEL]`: a function mixes high-level orchestration with low-level detail
 - `[COMMAND_QUERY_MIX]`: a single call both mutates something and hands back an answer
-- `[WEASEL_NAME]`: a name that states no responsibility (Manager, Processor, Handler, Data, Info, Util)
+- `[VAGUE_NAME]`: a name that states no responsibility (Manager, Processor, Handler, Data, Info, Util)
 - `[IMPLEMENTATION_IN_NAME]`: a name that bakes in a transport, vendor, or format instead of the abstraction
 
 ## 2. Dead Code
@@ -34,7 +32,6 @@ Per `/speq-code-guardrails`:
 
 ## 3. Test Quality
 
-Per `/speq-code-guardrails`' Tests section. Tests are quality subjects, not only removal candidates:
 - `[OBSOLETE_TEST]`: tests removed functionality
 - `[DUPLICATE_TEST]`: duplicate test coverage
 - `[ASSERTION_FREE_TEST]`: test always passes, no assertions
@@ -55,7 +52,7 @@ Per `/speq-code-guardrails`' Tests section. Tests are quality subjects, not only
 
 ## 5. Optimization Opportunities
 
-The Evidence Rule applies here: raise a finding in this category only with a measurement. Without one, the finding is `[UNMEASURED_OPTIMIZATION]` against the code that was optimized speculatively.
+The Evidence Rule applies here: raise a finding in this category only with a measurement.
 
 - `[PERFORMANCE_ISSUE]`: obvious performance issue
 - `[UNNECESSARY_ALLOCATION]`: unnecessary allocation in a loop
@@ -64,7 +61,6 @@ The Evidence Rule applies here: raise a finding in this category only with a mea
 
 ## 6. YAGNI / Over-Engineering
 
-Per `/speq-code-guardrails`'s YAGNI Checks:
 - `[STANDARD_LIBRARY_DUPLICATE]`: logic that reimplements something the language's standard library already provides
 - `[SHRINKABLE]`: same logic expressible in meaningfully fewer lines
 - `[DEAD_FLEXIBILITY]`: a feature flag, extension point, or parameter that is never varied
@@ -82,9 +78,8 @@ Per `/speq-code-guardrails`'s YAGNI Checks:
 
 ## 8. Design Depth
 
-Per `/speq-design-philosophy`:
-- `[SHALLOW_MODULE]`: learning the interface takes almost as much effort as the implementation behind it would, or classitis (many small modules named for a role, not a responsibility; a purely naming defect with no structural symptom is `[WEASEL_NAME]`, not this tag)
-- `[INFORMATION_LEAKAGE]`: a single design choice (a format, a protocol, an execution-order split) shows up in more than one module and would need editing in both if it changed
+- `[SHALLOW_MODULE]`: learning the interface takes almost as much effort as the implementation behind it would, or classitis (many small modules named for a role, not a responsibility
+- `[INFORMATION_COUPLING]`: a single design choice (a format, a protocol, an execution-order split) shows up in more than one module and would need editing in both if it changed
 - `[TACTICAL_SHORTCUT]`: a shortcut taken with no follow-up to invest in the design
 - `[MISSING_DESIGN_INTENT]`: a public/interface comment states purpose but not the design intent or rationale a non-obvious abstraction needs
 - `[BOUNDARY_VIOLATION]`: business logic names a delivery mechanism, storage engine, or framework directly
@@ -108,4 +103,4 @@ CODE REVIEW: <n> findings — standard: <n>, expert: <n> — specs/_plans/<plan-
 
 You partition the findings. The orchestrator never sees them individually. Place each finding under `## Standard fixes` or `## Expert fixes` in the findings document. The partition decides which single agent applies the whole fix pass: any Expert finding routes both sections to `implementer-expert-agent`. With no Expert finding, `implementer-agent` applies `## Standard fixes`.
 
-Every tag across all 8 categories is eligible for either section. Route a finding to `## Expert fixes` when its fix has cross-file, concurrency, or subtle-correctness implications: removing a dependency or abstraction with several call sites, correcting a dependency-direction or boundary violation, or any change whose failure mode is a passing test over wrong behavior. Everything else goes to `## Standard fixes`. You hold the context for this call. Decide it here, do not defer it.
+Every tag across all categories is eligible for either section. Route a finding to `## Expert fixes` when its fix has cross-file, concurrency, or subtle-correctness implications: removing a dependency or abstraction with several call sites, correcting a dependency-direction or boundary violation, or any change whose failure mode is a passing test over wrong behavior. Everything else goes to `## Standard fixes`. You hold the context for this call. Decide it here, do not defer it.

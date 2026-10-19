@@ -1,6 +1,6 @@
 ---
 name: speq-design-philosophy
-description: Complexity-management design principles — deep modules, information hiding and leakage, module boundaries, dependency direction, strategic vs. tactical tradeoffs. Used by speq planner, reviewer, and implementer agents during a speq run. Not for general design work.
+description: "Complexity-management design principles (deep modules, information hiding, dependency direction) for speq agents like /speq-plan or /speq-implement. Not for general design work."
 ---
 
 # Design Philosophy
@@ -23,22 +23,22 @@ Weigh a module by what it does for callers relative to what its interface costs 
 
 Depth, not size, decides whether an abstraction earns its place.
 
-## Information Hiding & Leakage
+## Information Hiding & Coupling
 
-A module is well designed when the rest of the system stays ignorant of a decision it makes internally. Leakage: the same decision surfaces in more than one module. Treat leakage as the defect class that deserves the closest attention.
+A module is well-designed when the rest of the system stays ignorant of a decision it makes internally. Coupling: the same decision surfaces in more than one module. Treat coupling as the defect class that deserves the closest attention.
 
-- **Temporal leakage**: modules organized around execution order (read, then parse, then write) instead of around what each stage knows. Every stage then carries the same format knowledge.
-- **Back-door leakage**: two modules independently assume the same data format, protocol, or convention, with nothing enforcing agreement.
+- **Temporal coupling**: modules organized around execution order (read, then parse, then write) instead of around what each stage knows. Every stage then carries the same format knowledge.
+- **Implicit coupling**: two modules independently assume the same data format, protocol, or convention, with nothing enforcing agreement.
 
 Fix: combine the modules that share the decision, or give the decision its own module and make both depend on it.
 
-## General- vs Special-Purpose Modules
+## General- vs. Special-Purpose Modules
 
 Test: an interface handles every need the code has *today* (see `/speq-code-guardrails`' YAGNI Checks for the "not tomorrow's" half) without forcing narrow, special-case methods onto callers.
 
 A configuration parameter is a decision the module declined to make. Prefer a sensible default, auto-detection, or elimination.
 
-## Strategic vs Tactical Programming
+## Strategic vs. Tactical Programming
 
 Tactical: ship the feature, leave the module harder to work with. Strategic: invest 10-20% of every change in design quality, not a separate cleanup phase. Flag a pattern of tactical shipping as a risk. Do not emulate it.
 
@@ -51,7 +51,7 @@ Per `/speq-code-guardrails`' Comments rule: a public/interface doc comment state
 Per Martin's *Clean Architecture*:
 
 - Dependencies point from volatile to stable. Business logic never names a delivery mechanism, storage engine, or framework.
-- Business logic performs no I/O and reads no ambient state — both are injected.
+- Business logic performs no I/O and reads no ambient state.
 - The consumer defines the abstraction it needs, in its own vocabulary — never shaped around a provider's API (Dependency Inversion).
 - Construct concrete implementations only at the entry point; no module builds its own dependencies.
 - No cycles in the module dependency graph.

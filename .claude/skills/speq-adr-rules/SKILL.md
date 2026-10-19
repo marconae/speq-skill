@@ -1,6 +1,6 @@
 ---
 name: speq-adr-rules
-description: The rules for when a decision becomes an ADR. The default is no, only durable decisions qualify, search first, one decision per ADR, and a human accepts an ADR when they record the plan. Use only inside a speq plan, record, or audit workflow, when deciding whether a decision becomes an ADR. Not for general decision records.
+description: "When a decision becomes an ADR: the default is no, only durable decisions qualify, search first, one decision per ADR. Use inside a /speq-plan, /speq-record, or /speq-audit run."
 ---
 
 # ADR Rules
@@ -18,7 +18,7 @@ An ADR is a rare record of a durable decision. Most plans produce none. This ski
 
 A decision qualifies only when at least one of these holds:
 
-- It affects multiple components or teams.
+- It affects multiple components.
 - It sets a long-lived constraint that binds future work.
 - It is a major technology, API, persistence, security, or deployment choice.
 - It rejects a plausible alternative, and the reason will matter to a later reader.
@@ -85,7 +85,7 @@ An ADR holds the least text that states the decision. Follow `/speq-writing-guar
 
 - An ADR is proposed at plan time. A `Promotes to ADR: yes` entry that passes rules 1 to 5 is the proposal. The plan skill prints it as an ADR candidate.
 - Recording the plan is the acceptance. `recorder-agent` writes `Status: Accepted` when `/speq-record` runs.
-- To reject a proposal, change the entry to `Promotes to ADR: no` and run the plan skill again before you record. In a headless run, comment on the draft PR and run `/speq-plan-pr` again with the PR number.
+- To reject a proposal, change the entry to `Promotes to ADR: no` and run the plan skill again before you record. In a PR run, comment on the draft PR and run `/speq-plan-pr` again with the PR number.
 - `Deprecated` and `Superseded by <slug>` follow the existing rules.
 
 ## 9. Vocabulary

@@ -1,6 +1,6 @@
 ---
 name: speq-code-guardrails
-description: TDD cycle and code quality guardrails — failing-test-first, evidence, dependency, error-handling, and test-quality rules. Used by speq implementer and reviewer agents during a speq implement run. Not for general coding.
+description: "TDD cycle and code quality guardrails for the implementer and reviewer agents during /speq-implement. Not for general coding."
 ---
 
 # Code Guardrails

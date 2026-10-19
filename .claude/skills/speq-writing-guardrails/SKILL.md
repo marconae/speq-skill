@@ -1,6 +1,6 @@
 ---
 name: speq-writing-guardrails
-description: Nine prose rules covering conclusion-first order, one idea per sentence, named actors, consistent names, plain explanations, no filler, neutral tone, current results only, and no em dashes. Used by speq orchestrators and agents for speq artifacts and PR text. Not for general writing.
+description: "Nine prose rules for speq artifacts and PR text: conclusion first, one idea per sentence, named actors, plain words, no filler, no em dashes. Not for general writing."
 ---
 
 # Writing Guardrails

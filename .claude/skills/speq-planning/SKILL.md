@@ -1,6 +1,6 @@
 ---
 name: speq-planning
-description: Plan-authoring workflow — spec delta authoring, test mapping, plan.md/decision-log.md generation, expert-task tagging, headless escalation, and revision mode. Use when authoring a plan.
+description: "Plan-authoring workflow for the planner-agent: spec deltas, test mapping, plan.md, decision-log.md, expert tagging, and revision mode."
 ---
 
 # Plan Authoring
@@ -9,6 +9,16 @@ description: Plan-authoring workflow — spec delta authoring, test mapping, pla
 
 - **BDD (Gherkin syntax)**: scenarios use GIVEN/WHEN/THEN; integration tests by default, unit tests only for isolated pure computation
 - **RFC 2119 keywords**: THEN steps use MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY (uppercase)
+
+## Rules
+
+- **Read-only investigation**: planning reads existing code, tests, specs, and docs. It never builds the software, runs a test suite, starts Docker or an e2e run, or launches the software. Plan the commands to run; do not run them.
+- **Short Background**: `## Background` is a concise summary of the context every scenario shares, 3-5 one-line bullets at most. It never encodes features, behavior, or requirements; each of those is a scenario (or a step in one). When a change adds behavior, add or change a scenario, not a Background line. When you rewrite a Background that has grown past this, cut it down in the same `DELTA:CHANGED` block.
+- **Architecture by delta**: never edit `specs/architecture.md`; `/speq-record` merges the delta. When the plan changes no architecture, write no delta.
+- **Proof is tests and manual runs**: `speq` commands (`speq plan validate`, `speq feature get`) check the plan, not the product, so never list them as test or manual evidence.
+- **One copy**: never embed spec content in `plan.md` or `decision-log.md`; reference the delta files. Write each artifact once, then change it with `Edit`, and do not re-read a file you wrote this run.
+- **Specs describe the software, not its tests**: a spec delta states features, behavior, and constraints of the software. Never encode e2e tests, test suites, Docker setups, or the test environment as scenarios or Background; they say how to verify the software, not what it does. `specs/mission.md` encodes how to test (suites, commands, environment), so reference it from the plan's Verification section.
+- **Local notes**: `notes/planning.md` is local scratch. It is never committed and never evidence.
 
 ## Workflow
 
@@ -56,16 +66,15 @@ Output: specs/_plans/<plan-name>/<domain>/<feature>/spec.md
 
 Decide whether the plan changes the architecture: a component, boundary, interface, data flow, constraint, or external dependency. If it does, write `specs/_plans/<plan-name>/architecture.md` per `/speq-plan`'s `references/architecture-delta-template.md`. Copy each changed section from `specs/architecture.md`, edit it, and set the BASE hash with `git hash-object specs/architecture.md`.
 
-- If the plan changes no architecture, write no delta.
 - If `specs/architecture.md` is absent, write no delta. State `Architecture: no change: specs/architecture.md absent` in the decision log entry.
-- Never edit `specs/architecture.md` itself. `/speq-record` merges the delta.
 
 ### 3. Test Mapping and Verification
 
 Every scenario requires two forms of external proof. No claims, only evidence.
 
 **Integration tests** (mandatory per scenario):
-- Map each scenario to an integration test (file path + test name)
+- Map each new or changed scenario to an integration test (file path + test name)
+- List the existing tests that the change or the new tests make redundant, for removal under plan.md's Dead Code Removal
 - One test per scenario by default; combine only when scenarios share setup and assertions
 - Unit tests only for pure computation with no I/O
 
@@ -75,12 +84,10 @@ Every scenario requires two forms of external proof. No claims, only evidence.
 
 ### 4. Generate plan.md
 
-Write each artifact once, then change it with `Edit`. Do not re-read a file you wrote this run. Draft per feature and do not restate spec delta text in `plan.md` or `decision-log.md`.
-
-Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
+Draft per feature. Populate plan.md per `/speq-plan`'s `references/plan-template.md`:
 
 1. **Context**: per the template's Context section. Decisions go in `decision-log.md` (step 5)
-2. **Features**: table referencing spec delta files (NEVER embed spec content), immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
+2. **Features**: table referencing spec delta files, immediately followed by an Impact entry describing user/operator-facing consequences (breaking changes called out, or "None")
 3. **Tasks**: work breakdown in implementation order
 4. **Parallelization**: knowledge clusters, per the rules below
 5. **Verification**: Scenario Coverage + Manual Testing + Checklist (from `specs/mission.md`)
@@ -97,10 +104,10 @@ If two clusters would contend on one shared file, split the module per feature (
 Create `specs/_plans/<plan-name>/decision-log.md` from `/speq-plan`'s `references/decision-log-plan-template.md`.
 
 **What to capture:**
-- **Interview section**: when `decision-log.md` already has it (interactive `speq-plan` writes it), keep it unchanged and do not copy it elsewhere. Otherwise (headless), write one line per Q&A from the brief, `- Q: <question> → A: <answer>`, a few words each; omit the section when the brief holds only a feature intent and no Q&A
+- **Interview section**: when `decision-log.md` already has it, keep it unchanged and do not copy it elsewhere
 - **Design Decisions section**: log a choice only when a reviewer or implementer cannot infer it from the deltas and tasks: a plausible alternative you rejected, or a constraint that is not obvious. Expect 0 to 3 entries. Never log naming, file placement, task order, or anything the deltas already state. Alternatives and Consequences are optional. For a new abstraction or module boundary, justify it in the entry's Rationale against `/speq-design-philosophy`'s Quick Diagnostic (deep vs. shallow, dependency direction)
 - **Architecture field**: an entry with `Promotes to ADR: yes` whose Rationale names `/speq-adr-rules` rule-2 criterion 1, 2, or 3 needs an `- **Architecture:** <§ Section[, § Section] | no change: <reason>>` line. Every named section needs a block in the architecture delta
-- **Review Findings section**: leave empty; populated in Revision Mode only for fixes that changed a design decision or settled a HUMAN finding
+- **Review Findings section**: leave empty; populated in Revision Mode only for fixes that changed a design decision
 
 **Promotion gate.** Apply `/speq-adr-rules` to every Design Decisions and Review Findings entry. Default `Promotes to ADR: no`. For `yes`, name the rule-2 criterion and the ADR digest result in Rationale. A promoted entry's Decision and Rationale are short and state facts, not history: the recorder derives the ADR from them (`/speq-adr-rules` rule 7a). A `[plan-review]` entry almost always stays `no`.
 
@@ -121,7 +128,7 @@ Tag tasks that require deep reasoning with `[expert]` at the end of the task lin
 - Novel algorithms or non-obvious correctness
 - Security-sensitive code paths
 
-**Do NOT tag as expert:**
+**Do not tag as expert:**
 - Standard CRUD, CLI flag plumbing, test fixtures
 - Copy-paste from existing patterns
 - Documentation or config changes
@@ -152,28 +159,14 @@ Do not write: why, invariants as prose, conventions commentary, or decisions. Th
 
 A revision-mode respawn (below) reads this note first, before it re-reads `plan.md`, `decision-log.md`, or spec deltas, and before it re-explores the codebase.
 
-This note stays out of every commit. It is local scratch, never evidence.
-
 ### 9. Pre-Return Self-Check
 
-Before you return to the orchestrator, run this checklist once against your own `plan.md`, `decision-log.md`, and spec deltas. Answer each line against your own writes in this run. Do not re-read the files. Fix anything that answers "no" before you return.
+Before you return to the orchestrator, check your own `plan.md`, `decision-log.md`, and spec deltas once, against your own writes in this run.
 
 This is prevention, not the review gate. `plan-reviewer` still runs next at full strength.
 
-Check your artifacts do not trip `/speq-plan-review`'s finding tags, across its five non-Prose axes (Prose stays `/speq-writing-guardrails`'s job):
-
-- **Intent Fidelity**: no `[INTENT_DRIFT]` (a substituted or reinterpreted goal), `[SCOPE_CREEP]` (untraceable extras), or `[SCOPE_REDUCTION]` (a dropped ask with no user agreement).
-- **Feasibility**: no `[EFFORT_MISESTIMATION]` (a task line that hides more work than it states), `[HIDDEN_DEPENDENCY]` (an unmodeled prerequisite), `[UNSTATED_ASSUMPTION]` (a load-bearing belief never stated), or `[NFR_IGNORED]` (security, performance, migration, or concurrency left untouched where the change touches it).
-- **Requirement Quality**: no `[AMBIGUOUS_REQUIREMENT]` (not testable as written), `[COMPLETENESS_GAP]` (a missing edge case or error path), `[REQUIREMENT_CONFLICT]` (contradicts another delta or a recorded spec — check via `/speq-cli`), or `[IMPLEMENTATION_LEAKAGE]` (a Background or Feature description fact no scenario step depends on).
-- **Task Breakdown**: no `[TRACEABILITY_GAP]` (a delta with no implementing task, or the reverse), `[TASK_GRANULARITY]` (a task too large to verify as one unit), or `[CLUSTER_INCOHERENCE]` (a Parallelization group sliced by layer, or overlapping `Knowledge` entries across groups).
-- **Design Depth** (per `/speq-design-philosophy`): no `[SHALLOW_DESIGN]`, `[INFORMATION_LEAKAGE]` (a format or protocol decision reflected across modules), `[TACTICAL_SHORTCUT]` with no scheduled follow-up, `[BOUNDARY_VIOLATION]` (business logic depending directly on a delivery mechanism, storage engine, or framework), `[ADR_OVERPROMOTION]` (a `Promotes to ADR: yes` entry with no named criterion, no search result, never-an-ADR content, or implementation detail in Decision, per `/speq-adr-rules`), `[ARCHITECTURE_DRIFT]` (a qualifying ADR entry with no `Architecture:` line, a named section the delta lacks, or `no change` with no reason; a component, boundary, interface, data flow, constraint, or external dependency in `plan.md` that the delta lacks; or a delta that breaks the delta template), or `[ADR_CONFLICT]` (a decision, spec delta, or architecture delta that contradicts an accepted ADR with no superseding entry).
-
-Open `/speq-plan-review` for a tag's full definition if you are unsure it applies.
-
-## Headless / Non-Interactive Mode
-
-Only if the orchestrator's prompt states `Interview Mode: headless`: read `/speq-planning`'s `references/headless-mode.md` and follow it.
+Check your artifacts against `/speq-plan-review`'s five non-Prose axes (Intent Fidelity, Feasibility, Requirement Quality, Task Breakdown, Design Depth) and its finding tags (load `/speq-plan-review` if they are not in context). Align prose with `/speq-writing-guardrails`. Fix anything the reviewer would flag.
 
 ## Revision Mode
 
-Only if the orchestrator respawns you with the path to a `plan-reviewer` findings file: read `/speq-planning`'s `references/revision-mode.md` and follow it. Read `notes/planning.md` first.
+Only if the orchestrator respawns you with the path to a feedback file (`plan-reviewer` findings or PR comments): read `notes/planning.md` first, then `/speq-planning`'s `references/revision-mode.md` and follow it.

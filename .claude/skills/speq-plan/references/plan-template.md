@@ -60,7 +60,7 @@ Optional: For changes affecting existing data/structure
 
 ## Parallelization
 
-Optional: task groups for the implement orchestrator. Each group is a knowledge cluster: a vertical slice of one spec delta plus the source and test files it governs. Fixtures, module code, and the feature's tests belong in the same group, not in separate layer groups.
+Optional.
 
 | Group | Tasks | Depends on | Knowledge |
 |-------|-------|------------|-----------|

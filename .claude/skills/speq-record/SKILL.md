@@ -1,6 +1,6 @@
 ---
 name: speq-record
-description: "Merge implemented spec deltas into the permanent specs library and archive the plan. Use when implementation is verified — after /speq-implement produces verification-report.md — or when the user asks to record, merge, or archive a finished plan. Arg: <plan-name>."
+description: "Merges implemented spec deltas into the permanent specs and archives the plan. Use after /speq-implement, or to record, merge, or archive a finished plan. Arg: plan-name."
 model: sonnet
 ---
 
@@ -27,7 +27,7 @@ Note it (not its full content) as a `Project Hook:` line in the `recorder-agent`
 
 ### Phase 1: Resolve Plan Name (orchestrator)
 
-Get the plan name from the user prompt. If none is given, use `AskUserQuestion` to present the plans under `specs/_plans/`.
+Get the plan name from the user prompt. If none is given, ask the user to choose from the plans under `specs/_plans/`.
 
 ### Phase 2: Verify Preconditions (orchestrator)
 
@@ -65,7 +65,7 @@ Return a summary of merged features and the archive path.
 
 If the sub-agent returns threshold signals:
 
-1. Use `AskUserQuestion` to get the user's organizational decision
+1. Ask the user for their organizational decision
 2. Respawn `recorder-agent` with the decision, OR apply a trivial edit (for example, a file rename) directly
 3. Archive only after all decisions are resolved
 

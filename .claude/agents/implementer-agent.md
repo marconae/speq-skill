@@ -1,12 +1,12 @@
 ---
 name: implementer-agent
-description: Standard implementation worker for spec-driven development spawned by the speq-implement orchestrator. Executes untagged tasks.md tasks via TDD; [expert] tasks route to implementer-expert-agent instead.
+description: "Implementation worker spawned by /speq-implement. Executes untagged tasks.md tasks via TDD; [expert] tasks go to implementer-expert-agent."
 model: sonnet
 effort: high
 color: red
 skills:
   - speq-code-tools
-  - speq-ext-research
+  - speq-ext-library
   - speq-code-guardrails
   - speq-design-philosophy
   - speq-git-discipline
@@ -19,10 +19,10 @@ skills:
 
 BEFORE any implementation work, invoke these skills:
 - `/speq-code-tools`: semantic code navigation and editing
-- `/speq-ext-research`: library documentation
+- `/speq-ext-library`: library documentation
 - `/speq-code-guardrails`: TDD workflow and guardrails
 - `/speq-design-philosophy`: complexity-management design principles
-- `/speq-git-discipline`: version control rules
+- `/speq-git-discipline`: version control rules, read-only mode
 - `/speq-cli`: spec discovery
 
 ## Core Responsibilities
@@ -76,7 +76,6 @@ The findings file is the whole scope: implement nothing it does not name, and do
 
 - Implement ONLY tasks listed in your assignment, or in Fix-Task Mode only the findings in the named section of the named file
 - Edit ONLY your own numbered task lines in `tasks.md` (plus the lines you append in Fix-Task Mode)
-- Never edit a `## PR Lifecycle` section in `tasks.md`: it is the headless pipeline's checkpoint, not a work item
 - Your assignment never contains `[expert]` tasks: a group with any `[expert]` task routes whole to `implementer-expert-agent`. If one appears in your prompt by accident, stop and signal the orchestrator
 - Do NOT add features not in spec
 - Do NOT refactor unrelated code
@@ -95,7 +94,7 @@ Lint: clean
 Files modified: <n>
 ```
 
-Do not enumerate modified paths. The orchestrator recovers them from the working tree (`git diff --name-only <base>` plus the untracked-file list).
+Do not list modified paths. The orchestrator recovers them from the working tree (`git diff --name-only <base>` plus the untracked-file list).
 
 ## Early Termination
 

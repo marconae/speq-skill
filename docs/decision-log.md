@@ -27,7 +27,7 @@ An ADR (Architecture Decision Record) is one durable decision. The decisions of 
                Recording the plan is the acceptance.
 ```
 
-To drop a candidate, set the entry to `Promotes to ADR: no` and run `/speq:plan` again. In a headless run, comment on the draft PR and run `/speq:plan-pr` again.
+To drop a candidate, set the entry to `Promotes to ADR: no` and run `/speq:plan` again. In a PR run, comment on the draft PR and run `/speq:plan-pr` again.
 
 ## Promotion rules
 

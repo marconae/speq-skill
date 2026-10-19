@@ -9,7 +9,7 @@ speq-skill works well with [Serena](https://github.com/oraios/serena), an MCP (M
 | Server | What your agent gets | Used by |
 |--------|----------------------|---------|
 | Serena | Symbol-level code navigation and editing | `/speq:code-tools` |
-| Context7 (optional) | Current library documentation | `/speq:ext-research` |
+| Context7 (optional) | Current library documentation | `/speq:ext-library` |
 
 ## Why Serena
 
@@ -44,10 +44,9 @@ See the [Serena documentation](https://github.com/oraios/serena) for advanced co
 ## How the skills use them
 
 ```
-Explore codebase  → Serena     structure, symbols, references
-Research APIs     → Context7   method signatures, usage examples (when installed)
-Research patterns → WebSearch  design guidance, best practices
-Edit code         → Serena     precise, symbol-level changes
+Explore codebase   → Serena     structure, symbols, references
+Research libraries → Context7   method signatures, usage examples (when installed)
+Edit code          → Serena     precise, symbol-level changes
 ```
 
-Without Context7, library API questions go to WebSearch.
+Without Context7, the skills rely on built-in knowledge for library APIs.
